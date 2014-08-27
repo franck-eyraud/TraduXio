@@ -95,7 +95,7 @@ div.metadata {
     margin:0 auto;
 }
 
-#work .addVersion, #work .removeDoc {
+#work img {
     float: right;
     display: inline;
     cursor: pointer;

@@ -409,15 +409,51 @@
   function changeVersion(oldVersion, newVersion) {
 	$("#hexapla").find("*[data-version='" + oldVersion + "']").attr("data-version", newVersion).data("version", newVersion).find(".creator").html(newVersion);
   }
+
+  function toggleHeader(item) {
+    $(item).slideToggle(200);
+    closeTop(item);
+  }
   
   function toggleAddVersion() {
-	$("#addPanel").slideToggle(200);
-	$("#removePanel").slideUp(200);
+    toggleHeader("#addPanel");
   }
   
   function toggleRemoveDoc() {
-	$("#removePanel").slideToggle(200);
-	$("#addPanel").slideUp(200);
+    toggleHeader("#removePanel");
+  }
+
+  function toggleGlossaryEntry() {
+    toggleHeader("#addGlossary");
+  }
+
+  function closeTop(except) {
+    $(".top form, #removePanel").not(except).slideUp(200);
+  }
+
+  function addGlossaryEntry() {
+  var id = $("#hexapla").data("id");
+  var form=$("#glossaryEntry");
+  var glossary_entry={
+    src_sentence:$("[name='src']").val(),
+    src_language:$("[name='src_language']").val(),
+    target_sentence:$("[name='target']").val(),
+    target_language:$("[name='target_language']").val()
+  };
+  if (glossary_entry.src_sentence && glossary_entry.src_language &&
+      glossary_entry.target_sentence && glossary_entry.target_language) {
+    $.ajax({
+    type: "POST",
+    url: "../glossary/"+id,
+    contentType: 'text/plain',
+    data: JSON.stringify(glossary_entry)
+    }).done(function() {
+      closeTop();
+    }).fail(function() { alert("fail!"); });
+  } else {
+    alert("missing data");
+  }
+  return false;
   }
   
   function addVersion() {
@@ -590,7 +626,8 @@
         e.stopPropagation();
         var unit=this;
         var menu=$("<div/>").addClass("context-menu");
-        menu.append($("<div/>").addClass("item concordance").append("search the concordance for <em>"+txt+"</em>"));
+        menu.append($("<div/>").addClass("item concordance").append("search the concordance for <em>"+txt+"</em>"))
+             .append($("<div/>").addClass("item glossary").append("add a translation of <em>"+txt+"</em> to the glossary"));
 
         menu.css({top:e.pageY,left:e.pageX});
         $("body .context-menu").remove();
@@ -599,6 +636,15 @@
           $("form.concordance #query").val(txt);
           $("form.concordance #language").val($(unit).getLanguage());
           $("form.concordance").submit();
+        });
+        $(".context-menu .glossary").on("click",function() {
+          $("form#addGlossary [name=src]").val(txt);
+          $("form#addGlossary [name=target]").val(txt);
+          $("form#addGlossary [name=src_language]").val($(unit).getLanguage());
+          $("form#addGlossary [name=target_language]").val($("td.pleat.open .unit.edit").getLanguage());
+          if (!$("form#addGlossary").is(":visible")) {
+            toggleGlossaryEntry();
+          }
         });
         $(".context-menu .item").on("click",function() {
           $("body .context-menu").remove();
@@ -698,9 +744,11 @@
 	
 	$(".top").on("click", ".addVersion", toggleAddVersion);
 	$(".top").on("click", ".removeDoc", toggleRemoveDoc);
+  $(".top").on("click", ".addGlossary", toggleGlossaryEntry);
 	
 	$("#addPanel").on("submit", addVersion);
 	$("#removePanel").on("click", removeDoc);
+  $("#addGlossary").on("submit", addGlossaryEntry);
     
     var versions=getVersions();
     const N = versions.length;
@@ -743,12 +791,13 @@
         return false;
       });
 
-      fillLanguages($("#work-info [name=language]"));
       $(".top h1,img.removeDoc,img.addVersion").hide();
     }
     if (N==1) {
       $(".button.hide").remove();
     }
+
+    fillLanguages($("select.language"));
 
   });
 

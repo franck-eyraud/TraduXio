@@ -1,9 +1,15 @@
 {{> header}}
   <div class="top">
 	<h1>{{work_title}} – {{work_creator}}</h1>
+  <img src="{{prefix}}/shared/glossary.png" alt="glossary entry" class="addGlossary" />
 	<img src="{{prefix}}/shared/remove.png" alt="remove doc" class="removeDoc" />
 	<img src="{{prefix}}/shared/add.png" alt="add version" class="addVersion" />
 	<form id="addPanel"><h3>{{addtrad}}</h3><input type="text"/><input type="submit" value="{{send}}" /></form>
+  <form id="addGlossary"><h3>{{glossaryEntry}}</h3>
+    <select class="language" name="src_language"></select><input name="src"/>
+    <select class="language" name="target_language"></select><input name="target"/>
+    <input type="submit" value="{{send}}" />
+  </form>
 	<div id="removePanel"><button>{{deleteMsg}}</button></div>
     <form id="work-info">
         <input class="title" name="title" placeholder="Titre">

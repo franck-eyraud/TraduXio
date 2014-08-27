@@ -59,13 +59,14 @@ function (newDoc, oldDoc, userCtx, secObj) {
             shouldBeArray(doc,attribute);
         });
     }
-    function testArray(array,callback) {
+    function testArray(array,callback,nullok) {
         var ok=false;
         if (isArray(array)) {
             ok=true;
             if (typeof callback=="function") {
                 array.forEach(function(val) {
-                    if (!callback(val)) {
+		    if (!nullok && val===null) ok=false;
+                    else if (!callback(val)) {
                         ok=false;
                     }
                 });
@@ -75,9 +76,12 @@ function (newDoc, oldDoc, userCtx, secObj) {
     }
     
     if (newDoc.hasOwnProperty("title")) {
-        ensureArrays(["text"]);
+        ensureArrays(["text","glossary"]);
         if (newDoc.text && !testArray(newDoc.text,isString)) {
             throw({forbidden:"text lines must be strings "+JSON.stringify(newDoc.text)});
+        }
+        if (newDoc.glossary && !testArray(newDoc.glossary,isObject)) {
+            throw({forbidden:"glossary entry must be objects"+JSON.stringify(newDoc)});
         }
         mandatoryFields(["translations"]);
         ensureStrings(["creator","date","language","title"]);
@@ -87,5 +91,9 @@ function (newDoc, oldDoc, userCtx, secObj) {
             mandatory(translation,"text");
             shouldBeArray(translation,"text");
         }
+        newDoc.glossary && newDoc.glossary.forEach(function(glossary) {
+            mandatoryFields(["src_language","src_sentence","target_language","target_sentence"],glossary);
+            ensureStrings(["src_language","src_sentence","target_language","target_sentence"],glossary);
+        });
     }
 }

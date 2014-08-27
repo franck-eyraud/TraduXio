@@ -4,30 +4,31 @@ function(o) {
     return text.substr(begin, SIZE).toLowerCase();
   }
 
-  const WORD_MATCHER = /[^\s'`\-]+/g;
   for (var i in o.text) {
-    var text = o.text[i];
-    if (text) {
-      var match;
-      while ((match = WORD_MATCHER.exec(text))) {
-	var begin = match.index;
-	emit([o.language, format(text, begin)], {unit: i, char: begin});
-      }
-    }
+      send_text(o.text[i],o.language,{unit:i});
   }
   for (var t in o.translations) {
     var translation = o.translations[t];
     for (var i in translation.text) {
-      var text = translation.text[i];
-      if (text) {
-        var match;
-        while ((match = WORD_MATCHER.exec(text))) {
-          var begin = match.index;
-          emit(
-            [translation.language, format(text, begin)], 
-            {unit: i, char: begin, translation: t}
-          );
-        }
+      send_text(translation.text[i],translation.language,{unit:i,translation:t});
+    }
+  }
+  if (o.glossary && o.glossary.forEach)
+    o.glossary.forEach(function(glossary_entry,i) {
+      send_text(glossary_entry.src_sentence,glossary_entry.src_language,{glossary_entry:i});
+      send_text(glossary_entry.target_sentence,glossary_entry.target_language,{glossary_entry:i,reverse:true});
+    });
+
+  function send_text(text,language,object) {
+    const WORD_MATCHER = /[^\s"’'`\-]+/g;
+    if (text) {
+      var match;
+      while ((match = WORD_MATCHER.exec(text))) {
+        var begin = match.index;
+        object.char=begin;
+        emit(
+          [language, format(text, begin)], object
+        );
       }
     }
   }

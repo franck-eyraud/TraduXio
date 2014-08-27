@@ -88,6 +88,7 @@ function(o, req) {
   data.addtrad="Traduction :";
   data.send="Cr&eacute;er";
   data.deleteMsg="Supprimer le texte et toutes ses traductions";
+  data.glossaryEntry="Ajouter une entrée du glossaire";
   data.rows=hexapla.getRows();
   data.name="work";
   data.css=true;
