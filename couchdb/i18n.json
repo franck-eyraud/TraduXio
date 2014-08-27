@@ -80,6 +80,7 @@
     "i_translator": "Translation author",
     "i_title": "Title",
     "i_translated_title": "Translated title",
+    "i_add_glossary_entry": "Add a glossary entry",
     "i_enter_text": "Enter your text here"
   },
   "fr": {
@@ -162,6 +163,7 @@
     "i_version_author": "Auteur (translittéré si nécessaire)",
     "i_translator": "Auteur de la traduction",
     "i_title": "Titre",
+    "i_add_glossary_entry": "Ajouter une entrée du glossaire",
     "i_translated_title": "Titre traduit"
   },
   "pt": {

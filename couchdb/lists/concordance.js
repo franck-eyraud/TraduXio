@@ -48,12 +48,11 @@ function(head, req) {
   var data = {
     lang: req.query.language,
     query: req.query.query,
-    occurrences:[]
+    occurrences:[],
+    glossary_entries:[]
   };
   if (req.query.query) {
     while (row = getRow()) {
-      var translation_id = row.value.translation;
-      var line_number = row.value.unit;
       var work = row.doc;
       var original = (work.text)? {
         id: "original",
@@ -61,28 +60,44 @@ function(head, req) {
       } : null;
       var original_header = {
         work_id: work._id,
-        creator: work.creator?work.creator:i18n["i_no_author"],
-        title: work.title?work.title:i18n["i_no_title"],
+        creator: work.creator?work.creator:"Anonymus",
+        title: work.title,
         publisher: work.publisher,
         date: work.date
       };
-      if (translation_id) {
-        var translation = getTranslation(work, translation_id);
-        var translation_header = getHeaders(work, translation_id);
-        // translation >> original
-        if (original) {
-          push(data.occurrences, translation, original, line_number, original_header, translation_header);
-        }
-        // translation >> translations
-        for (var t in work.translations) {
-          if (t!=translation_id) {
-            push(data.occurrences, translation, getTranslation(work, t), line_number, original_header, [translation_header, getHeaders(work, t)]);
+      if (row.value.unit) {
+        var translation_id = row.value.translation;
+        var line_number = row.value.unit;
+        if (translation_id) {
+          var translation = getTranslation(work, translation_id);
+          var translation_header = getHeaders(work, translation_id);
+          // translation >> original
+          if (original) {
+            push(data.occurrences, translation, original, line_number, original_header, translation_header);
+          }
+          // translation >> translations
+          for (var t in work.translations) {
+            if (t!=translation_id) {
+              push(data.occurrences, translation, getTranslation(work, t), line_number, original_header, [translation_header, getHeaders(work, t)]);
+            }
+          }
+        } else {
+          // original >> translations
+          for (var t in work.translations) {
+            push(data.occurrences, original, getTranslation(work, t), line_number, original_header, getHeaders(work, t));
           }
         }
-      } else {
-        // original >> translations
-        for (var t in work.translations) {
-          push(data.occurrences, original, getTranslation(work, t), line_number, original_header, getHeaders(work, t));
+      } else if (row.value.hasOwnProperty("glossary_entry")) {
+        if (work.glossary[row.value.glossary_entry]) {
+          var glossary_entry=work.glossary[row.value.glossary_entry];
+          if (row.value.reverse) {
+            var mapping=glossary_entry.src_sentence;
+            var context=glossary_entry.target_sentence;
+          } else {
+            var context=glossary_entry.src_sentence;
+            var mapping=glossary_entry.target_sentence;
+          }
+          data.glossary_entries.push({context:highlight(context,req.query.query),mapping:mapping,original:original_header,glossary_entry:glossary_entry});
         }
       }
     }

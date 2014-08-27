@@ -23,8 +23,6 @@ function(o) {
     return s.substr(0, end).toLowerCase();
   }
 
-  const WORD_MATCHER = new RegExp(regex,"g");
-
   if (o.translations) {
     var nb_translations=Object.keys(o.translations).length;
 
@@ -32,11 +30,7 @@ function(o) {
       if (o.language) for (var i in o.text) {
         var text = o.text[i];
         if (text && text.length<1024) {
-          var match;
-          while ((match = WORD_MATCHER.exec(text))) {
-            var begin = match.index;
-            emit([o.language, format(text, begin)], {unit: i, char: begin});
-          }
+          send_text(text, o.language, {unit: i});
         }
       }
       for (var t in o.translations) {
@@ -44,16 +38,28 @@ function(o) {
         if (translation.language) for (var i in translation.text) {
           var text = translation.text[i];
           if (text && text.length<1024) {
-            var match;
-            while ((match = WORD_MATCHER.exec(text))) {
-              var begin = match.index;
-              emit(
-                [translation.language, format(text, begin)],
-                {unit: i, char: begin, translation: t}
-              );
-            }
+            send_text(text, translation.language, {unit: i, translation: t});
           }
         }
+      }
+    }
+  }
+  if (o.glossary && o.glossary.forEach)
+    o.glossary.forEach(function(glossary_entry,i) {
+      send_text(glossary_entry.src_sentence,glossary_entry.src_language,{glossary_entry:i});
+      send_text(glossary_entry.target_sentence,glossary_entry.target_language,{glossary_entry:i,reverse:true});
+    });
+
+  function send_text(text,language,object) {
+    const WORD_MATCHER = new RegExp(regex,"g");
+    if (text) {
+      var match;
+      while ((match = WORD_MATCHER.exec(text))) {
+        var begin = match.index;
+        object.char=begin;
+        emit(
+          [language, format(text, begin)], object
+        );
       }
     }
   }

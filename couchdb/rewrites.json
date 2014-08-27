@@ -45,6 +45,14 @@
   "to": "_show/license/:id",
   "method": "GET"
 },{
+  "from": "glossary/:id",
+  "to": "_update/glossary/:id",
+  "method": "POST"
+},{
+  "from": "glossary/:id/:glossary_entry",
+  "to": "_update/glossary/:id",
+  "method": "PUT"
+},{
   "from": "",
   "to": "_show/welcome"
 }]

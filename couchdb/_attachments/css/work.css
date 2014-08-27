@@ -126,10 +126,6 @@ div.creator {
   padding-right: 5px;
 }
 
-.top .removeDoc, .top .addVersion {
-  margin-top: -3px;
-}
-
 .top form h3 {
   display: inline;
 }
