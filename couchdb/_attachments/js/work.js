@@ -167,10 +167,6 @@ function toggleShow(e) {
   }
 }
 
-function getDocId() {
-  return $("#hexapla").data("id");
-}
-
 $.fn.isEdited = function() {
   return this.hasClass("edit");
 };
@@ -240,7 +236,7 @@ function toggleEdit (e) {
       var fulltext=$("textarea.fulltext").val();
       $("textarea.fulltext").prop("disabled",true);
       var lines=fulltext.split("\n\n");
-      var id=getDocId();
+      var id=Traduxio.getId();
       var update=function(){
         $("#hexapla tbody tr.fulltext").hide();
         $("#hexapla tbody tr:not(.fulltext)").remove();
@@ -374,7 +370,7 @@ function updateUrl() {
   }
   suffix = suffix ? "?"+suffix:"";
 
-  window.history.pushState("object or string","",getDocId()+suffix);
+  window.history.pushState("object or string","",Traduxio.getId()+suffix);
 }
 
 function changeVersion(oldVersion, newVersion) {
@@ -443,7 +439,7 @@ function addPanelFormUpdate() {
 }
 
 function addVersion() {
-  var id = getDocId(),
+  var id = Traduxio.getId(),
       ref,
       data = {};
   if ($("#addPanel input[name='add-type']:checked").val()=="original") {
@@ -471,7 +467,7 @@ function removeDoc() {
   if(confirm(getTranslated("i_confirm_delete"))) {
     request({
       type: "DELETE",
-      url: "work/"+getDocId(),
+      url: "work/"+Traduxio.getId(),
       contentType: 'text/plain'
     }).done(function() {
       window.location.href = "./";
@@ -493,7 +489,7 @@ function clickDeleteVersion() {
 }
 
 function deleteVersion(version) {
-  var id = getDocId();
+  var id = Traduxio.getId();
   request({
     type: "DELETE",
     url: "work/"+id+"/"+version,
@@ -569,7 +565,7 @@ function saveMetadata() {
   var elem=$(this);
   var inputType=elem.prop("tagName");
   if(inputType!="INPUT" || elem.hasClass("dirty")) {
-    var id = getDocId();
+    var id = Traduxio.getId();
     var ref = elem.closest("th").data("version");
     var modify={};
     var newValue=elem.val();
@@ -614,7 +610,7 @@ function getPreviousUnit(unit) {
 var editOnServer = function(content, reference) {
   return request({
     type: "PUT",
-    url: "version/"+getDocId()+"?"+ $.param(reference),
+    url: "version/"+Traduxio.getId()+"?"+ $.param(reference),
     contentType: "text/plain",
     data: content
   });
@@ -626,7 +622,7 @@ $(document).ready(function() {
   $("#hexapla").on("click", ".button.show", toggleShow);
 
   $("#hexapla").on("click", ".button.edit-license", function() {
-    window.location=getPrefix()+"/works/license/"+getDocId()+'/'+$(this).getVersion("th");
+    window.location=getPrefix()+"/works/license/"+Traduxio.getId()+'/'+$(this).getVersion("th");
   });
 
   $("input.edit").on("click",toggleEdit);
@@ -826,7 +822,7 @@ $(document).ready(function() {
       ["work-creator","language","title","date"].forEach(function(field) {
         data[field]=$("[name='"+field+"']","#work-info").val();
       });
-      var id=getDocId();
+      var id=Traduxio.getId();
       data.original=$("[name=original-work]","#work-info").prop("checked");
       request({
         type:"PUT",

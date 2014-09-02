@@ -107,3 +107,21 @@ $(document).ready(function() {
   fixLanguages();
   $("form.concordance").concordancify();
 });
+
+Traduxio=$.extend({},{
+    version:"1.0",
+    getPrefix:getPrefix,
+    getLanguagesNames:getLanguageNames,
+    getLanguageName:getLanguageName,
+    addCss:function(name) {
+      $("<link/>", {
+         rel: "stylesheet",
+         type: "text/css",
+         href: Traduxio.getPrefix()+"/shared/css/"+name+".css"
+      }).appendTo("head");
+    },
+    getId:function() {
+      return $("#hexapla").data("id");
+    }
+  }
+);
