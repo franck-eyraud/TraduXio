@@ -216,7 +216,7 @@
       if (getVersions().length==1) {
           var fulltext=$("textarea.fulltext").val();
           var lines=fulltext.split("\n\n");
-            var id=$("#hexapla").data("id");
+            var id=Traduxio.getId();
             var update=function(){
                 $("#hexapla tbody tr").remove();
               lines.forEach(function(line,i) {
@@ -329,7 +329,7 @@
 		language.val(target.data("id"));
 		language.addClass("editedMeta").css("width", "50%");
 		language.on("change", function() {
-		  var id = $("#hexapla").data("id");
+		  var id = Traduxio.getId();
 		  var ref = $(this).closest("th").data("version");
 		  $.ajax({
 		    type: "PUT",
@@ -365,7 +365,7 @@
     }
     suffix = suffix ? "?"+suffix:"";
 
-    window.history.pushState("object or string","",$("#hexapla").data("id")+suffix);
+    window.history.pushState("object or string","",Traduxio.getId()+suffix);
   }
 
   function setEditState(isEdited, container, name, placeholder) {
@@ -383,7 +383,7 @@
     component.attr("title", placeholder);
 	  component.on(event, function() {
 		if(component.hasClass("dirty")) {
-		  var id = $("#hexapla").data("id");
+		  var id = Traduxio.getId();
 		  var ref = $(this).closest("th").data("version");
 		  $.ajax({
 		    type: "PUT",
@@ -432,7 +432,7 @@
   }
 
   function addGlossaryEntry() {
-  var id = $("#hexapla").data("id");
+  var id = Traduxio.getId();
   var form=$("#glossaryEntry");
   var glossary_entry={
     src_sentence:$("[name='src']").val(),
@@ -457,7 +457,7 @@
   }
   
   function addVersion() {
-	var id = $("#hexapla").data("id");
+	var id = Traduxio.getId();
 	var ref = $("#addPanel").find("input[type='text']").val();
 	if(ref != "") {
 	  $.ajax({
@@ -476,7 +476,7 @@
 	if(confirm("La suppression est irréversible. Continuer ?")) {
 	  $.ajax({
 		type: "PUT",
-		url: "work/"+$("#hexapla").data("id"),
+		url: "work/"+Traduxio.getId(),
 		contentType: 'text/plain',
 		data: JSON.stringify({"key": "remove"})
 	  }).done(function() {
@@ -493,7 +493,7 @@
   }
   
   function deleteVersion(version) {
-	var id = $("#hexapla").data("id");
+	var id = Traduxio.getId();
 	$.ajax({
 	  type: "PUT",
 	  url: "work/"+id+"/"+version,
@@ -592,7 +592,7 @@
   }
 
   var editOnServer = function(content, reference) {
-    var id=$("#hexapla").data("id");
+    var id=Traduxio.getId();
     return $.ajax({
       type: "PUT",
       url: "version/"+id+"?"+ $.param(reference),
@@ -614,7 +614,7 @@
     });
 
     $("#hexapla").on("click", ".button.edit-license", function() {
-      window.location=getPrefix()+"/works/license/"+$("#hexapla").data("id")+'/'+$(this).getVersion("th");
+      window.location=getPrefix()+"/works/license/"+Traduxio.getId()+'/'+$(this).getVersion("th");
     });
 
     $("input.edit").on("click",toggleEdit);

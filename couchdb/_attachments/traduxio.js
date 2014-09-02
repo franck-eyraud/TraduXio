@@ -28,7 +28,7 @@ $.fn.concordancify = function() {
       query: query,
       language: language
     });
-  }
+  };
 
   this.on("submit",submitForm);
   $(".submit",form).on("click",submitForm);
@@ -37,7 +37,7 @@ $.fn.concordancify = function() {
 	  submitForm(e);
       }
   });
-}
+};
 
 var languagesNames;
 var currentLanguage='fr';
@@ -73,7 +73,7 @@ function getLanguageNames(callback) {
 
 $.fn.outerHtml = function() {
   return this.clone().wrap("<div>").parent().html();
-}
+};
 
 function getPrefix() {
   return $("body").data("prefix");
@@ -96,3 +96,20 @@ $(document).ready(function() {
   $("form.concordance").concordancify();
 });
 
+Traduxio=$.extend({},{
+    version:"1.0",
+    getPrefix:getPrefix,
+    getLanguagesNames:getLanguageNames,
+    getLanguageName:getLanguageName,
+    addCss:function(name) {
+      $("<link/>", {
+         rel: "stylesheet",
+         type: "text/css",
+         href: Traduxio.getPrefix()+"/shared/"+name+".css"
+      }).appendTo("head");
+    },
+    getId:function() {
+      return $("#hexapla").data("id");
+    }
+  }
+);
