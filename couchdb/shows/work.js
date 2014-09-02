@@ -93,7 +93,7 @@ function(o, req) {
   data.name="work";
   data.css=true;
   data.script=true;
-  data.scripts=["jquery.selection"];
+  data.scripts=["jquery.selection","activity","chat"];
   data.language=data.work_language;
   data.prefix="..";
  
