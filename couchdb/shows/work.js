@@ -89,7 +89,7 @@ function(o, req) {
   data.name="work";
   data.css=true;
   data.script=true;
-  data.scripts=["jquery.selection","jquery.ajax-retry"];
+  data.scripts=["jquery.selection","jquery.ajax-retry","activity","chat"];
   data.language=data.work_language;
   data.prefix="..";
   data.notext=o.text ? false : true;

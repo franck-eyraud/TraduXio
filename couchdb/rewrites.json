@@ -55,4 +55,15 @@
 },{
   "from": "",
   "to": "_show/welcome"
+},{
+  "from":"works/:id/chat",
+  "method":"POST",
+  "to":"_update/chat/:id"
+},{
+  "from":"works/:id/activity",
+  "to":"_show/doc_activity/:id"
+},{
+  "from":"works/:id/changes/:seq",
+  "to":"../../_changes",
+  "query":{"filter":"traduxio/docid","feed":"longpoll","since":":seq"}
 }]
