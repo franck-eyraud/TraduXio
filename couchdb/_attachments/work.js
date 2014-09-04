@@ -570,13 +570,15 @@
       editOnServer(content, $(this).getReference()).done(function(message,result) {
 		if (result == "success") {
 		  $(self).removeClass("dirty"); 
-		  $(self).prop("disabled",false);
 			if (callback && typeof(callback) == "function") {
 			  callback();
 			}
 		} else {
 		  alert(result+":"+message);
 		}
+      })
+      .always(function() {
+        $(self).prop("disabled",false);
       });
     } else {
       if (callback && typeof(callback) == "function") {
@@ -798,6 +800,52 @@
     }
 
     fillLanguages($("select.language"));
+    
+    Traduxio.activity.register("edit",function(edit) {
+      if (edit.version) {
+        var version=find(edit.version);
+        if (version.length>0) {
+          switch(edit.action) {
+            case "translated":
+              if (edit.content) {
+                var unit=$("tr[data-line='"+edit.line+"'] .unit[data-version='"+edit.version+"']");
+                if (unit) {
+                  var oldVal;
+                  if (unit.is(".edit")) {
+                    var element=$("textarea",unit);
+                    oldVal=element.val();
+                    if (oldVal!=edit.content) element.val(edit.content);
+                  } else {
+                    var element=$(".text",unit);
+                    oldVal=htmlToString(element);
+                    if (oldVal!=edit.content) element.html(stringToHtml(edit.content));
+                  }
+                  if (oldVal!=edit.content) {
+                    var color=Traduxio.activity.getColor(edit.author);
+                    if (element.is(":visible")) {
+                      element.css({"background-color":color});
+                      version.css({"border-color":color,"border-width":"0px 2px"});
+                    } else {
+                      findPleat(edit.version).css({"border-color":color,"border-width":"0px 2px"});
+                    }
+                    setTimeout(function() {
+                      if (element.is(":visible")) {
+                        element.css({"background-color":""});
+                        version.css({"border-color":"","border-width":""});
+                      } else {
+                        findPleat(edit.version).css({"border-color":"","border-width":""});
+                      }
+                    },1000);
+                  }
+                }
+              }
+              break;
+            case "edited":
+              break;
+          }
+        }
+      }
+    });
 
   });
 
