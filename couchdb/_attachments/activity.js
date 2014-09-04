@@ -54,20 +54,24 @@
     }
   });
 
+  var changeWaitTime=initialTime=500;
   function listenChanges(id,seq) {
     $.ajax({
       url:id+"/changes/"+seq,
-      dataType:"json",
-      success:function(result) {
-        if(result.last_seq!=seq) {
-          seq=result.last_seq;
-          checkActivity(id);
-        }
-        setTimeout(listenChanges,500,id,seq);
-      },
-      fail:function() {
-        setTimeout(listenChanges,1000,id,seq);
+      dataType:"json"
+    })
+    .done(function(result) {
+      changeWaitTime=initialTime;
+      if(result.last_seq!=seq) {
+        seq=result.last_seq;
+        checkActivity(id);
       }
+    })
+    .fail(function() {
+       changeWaitTime*=2;
+    })
+    .always(function() {
+       setTimeout(listenChanges,changeWaitTime,id,seq);
     });
   };
 
