@@ -36,6 +36,7 @@
           },
           complete:function() {
             $(input,this).attr("disabled",null);
+            Traduxio.activity.wasActive();
           }
         });
       }
@@ -49,6 +50,7 @@
     var date=$("<span/>").addClass("date").attr("title",message.when || "date inconnue")
       .text(new Date(message.when).toLocaleString());
     div.append(date).append(author).append(message.message || "empty");
+    author.css({color:Traduxio.activity.getColor(message.author)});
     chatContent.append(div);
     chatContent.clearQueue().animate({scrollTop:chatContent.get(0).scrollHeight});
   }
