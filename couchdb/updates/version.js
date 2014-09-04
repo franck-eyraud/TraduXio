@@ -1,4 +1,6 @@
 function(old, req) {
+  var doc=old;
+  //!code lib/traduxio.js
 
   function Work() {
     this.data = old;
@@ -22,6 +24,8 @@ function(old, req) {
       } else {
         this.data.translations[version].text[line] = content;
       }
+      this.data.edits=this.data.edits || [];
+      Traduxio.addActivity(this.data.edits,{action:"translated",version:VERSION_ID,line:LINE,content:new_content});
     };
   }
 
