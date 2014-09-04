@@ -122,6 +122,9 @@ Traduxio=$.extend({},{
     },
     getId:function() {
       return $("#hexapla").data("id");
+    },
+    getSeqNum:function() {
+      return $(document.body).data("seq");
     }
   }
 );

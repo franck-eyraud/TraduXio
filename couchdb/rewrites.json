@@ -53,6 +53,9 @@
   "to": "_update/glossary/:id",
   "method": "PUT"
 },{
+  "from": "works/:id/presence",
+  "to": "_update/presence/:id"
+},{
   "from": "",
   "to": "_show/welcome"
 },{

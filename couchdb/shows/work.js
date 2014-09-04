@@ -24,6 +24,7 @@ function(o, req) {
   }
   var data = {
     id: o._id,
+    seq:req.info.update_seq,
     work_title: o.title,
     display_work_title: o.title?o.title:i18n["i_no_title"],
     work_creator: o.creator,
