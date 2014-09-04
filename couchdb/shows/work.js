@@ -37,6 +37,7 @@ function(o, req) {
 
   var data = {
     id: o._id,
+    seq:req.info.update_seq,
     work_title: o.title,
     work_creator: o.creator?o.creator:"Anonymus",
     work_language: o.language,
