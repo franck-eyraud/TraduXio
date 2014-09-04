@@ -18,11 +18,12 @@
       dataType:"json"
     }).done(function(result){
       if (result.user) {
-        addUser(result.user,true);
+        me=result.user;
+        if (result.ok) online(me);
       }
       if (result.users) {
         for (var user in result.users) {
-          addUser(user);
+          online(user);
         }
       }
       if (result.sessionLength) {
@@ -48,8 +49,7 @@
         resetInterval();
       },
       getColor:function(user) {
-        if (!isset(users[user])) addUser(user);
-        return users[user].color;
+        return getUser(user).color;
       }
     }
   });
@@ -103,14 +103,14 @@
   function sessionInfo(activity) {
     if (activity.author)
       if (activity.entered || activity.action=="entered") {
-        addUser(activity.author);
+        online(activity.author);
       }
       if (activity.left || activity.action=="left") {
         if (activity.author==me) {
           presence();
           resetInterval();
         } else {
-          removeUser(activity.author);
+          offline(activity.author);
         }
       }
   }
@@ -118,20 +118,23 @@
   var users={};
   var offlineUsers={};
   var me="";
-  var colors=["blue","yellow","green","red","cyan","purple"];
-  var colorindex=0;
+  var colors=["blue","peru","green","red","orangered","lightskyblue","purple","seagreen","tomato"];
+
   function currentColor() {
-    return colors[colorindex++ % colors.length];
+    return colors[Object.keys(users).length % colors.length];
   }
 
-  function addUser(username,self) {
-    var user=users[username] || offlineUsers[username] || {};
-    if (self) me=username;
+  function getUser(username) {
+    var user=users[username] || {};
     if (!user.color) {
       user.color=currentColor();
     }
     users[username]=user;
-    
+    return user;
+  }
+
+  function online(username) {
+    var user=getUser(username);
     var userDiv=$("#session-"+username,sessionPane,sessionPane);
     if (!userDiv.length) {
       userDiv=$("<div/>").attr("id","session-"+username).append(username).prepend($("<span/>").addClass("colorcode"));
@@ -149,17 +152,11 @@
     }
   }
 
-  function removeUser(username) {
-    if (username !== me) {
-      if (users[username]) {
-        offlineUsers[username]=users[username];
-        delete users[username];
-      }
-      if (sessionPane.has("#session-"+username)) {
-        sessionPane.slideDown(function() {
-          $("#session-"+username,sessionPane).fadeOut(function() {this.remove();});
-        });
-      }
+  function offline(username) {
+    if (username !== me && sessionPane.has("#session-"+username)) {
+      sessionPane.slideDown(function() {
+        $("#session-"+username,sessionPane).fadeOut(function() {this.remove();});
+      });
     }
   }
 
