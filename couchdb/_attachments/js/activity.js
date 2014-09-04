@@ -137,17 +137,18 @@
     var user=getUser(username);
     var userDiv=$("#session-"+username,sessionPane,sessionPane);
     if (!userDiv.length) {
-      userDiv=$("<div/>").attr("id","session-"+username).append(username).prepend($("<span/>").addClass("colorcode"));
+      userDiv=$("<div/>").attr("id","session-"+username).append(username).prepend($("<span/>").addClass("colorcode")).hide();
       added=true;
     }
     $(".colorcode",userDiv).css({"background-color":user.color});
     if (added) {
+      if (me==username) {
+        $(".me",sessionPane).empty().append(userDiv);
+      } else {
+        $(".them",sessionPane).append(userDiv);
+      }
       sessionPane.slideDown(function() {
-        if (me==username) {
-          $(".me",this).empty().append(userDiv);
-        } else {
-          $(".them",this).append(userDiv);
-        }
+        userDiv.fadeIn();
       });
     }
   }
