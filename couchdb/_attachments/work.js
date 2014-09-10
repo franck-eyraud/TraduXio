@@ -800,14 +800,14 @@
     }
 
     fillLanguages($("select.language"));
-    
+
     Traduxio.activity.register("edit",function(edit) {
       if (edit.version) {
         var version=find(edit.version);
         if (version.length>0) {
           switch(edit.action) {
             case "translated":
-              if (edit.content) {
+              if ("content" in edit) {
                 var unit=$("tr[data-line='"+edit.line+"'] .unit[data-version='"+edit.version+"']");
                 if (unit) {
                   var oldVal;
