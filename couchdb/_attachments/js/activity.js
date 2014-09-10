@@ -64,6 +64,8 @@
       changeWaitTime=initialTime;
       if(result.last_seq!=seq) {
         seq=result.last_seq;
+      }
+      if (result.results && result.results.length>0) {
         checkActivity(id);
       }
     })
@@ -139,7 +141,7 @@
 
   function online(username) {
     var user=getUser(username);
-    var userDiv=$("#session-"+username,sessionPane,sessionPane);
+    var userDiv=$("[id='session-"+username+"']",sessionPane,sessionPane);
     if (!userDiv.length) {
       userDiv=$("<div/>").attr("id","session-"+username).append(username).prepend($("<span/>").addClass("colorcode")).hide();
       added=true;
@@ -158,9 +160,9 @@
   }
 
   function offline(username) {
-    if (username !== me && sessionPane.has("#session-"+username)) {
+    if (username !== me && sessionPane.has("[id='session-"+username+"']")) {
       sessionPane.slideDown(function() {
-        $("#session-"+username,sessionPane).fadeOut(function() {this.remove();});
+        $("[id='session-"+username+"']",sessionPane).fadeOut(function() {this.remove();});
       });
     }
   }
