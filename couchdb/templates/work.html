@@ -1,6 +1,9 @@
 {{> header}}
 {{#i18n}}
 <script>var i18n={{{i18n_str}}};</script>
+<script type="text/javascript">
+  var glossary={{{glossary}}};
+</script>
 <div class="top">
   <h1><span class="title">{{display_work_title}}</span> – <span class="creator">{{display_work_creator}}</span> (<span class="language expand" data-id="{{language}}">{{language}}</span>)</h1>
   {{^original}}<a href="#" class="workButton" id="editDoc">{{i_edit}}</a>{{/original}}
@@ -20,6 +23,7 @@
   <form id="addGlossaryForm"><h3>{{i_add_glossary_entry}}</h3>
     <select class="language" name="src_language"></select><input name="src"/>
     <select class="language" name="target_language"></select><input name="target"/>
+    <input type="hidden" name="num" />
     <input type="submit" value="{{i_save}}" />
   </form>
   <div id="removePanel"><button id="remove-confirm">{{i_delete_text_and_translations}}</button></div>

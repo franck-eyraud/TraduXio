@@ -415,3 +415,12 @@ div.context-menu div:hover {
   background:#333333;
   color:#AAAAAA;
 }
+
+.glossary {
+    font-weight: bolder;
+    cursor:pointer;
+}
+
+.temp {
+    font-style: italic;
+}
