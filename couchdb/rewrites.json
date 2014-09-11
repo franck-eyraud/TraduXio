@@ -51,7 +51,7 @@
   "to": "_update/glossary/:id",
   "method": "POST"
 },{
-  "from": "glossary/:id/:glossary_entry",
+  "from": "glossary/:id/:num",
   "to": "_update/glossary/:id",
   "method": "PUT"
 },{

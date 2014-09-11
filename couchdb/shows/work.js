@@ -93,9 +93,10 @@ function(o, req) {
   data.name="work";
   data.css=true;
   data.script=true;
-  data.scripts=["jquery.selection"];
+  data.scripts=["jquery.selection","jquery.highlight"];
   data.language=data.work_language;
   data.prefix="..";
+  data.glossary=o.glossary?JSON.stringify(o.glossary):"[]";
  
   return Mustache.to_html(this.templates.work, data, this.templates.partials);
 }
