@@ -10,9 +10,11 @@ $.fn.toggleText = function(text1, text2) {
   );
 };
 
-function displayGlossary(glossaryEntry,num) {
+function displayGlossary(glossaryEntry,num,version) {
+  if (version) versions=[version];
+  else versions=getVersions();
   if (glossaryEntry) {
-    getVersions().forEach(function(version) {
+    versions.forEach(function(version) {
       var l=find(version).getLanguage();
       if (l==glossaryEntry.src_language) {
         $("span.temp.glossary",
@@ -952,7 +954,7 @@ $(document).ready(function() {
   });
 
   if (glossary && glossary.forEach) {
-      glossary.forEach(displayGlossary);
+      glossary.forEach(function(g,i) {displayGlossary(g,i);});
   }
 
   $("#hexapla").on("click",".glossary",function(e) {
