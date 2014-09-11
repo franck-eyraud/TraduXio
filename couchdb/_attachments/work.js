@@ -11,9 +11,11 @@
     );
   };
 
-  function displayGlossary(glossaryEntry,num) {
+  function displayGlossary(glossaryEntry,num,version) {
+    if (version) versions=[version];
+    else versions=getVersions();
     if (glossaryEntry) {
-      getVersions().forEach(function(version) {
+      versions.forEach(function(version) {
         var l=find(version).getLanguage();
         if (l==glossaryEntry.src_language) {
           $("span.temp.glossary",
@@ -316,9 +318,9 @@
 		  unit.removeClass("edit");
 		}]);
       } else {
-		$(this).addClass("edit").find("span").remove();
+		$(this).addClass("edit");
 		var textarea=$("<textarea/>").addClass("autosize");
-		textarea.val(htmlToString($(".text",this)));
+		textarea.val(htmlToString($(".text",this).removeHighlight("glossary")));
 		$(this).prepend(textarea);
 		$(this).find(".text").css("min-height",(getSize(unit)*32)+"px");
 		autoSize.apply(textarea);
@@ -328,6 +330,10 @@
 		}
       }
     });
+    if (edited && glossary)
+      glossary.forEach(
+        function(g,i){displayGlossary(g,i,version);
+      });
     if (e.hasOwnProperty("cancelable")) //means it is an event, and as such toggle occured on user action
       updateUrl();
   }
@@ -862,7 +868,7 @@
     fillLanguages($("select.language"));
 
     if (glossary && glossary.forEach) {
-        glossary.forEach(displayGlossary);
+        glossary.forEach(function(g,i) {displayGlossary(g,i);});
     }
 
     $("#hexapla").on("click",".glossary",function(e) {
