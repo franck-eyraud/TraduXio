@@ -11,7 +11,7 @@ $.fn.toggleText = function(text1, text2) {
 };
 
 function browseGlossary(callback) {
-  var args=Array.slice(arguments);
+  var args=Array.slice ? Array.slice(arguments) : Array.prototype.slice.call(arguments);
   if (glossary) {
     for (language in glossary) {
       for (sentence in glossary[language]) {
