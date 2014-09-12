@@ -18,7 +18,7 @@ function(doc,req) {
   var activity=[];
 
   if(doc.edits) Traduxio.getActivity(doc.edits,since,{type:"edit"},activity);
-  if(doc.glossary) Traduxio.getActivity(doc.glossary,since,{type:"glossary"},activity);
+  if(doc.glossary.edits) Traduxio.getActivity(doc.glossary.edits,since,{type:"glossary"},activity);
   if(doc.session) Traduxio.getActivity(doc.session,since,{type:"session"},activity);
   if (doc.messages) for(var forum in doc.messages ) {
     Traduxio.getActivity(doc.messages[forum],since,{type:"forum",forum:forum},activity);

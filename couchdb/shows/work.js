@@ -97,7 +97,13 @@ function(o, req) {
   data.scripts=["jquery.selection","jquery.highlight","activity","chat"];
   data.language=data.work_language;
   data.prefix="..";
-  data.glossary=o.glossary?JSON.stringify(o.glossary):"[]";
+  if (o.glossary) {
+    var glossary=o.glossary;
+  } else {
+    glossary={};
+  }
+  delete glossary.edits;
+  data.glossary=JSON.stringify(glossary);
  
   return Mustache.to_html(this.templates.work, data, this.templates.partials);
 }

@@ -14,6 +14,7 @@
   function browseGlossary(callback) {
     var args=Array.slice ? Array.slice(arguments) : Array.prototype.slice.call(arguments);
     if (glossary) {
+      var language,sentence;
       for (language in glossary) {
         for (sentence in glossary[language]) {
           args.shift();
@@ -38,34 +39,45 @@
           glossary[src_language] || {};
       glossary[src_language][src_sentence]=
           glossary[src_language][src_sentence] || {};
+      if (!Object.keys(glossary[src_language][src_sentence]).length) {
+        displayGlossaryAllText(glossaryEntry);
+      }
       glossary[src_language][src_sentence][target_language]=target_sentence;
     }
   }
-
-  function displayGlossary(glossaryEntry,version) {
+  
+  function displayGlossaryAllText(glossaryEntry,version) {
+    var versions;
     if (version) versions=[version];
     else versions=getVersions();
-    if (glossaryEntry) {
-      versions.forEach(function(version) {
-        var l=find(version).getLanguage();
-        if (l==glossaryEntry.src_language) {
-          $("span.temp.glossary",
-            $(".unit",find(version))
-            .highlight(glossaryEntry.src_sentence,"temp glossary"))
-          .data("sentence",glossaryEntry.src_sentence)
-          .removeClass("temp");
-        }
-      });
+    versions.forEach(function(version) {
+      displayGlossary(glossaryEntry,$(".unit",find(version)));
+    });
+  }
+
+  function displayGlossary(glossaryEntry,element) {
+    var l=element.getLanguage();
+    if (l==glossaryEntry.src_language) {
+      $("span.temp.glossary",
+        element.highlight(glossaryEntry.src_sentence,"temp glossary"))
+      .data("sentence",glossaryEntry.src_sentence)
+      .removeClass("temp");
     }
   }
 
   function removeGlossary(glossaryEntry) {
-    getVersions().forEach(function(version) {
-      var v=find(version);
-      if (v.getLanguage()==glossaryEntry.src_language) {
-        v.removeHighlight("glossary",glossaryEntry.src_sentence);
+    var g=getGlossaryEntry(glossaryEntry.src_language,glossaryEntry.src_sentence);
+    if (g) {
+      delete glossary[glossaryEntry.src_language][glossaryEntry.src_sentence][glossaryEntry.target_language];
+      if (!Object.keys(glossary[glossaryEntry.src_language][glossaryEntry.src_sentence]).length) {
+        getVersions().forEach(function(version) {
+          var v=find(version);
+          if (v.getLanguage()==glossaryEntry.src_language) {
+            v.removeHighlight("glossary",glossaryEntry.src_sentence);
+          }
+        });        
       }
-    });
+    }
   }
 
   function editGlossaryEntry(glossaryEntry,language) {
@@ -360,7 +372,7 @@
 		}
       }
     });
-    if (edited) browseGlossary(displayGlossary,version);
+    if (edited) browseGlossary(displayGlossaryAllText,version);
 
     if (e.hasOwnProperty("cancelable")) //means it is an event, and as such toggle occured on user action
       updateUrl();
@@ -521,13 +533,7 @@
     }).done(function(result) {
       closeTop();
       if ("ok" in result) {
-        var g=getGlossaryEntry(glossaryEntry.src_language,glossaryEntry.src_sentence);
-        if (g) {
-          g.targets[glossaryEntry.target_language]=glossaryEntry.target_sentence;
-        } else {
-          displayGlossary(glossaryEntry);
-          addGlossaryEntry(glossaryEntry);
-        }
+        addGlossaryEntry(glossaryEntry);
       }
     }).fail(function() { alert("fail!"); });
   } else {
@@ -679,12 +685,8 @@
         contentType: 'application/json'
       }).done(function(result) {
         if ("ok" in result) {
-          var g=getGlossaryEntry(glossaryEntry.src_language,glossaryEntry.src_sentence);
-          if (g) {
-            delete glossary[glossaryEntry.src_language][glossaryEntry.src_sentence][language];
-            if (!Object.keys(glossary[glossaryEntry.src_language][glossaryEntry.src_sentence]).length)
-              removeGlossary(glossaryEntry);
-          }
+          glossaryEntry.target_language=language;
+          removeGlossary(glossaryEntry);
         }
       }).fail(function() { alert("fail!"); });
     }
@@ -940,7 +942,10 @@
                     } else {
                       var element=$(".text",unit);
                       oldVal=htmlToString(element);
-                      if (oldVal!=edit.content) element.html(stringToHtml(edit.content));
+                      if (oldVal!=edit.content) {
+                        element.html(stringToHtml(edit.content));
+                        browseGlossary(displayGlossary,element);
+                      }
                     }
                     if (oldVal!=edit.content) {
                       var color=edit.color;
@@ -987,16 +992,53 @@
       }
     });
 
-    browseGlossary(displayGlossary);
+    browseGlossary(displayGlossaryAllText);
 
     $("#hexapla").on("click",".glossary",function(e) {
       var l=$(this).getLanguage();
       var s=$(this).data("sentence");
       var entry=getGlossaryEntry(l,s);
       openContextMenu(entry,{top:e.pageY+10,left:e.pageX});
-
     });
 
+    Traduxio.activity.register("glossary",function(edit) {
+      if (edit.entry) {
+        switch (edit.action) {
+          case "added":
+            edit.message="Entrée du glossaire <em>"+
+              edit.entry.src_language+":"+
+              edit.entry.src_sentence+"</em>"+" -> "+
+              edit.entry.target_language+":"+
+              edit.entry.target_sentence+"</em>"+
+              " ajoutée";
+            if (!edit.isPast) addGlossaryEntry(edit.entry);            
+            break;
+          case "modified":
+            edit.message="Entrée du glossaire <em>"+
+              edit.entry.src_language+":"+
+              edit.entry.src_sentence+"</em>"+" -> "+
+              edit.entry.target_language+":"+
+              edit.entry.was+"</em>"+
+              " modifiée en <em>"+edit.entry.target_sentence+"</em>";
+            if (!edit.isPast) addGlossaryEntry(edit.entry);            
+            break;
+          case "deleted":
+            edit.message="Entrée du glossaire <em>"+
+              edit.entry.src_language+":"+
+              edit.entry.src_sentence+"</em>"+" -> "+
+              edit.entry.target_language+":"+
+              edit.entry.was+"</em>"+
+              " supprimée";
+            if (!edit.isPast) removeGlossary(edit.entry);            
+            break;
+        }
+        
+      }
+      if (edit.message && Traduxio.chat && Traduxio.chat.addMessage) {
+        Traduxio.chat.addMessage(edit);
+      }
+      
+    });
   });
 
   $(window).load(function() {
