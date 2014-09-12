@@ -165,7 +165,7 @@
       } else {
         $(".them",sessionPane).append(userDiv);
       }
-      sessionPane.slideDown(function() {
+      sessionPane.showPane(function() {
         userDiv.fadeIn();
       });
     }
@@ -173,11 +173,26 @@
 
   function offline(username) {
     if (username !== me && sessionPane.has("[id='session-"+username+"']")) {
-      sessionPane.slideDown(function() {
+      sessionPane.showPane(function() {
         $("[id='session-"+username+"']",sessionPane).fadeOut(function() {this.remove();});
       });
     }
   }
+
+  var defaultShowTime=5000;
+  $.fn.showPane=function (after,showtime) {
+    showtime=showtime || defaultShowTime;
+    var hideBack=this.is(":hidden");
+    var self=this;
+    this.slideDown(function() {
+      var queuename="showback";
+      if (typeof after=="function") after();
+      if (hideBack && showtime) {
+        self.clearQueue(queuename).
+        delay(showtime,queuename).slideUp({queue:queuename}).dequeue(queuename);
+      }
+    });
+  };
 
   var sessionPane;
 
