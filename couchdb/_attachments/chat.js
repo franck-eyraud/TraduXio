@@ -2,22 +2,21 @@
 
   var defaultMessage="Ceci est le chat traduxio pour ce texte";
 
-  var chatContent;
+  var chatContent,chatWindow;
 
   function createChat() {
     Traduxio.addCss("chat");
     var chatOuter = $("<div/>").attr("id","chat");
     var header=$("<h1/>").text("Chat");
-    var chatWindow=$("<div/>").addClass("chat");
+    chatWindow=$("<div/>").addClass("chat").hide();
     chatContent=$("<div/>").addClass("chat-content");
     var chatForm=$("<form>")
       .append($("<input/>",{type:"text",name:"message"}))
       .append($("<input/>",{type:"submit",name:"submit"}));
     chatOuter.append(header).append(chatWindow);
     chatWindow.append(chatContent).append(chatForm);
-    addMessage({author:"TraduXio",when:new Date().toISOString(),message:defaultMessage});
     header.on("click",function() {
-      chatWindow.slideToggle();
+      chatWindow.clearQueue().slideToggle();
     });
     chatForm.on("submit",function(e) {
       e.preventDefault();
@@ -42,6 +41,7 @@
       }
     });
     $("#body").append(chatOuter);
+    addMessage({author:"TraduXio",when:new Date().toISOString(),message:defaultMessage});
   }
 
   function addMessage(message) {
@@ -50,9 +50,14 @@
     var date=$("<span/>").addClass("date").attr("title",message.when || "date inconnue")
       .text(new Date(message.when).toLocaleString());
     div.append(date).append(author).append(message.message || "empty");
-    author.css({color:Traduxio.activity.getColor(message.author)});
-    chatContent.append(div);
-    chatContent.clearQueue().animate({scrollTop:chatContent.get(0).scrollHeight});
+    author.css({color:message.color});
+
+    function _add() {
+      chatContent.append(div);
+      chatContent.clearQueue().animate({scrollTop:chatContent.get(0).scrollHeight});
+    }
+    if (message.isMe) _add();
+    else (chatWindow.showPane(_add));
   }
 
   $.extend(Traduxio,{
