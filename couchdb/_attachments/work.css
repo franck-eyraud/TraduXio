@@ -201,13 +201,13 @@ div.metadata {
 
 #hexapla div.unit .text {
     padding: 0.5em;   /* Same border+padding as text area. */
-    padding-bottom: 1.5em; /* A bit more than one additional line of text. */ 
+    padding-bottom: 1.5em; /* A bit more than one additional line of text. */
     width: 100%;
     height: 100%;
     box-shadow: 0 0 2px grey;
 }
 
-/*to have the margin behaviour but allowing 
+/*to have the margin behaviour but allowing
 .unit to have 100% height */
 #hexapla td.pleat.open .box-wrapper {
     padding:0.5em 0px;
@@ -373,12 +373,26 @@ div.context-menu {
   border:#000000;
 }
 
-div.context-menu div.item {
+div.context-menu div {
   padding:2px;
   cursor:default;
 }
 
-div.context-menu div:hover {
+div.context-menu span.action {
+  float:right;
+  padding:0px 0.5em;
+}
+
+div.context-menu .action:hover {
   background:#333333;
   color:#AAAAAA;
+}
+
+.glossary {
+    font-weight: bolder;
+    cursor:pointer;
+}
+
+.temp {
+    font-style: italic;
 }

@@ -1,4 +1,7 @@
 {{> header}}
+  <script type="text/javascript">
+    var glossary={{{glossary}}};
+  </script>
   <div class="top">
 	<h1>{{work_title}} – {{work_creator}}</h1>
   <img src="{{prefix}}/shared/glossary.png" alt="glossary entry" class="addGlossary" />
@@ -8,6 +11,7 @@
   <form id="addGlossary"><h3>{{glossaryEntry}}</h3>
     <select class="language" name="src_language"></select><input name="src"/>
     <select class="language" name="target_language"></select><input name="target"/>
+    <input type="hidden" name="num" />
     <input type="submit" value="{{send}}" />
   </form>
 	<div id="removePanel"><button>{{deleteMsg}}</button></div>
