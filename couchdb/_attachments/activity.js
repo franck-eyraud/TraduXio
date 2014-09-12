@@ -106,6 +106,13 @@
   };
 
   function receivedActivity(activity) {
+    if (activity.author) {
+      if (activity.author==me) activity.isMe=true;
+      activity.color=getUser(activity.author).color;
+    }
+    if (activity.seq && activity.seq < Traduxio.getSeqNum()) {
+      activity.isPast=true;
+    }
     if (activity.type && callbacks[activity.type]) {
       callbacks[activity.type](activity);
     }
