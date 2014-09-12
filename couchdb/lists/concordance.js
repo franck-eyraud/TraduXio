@@ -88,17 +88,10 @@ function(head, req) {
           }
         }
       } else if (row.value.hasOwnProperty("glossary_entry")) {
-        if (work.glossary[row.value.glossary_entry]) {
-          var glossary_entry=work.glossary[row.value.glossary_entry];
-          if (row.value.reverse) {
-            var mapping=glossary_entry.src_sentence;
-            var context=glossary_entry.target_sentence;
-          } else {
-            var context=glossary_entry.src_sentence;
-            var mapping=glossary_entry.target_sentence;
-          }
+          var glossary_entry=row.value.glossary_entry;
+          var mapping=glossary_entry.src.sentence;
+          var context=glossary_entry.target.sentence;
           data.glossary_entries.push({context:highlight(context,req.query.query),mapping:mapping,original:original_header,glossary_entry:glossary_entry});
-        }
       }
     }
   }

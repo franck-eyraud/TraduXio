@@ -49,9 +49,8 @@
   "to": "_update/glossary/:id",
   "method": "POST"
 },{
-  "from": "glossary/:id/:num",
-  "to": "_update/glossary/:id",
-  "method": "PUT"
+  "from": "works/work/:id/glossary/:src_language/:src_sentence/:target_language",
+  "to": "_update/glossary/:id"
 },{
   "from": "works/:id/presence",
   "to": "_update/presence/:id"

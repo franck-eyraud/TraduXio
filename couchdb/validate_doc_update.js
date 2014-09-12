@@ -93,20 +93,13 @@ function (newDoc, oldDoc, userCtx, secObj) {
     if (newDoc.text && !testArray(newDoc.text,isString)) {
       throw({forbidden:"text lines must be strings "+JSON.stringify(newDoc.text)});
     }
-    if (newDoc.glossary && !testArray(newDoc.glossary,isObject)) {
-        throw({forbidden:"glossary entry must be objects"+JSON.stringify(newDoc)});
-    }
     mandatoryFields(["translations"]);
     ensureStrings(["creator","date","language","title"]);
-    ensureObjects(["translations"]);
+    ensureObjects(["translations","glossary"]);
     for (var t in newDoc.translations) {
       var translation=newDoc.translations[t];
       mandatory(translation,"text");
       shouldBeArray(translation,"text");
     }
-    newDoc.glossary && newDoc.glossary.forEach(function(glossary) {
-        mandatoryFields(["src_language","src_sentence","target_language","target_sentence"],glossary);
-        ensureStrings(["src_language","src_sentence","target_language","target_sentence"],glossary);
-    });
   }
 }
