@@ -13,11 +13,24 @@ function(o) {
       send_text(translation.text[i],translation.language,{unit:i,translation:t});
     }
   }
-  if (o.glossary && o.glossary.forEach)
-    o.glossary.forEach(function(glossary_entry,i) {
-      send_text(glossary_entry.src_sentence,glossary_entry.src_language,{glossary_entry:i});
-      send_text(glossary_entry.target_sentence,glossary_entry.target_language,{glossary_entry:i,reverse:true});
-    });
+  if (o.glossary)
+    for (src_language in o.glossary) {
+      for (src_sentence in o.glossary[src_language]) {
+        for (target_language in o.glossary[src_language][src_sentence]) {
+          var target_sentence=o.glossary[src_language][src_sentence][target_language];
+          var glossary_entry={
+            src:{language:src_language,sentence:src_sentence},
+            target:{language:target_language,sentence:target_sentence}
+          };
+          send_text(src_sentence,src_language,{glossary_entry:glossary_entry});
+
+          var target=glossary_entry.target;
+          glossary_entry.target=glossary_entry.src;
+          glossary_entry.src=target;
+          send_text(target_sentence,target_language,{glossary_entry:glossary_entry});
+        }
+      }
+    }
 
   function send_text(text,language,object) {
     const WORD_MATCHER = /[^\s"’'`\-]+/g;

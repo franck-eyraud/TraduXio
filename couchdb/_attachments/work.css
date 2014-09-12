@@ -373,12 +373,17 @@ div.context-menu {
   border:#000000;
 }
 
-div.context-menu div.item {
+div.context-menu div {
   padding:2px;
   cursor:default;
 }
 
-div.context-menu div:hover {
+div.context-menu span.action {
+  float:right;
+  padding:0px 0.5em;
+}
+
+div.context-menu .action:hover {
   background:#333333;
   color:#AAAAAA;
 }
