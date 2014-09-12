@@ -1,4 +1,7 @@
 function (work, req) {
+  var doc=work;
+  //!code lib/traduxio.js
+  
   try {
     if (!work) {
       throw {code:404,message:"not found"};
@@ -44,6 +47,18 @@ function (work, req) {
       } else {
         throw {code:201,message:"not modified"};
       }
+
+      var glossaryEntry={
+        src_language:src_language,
+        src_sentence:src_sentence,
+        target_language:target_language,
+        target_sentence:target_sentence,
+        was:old
+      };
+      work.glossary.edits=work.glossary.edits||[];
+      var act={entry:glossaryEntry};
+      act.action=old ? "modified" : "added";
+      Traduxio.addActivity(work.glossary.edits,act);
       return old;
     }
 
@@ -53,21 +68,17 @@ function (work, req) {
         var old=work.glossary[src_language][src_sentence][target_language];
         delete work.glossary[src_language][src_sentence][target_language];
         if (!Object.keys(work.glossary[src_language][src_sentence]).length) delete work.glossary[src_language][src_sentence];
+        var glossaryEntry={
+          src_language:src_language,
+          src_sentence:src_sentence,
+          target_language:target_language,
+          was:old
+        };
+        Traduxio.addActivity(work.glossary.edits,{action:"deleted",entry:glossaryEntry});
         return old;
       } else {
         throw {code:404,message:"was not in the glossary"};
       }
-    }
-
-    //temporarily convert old glossary format into new one
-    if (work.glossary && work.glossary.forEach) {
-      work.glossary_old=work.glossary;
-      work.glossary={};
-      work.glossary_old.forEach(function(glossaryEntry) {
-        with (glossaryEntry) {
-          addEntry (src_language,src_sentence,target_language,target_sentence);
-        }
-      });
     }
 
     validate();

@@ -93,7 +93,13 @@ function(o, req) {
   data.scripts=["jquery.selection","jquery.ajax-retry","activity","chat","jquery.highlight"];
   data.language=data.work_language;
   data.prefix="..";
-  data.glossary=o.glossary?JSON.stringify(o.glossary):"[]";
+  if (o.glossary) {
+    var glossary=o.glossary;
+  } else {
+    glossary={};
+  }
+  delete glossary.edits;
+  data.glossary=JSON.stringify(glossary);
   data.notext=o.text ? false : true;
   data.original=o.text ? true : (newWork ? true : false);
   data.i18n_str=JSON.stringify(js_i18n);
