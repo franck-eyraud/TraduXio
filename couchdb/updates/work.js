@@ -1,4 +1,7 @@
 function(work, req) {
+  var doc=work;
+  //!code lib/traduxio.js
+
   if (["PUT","POST","DELETE"].indexOf(req.method)==-1) {
     return [null,{code:405,body:"Method "+req.method+" not allowed"}];
   }
@@ -17,12 +20,10 @@ function(work, req) {
     if (work===null) {
       return [null,{code:404,body:"Not found"}];
     }
-    var doc,
-        original=false,
+    var original=false,
         created=false;
 
     if(!version_name || version_name == "original") {
-      doc = work;
       original=true;
 
     } else {
@@ -50,13 +51,15 @@ function(work, req) {
       created=true;
       original=true;
       version_name="original";
-      work={};
+      Traduxio.doc=doc=work={};
       work._id=work.id || req.uuid;
       delete work.id;
+      work.edits=[];
       actions.push("created new doc "+work._id);
       work.translations={};
       result.id=work._id;
       doc=work;
+      Traduxio.addActivity(work.edits,{action:"created"});
     }
 
     if (original) {
@@ -64,10 +67,12 @@ function(work, req) {
         doc=work;
         doc.text=emptyText(work);
         actions.push("created original version");
+        Traduxio.addActivity(work.edits,{action:"created",version:"original"});
         created=true;
       } else if (created) {
         work.translations["first"] = { text: emptyText(work) };
         actions.push("created first version");
+        Traduxio.addActivity(work.edits,{action:"created",version:"first"});
         created=true;
       }
       delete args.original;
@@ -76,24 +81,30 @@ function(work, req) {
         work.translations[version_name] = { title: "", language: "", creator:"", text: emptyText(work) };
         doc=work.translations[version_name];
         actions.push("created "+version_name+" version");
+        Traduxio.addActivity(work.edits,{action:"created",version:version_name});
         created=true;
       }
     }
 
   }
 
+  work.edits=work.edits||[];
+
   if (req.method=="DELETE") {
     if (!version_name && original) {
       work._deleted = true;
       actions.push("document removed");
+      Traduxio.addActivity(work.edits,{action:"deleted"});
     } else if (version_name=="original") {
       if (work.text) {
         delete work.text;
         actions.push("original version removed");
+        Traduxio.addActivity(work.edits,{action:"deleted",version:"original"});
       }
     } else {
       delete work.translations[version_name];
       actions.push("Translation "+version_name+" removed");
+      Traduxio.addActivity(work.edits,{action:"deleted",version:version_name});
     }
     result._deleted=true;
   } else {
@@ -122,6 +133,7 @@ function(work, req) {
           work.translations[new_name] = doc;
           delete work.translations[version_name];
           actions.push("changed version name from "+version_name+" to "+new_name);
+          Traduxio.addActivity(work.edits,{action:"edited",version:version_name,key:"creator",value:new_name});
           version_name=new_name;
         }
         result.creator=version_name;
@@ -142,6 +154,7 @@ function(work, req) {
       }
       if (args.hasOwnProperty("work-creator")) {
         actions.push("changed original creator from "+doc["creator"]+" to "+args["work-creator"]);
+        Traduxio.addActivity(work.edits,{action:"edited",version:"original",key:"work-creator",value:new_name});
         result["work-creator"]=args["work-creator"];
         doc["creator"]=args["work-creator"];
         delete args["work-creator"];
@@ -164,10 +177,12 @@ function(work, req) {
           result[key]=args[key];
           actions.push("change "+key+" from "+doc[key]+" to "+args[key]+" for "+version_name);
           doc[key]=args[key];
+          Traduxio.addActivity(work.edits,{action:"edited",version:version_name,key:key,value:args[key]});
         } else if (!doc[key]) {
           result[key]=args[key];
           actions.push("set "+key+" to "+args[key]+" for "+version_name);
           doc[key]=args[key];
+          Traduxio.addActivity(work.edits,{action:"edited",version:version_name,key:key,value:args[key]});
         }
       } else {
         return [null,{code:400,body:"can't set value for "+key}];
