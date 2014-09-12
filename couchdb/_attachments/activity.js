@@ -11,6 +11,8 @@
     activityInterval=setInterval(presence,sessionLength);
   };
 
+  var waitPresence=initialWaitPresence=500;
+
   function presence () {
     return $.ajax({
       url:Traduxio.getId()+"/presence",
@@ -29,10 +31,13 @@
       if (result.sessionLength) {
         sessionLength=result.sessionLength;
       }
+      waitPresence=initialWaitPresence;
     }).fail(function(result) {
-      presence();
+      setTimeout(presence,waitPresence);
+      waitPresence*=2;
     });
   };
+
   function leave() {
     $.ajax({
       url:Traduxio.getId()+"/presence",
