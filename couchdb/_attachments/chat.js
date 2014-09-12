@@ -55,6 +55,10 @@
     chatContent.clearQueue().animate({scrollTop:chatContent.get(0).scrollHeight});
   }
 
+  $.extend(Traduxio,{
+    chat:{addMessage:addMessage}
+  });
+
   $(document).ready(function() {
 
     createChat();

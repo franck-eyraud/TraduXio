@@ -1,4 +1,7 @@
 function(work, req) {
+  var doc=work;
+  //!code lib/traduxio.js
+
   var args = JSON.parse(req.body);
   if(args.key == "remove") {
 	work._deleted = true;
@@ -16,14 +19,18 @@ function(work, req) {
         delete work.text;
         work.translations={"first":{text:[]}};
     }
+    work.edits=[];
+    Traduxio.addActivity(work.edits,{action:"created"});
     return [work, JSON.stringify({ok:"created",id:work._id})];
   }
   var version = req.query.version;
   if(args.key == "delete") {
 	delete work.translations[version];
+  Traduxio.addActivity(work.edits,{action:"deleted",version:version});
 	return [work, version + " deleted"];
   }
   var doc;
+  work.edits=work.edits || [];
   if(version == "original") {
 	doc = work;
   } else {
@@ -42,9 +49,11 @@ function(work, req) {
 		  text.push("");
 	  }
 	  work.translations[version] = { title: work.title, language: work.language, text: text };
+    Traduxio.addActivity(work.edits,{action:"created",version:version});
 	}
 	doc = work.translations[version];
   }
+  Traduxio.addActivity(work.edits,{action:"edited",version:version,key:args.key,value:args.value});
   if(args.key == "work-creator") {
 	doc.creator = args.value;
   } else if(args.key == "creator") {
