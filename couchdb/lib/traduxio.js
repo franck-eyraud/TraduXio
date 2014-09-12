@@ -98,6 +98,7 @@ Traduxio= {
     if (typeof active == "undefined") active=true;
     var activity=data || {};
     activity.when = activity.when || new Date();
+    activity.seq = req.info.update_seq;
     activity.author = activity.author || this.getUserName(doc);
     activityList.push(activity);
     if (active) this.userActivity();
@@ -108,6 +109,7 @@ Traduxio= {
   fixActivity: function(activityList) {
     for (var i in activityList) {
       activityList[i].when=new Date(activityList[i].when);
+      activityList[i].seq=activityList[i].seq || req.info.update_seq;
     }
   },
 
