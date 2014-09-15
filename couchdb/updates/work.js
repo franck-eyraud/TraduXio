@@ -8,7 +8,7 @@ function(work, req) {
 	return [work, "document removed"];
   }
   if (work===null) {
-    work=args;
+    doc=work=args;
     work._id=work.id || req.id || req.uuid;
     work.creator=work["work-creator"];
     delete work["work-creator"];

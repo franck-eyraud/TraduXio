@@ -15,6 +15,7 @@ function(o) {
   }
   if (o.glossary)
     for (src_language in o.glossary) {
+      if (src_language!="edits")
       for (src_sentence in o.glossary[src_language]) {
         for (target_language in o.glossary[src_language][src_sentence]) {
           var target_sentence=o.glossary[src_language][src_sentence][target_language];
