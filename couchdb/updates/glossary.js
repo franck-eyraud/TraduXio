@@ -34,6 +34,7 @@ function (work, req) {
     }
 
     function addEntry(src_language,src_sentence,target_language,target_sentence) {
+      work.glossary = work.glossary || {};
       work.glossary[src_language]=
           work.glossary[src_language] || {};
       work.glossary[src_language][src_sentence]=
