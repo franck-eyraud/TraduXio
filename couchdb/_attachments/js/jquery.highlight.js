@@ -19,7 +19,16 @@ jQuery.fn.highlight = function(pat,classname) {
  function innerHighlight(node, pat) {
   var skip = 0;
   if (node.nodeType == 3) {
-   var pos = node.data.toUpperCase().indexOf(pat);
+   var pattest=pat.toLowerCase(),nodetest=node.data.toLowerCase();
+   if (pattest.length!=pat.length || nodetest.length!=node.data.length) {
+     pattest=pat.toUpperCase();
+     nodetest=node.data.toUpperCase();
+     if (pat.toUpperCase().length==pat.length && node.data.toUpperCase().length==node.data.length) {
+       pattest=pat;
+       nodetest=node.data;
+    }
+   }
+   var pos = nodetest.indexOf(pattest);
    if (pos >= 0) {
     var spannode = document.createElement('span');
     spannode.className = classname;
@@ -39,7 +48,7 @@ jQuery.fn.highlight = function(pat,classname) {
   return skip;
  }
  return this.length && pat && pat.length ? this.each(function() {
-  innerHighlight(this, pat.toUpperCase());
+  innerHighlight(this, pat);
  }) : this;
 };
 
