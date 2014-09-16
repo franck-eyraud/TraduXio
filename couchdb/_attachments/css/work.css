@@ -422,8 +422,12 @@ div.context-menu .action:hover {
 }
 
 .glossary {
-    font-weight: bolder;
     cursor:pointer;
+    border-bottom: 1px dotted #08C;
+}
+
+.glossary:hover {
+    background-color: #FFD;
 }
 
 .temp {
