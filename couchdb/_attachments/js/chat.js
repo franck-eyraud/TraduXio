@@ -65,10 +65,9 @@
   });
 
   $(document).ready(function() {
-
-    createChat();
-
-    Traduxio.activity.register("forum",addMessage);
-
+    if (Traduxio.getId()) {
+      createChat();
+      Traduxio.activity.register("forum",addMessage);
+    }
   });
 })(jQuery,Traduxio);

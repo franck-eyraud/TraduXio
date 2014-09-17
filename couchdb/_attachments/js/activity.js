@@ -198,24 +198,26 @@
 
   $(document).ready(function(){
     var id = Traduxio.getId();
-    presence();
-    resetInterval();
-    listenChanges(id,Traduxio.getSeqNum());
-    $(window).on("beforeunload",leave);
-    setTimeout(function() {
-      checkActivity(id,86600).done(function() {
-        Traduxio.activity.register("session",sessionInfo);
-      });
-    },500);
-    Traduxio.addCss("sessions");
-    sessionPane=$("<div/>").attr("id","sessions");
-    sessionPane.append($("<h1/>").text("Vous êtes")).append($("<div/>").addClass("me"));
-    sessionPane.append($("<h1/>").text("Collaborateur")).append($("<div/>").addClass("them"));
-    sessionPane.hide();
-    $(body).append(sessionPane);
-    var button=$("<span/>").attr("id","show-sessions").text("users").on("click",function() {
-      sessionPane.slideToggle();
-    }).css({cursor:"pointer",float:"right"}).insertBefore("#header form.concordance");
+    if (id) {
+      presence();
+      resetInterval();
+      listenChanges(id,Traduxio.getSeqNum());
+      $(window).on("beforeunload",leave);
+      setTimeout(function() {
+        checkActivity(id,86600).done(function() {
+          Traduxio.activity.register("session",sessionInfo);
+        });
+      },500);
+      Traduxio.addCss("sessions");
+      sessionPane=$("<div/>").attr("id","sessions");
+      sessionPane.append($("<h1/>").text("Vous êtes")).append($("<div/>").addClass("me"));
+      sessionPane.append($("<h1/>").text("Collaborateur")).append($("<div/>").addClass("them"));
+      sessionPane.hide();
+      $(body).append(sessionPane);
+      var button=$("<span/>").attr("id","show-sessions").text("users").on("click",function() {
+        sessionPane.slideToggle();
+      }).css({cursor:"pointer",float:"right"}).insertBefore("#header form.concordance");
+    }
   });
 
 })(jQuery,Traduxio);
