@@ -916,7 +916,7 @@
         return false;
       });
 
-      $(".top h1,img.removeDoc,img.addVersion").hide();
+      $(".top h1,img.removeDoc,img.addVersion,img.addGlossary").hide();
     }
     if (N==1) {
       $(".button.hide").remove();
