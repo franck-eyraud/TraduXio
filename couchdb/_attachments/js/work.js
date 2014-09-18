@@ -251,9 +251,13 @@ $.fn.isEdited = function() {
 };
 
 function stringToHtml(formattedString) {
-   return formattedString
-    .replace("<","&lt").replace(">","&gt;")
-    .replace(/\n$/,"\n ").replace(/\n/g, "<br>");
+  return formattedString
+       .replace(/</g,"&lt")
+       .replace(/>/g,"&gt;")
+       .replace(/^ /gm,"&nbsp;")
+       .replace(/  /g," &nbsp;")
+       .replace(/\n/g, "<br>\n")
+       ;
 }
 
 $.fn.getVersion = function(ancestor) {
