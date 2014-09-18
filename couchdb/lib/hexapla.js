@@ -47,7 +47,7 @@ function Hexapla() {
       return '<div class="unit" data-line="'
         + line_number + '" data-version="'
         + this.versions[version_number].id + '">'
-        + string.replace("<","&lt").replace(">","&gt;").replace(NEW_LINE, "<br/>")
+        + string.replace("<","&lt").replace(">","&gt;").replace(NEW_LINE, "<br/>\n")
         + "</div>";
     return null;
   };
@@ -116,7 +116,7 @@ function Hexapla() {
 	    }
 	    var line={
 	      version:this.versions[vi].id,
-	      text:this.versions[vi].text[i].replace("<","&lt").replace(">","&gt;").replace(NEW_LINE, "<br/>")
+	      text:this.versions[vi].text[i].replace("<","&lt").replace(">","&gt;").replace(NEW_LINE, "<br/>\n")
 	    };
 	    row.units.push(line);
 	    lastLines[vi]={line:line,num:i};

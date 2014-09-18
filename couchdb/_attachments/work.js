@@ -234,12 +234,21 @@
   };
 
   function htmlToString(unit) {
-    return unit.html()
-      .replace(/<br\/?>/g, "\n").replace("&lt;","<").replace("&gt;",">");
+    return unit.clone().removeHighlight("glossary").html()
+          .replace(/<br\/?>\n*/g, "\n")
+          .replace(/&lt;/g,"<")
+          .replace(/&gt;/g,">")
+          .replace(/&nbsp;/g," ");
   }
 
   function stringToHtml(formattedString) {
-     return formattedString.replace("<","&lt").replace(">","&gt;").replace(/\n$/,"\n ").replace(/\n/g, "<br>");
+     return formattedString
+          .replace(/</g,"&lt")
+          .replace(/>/g,"&gt;")
+          .replace(/^ /gm,"&nbsp;")
+          .replace(/  /g," &nbsp;")
+          .replace(/\n/g, "<br>\n")
+          ;
   }
 
   $.fn.getVersion = function(ancestor) {
@@ -874,6 +883,16 @@
 	$("#addPanel").on("submit", addVersion);
 	$("#removePanel").on("click", removeDoc);
   $("#addGlossary").on("submit", addGlossarySubmit);
+
+  $(".unit .text").each(function() {
+    $(this).html(
+      stringToHtml(
+        htmlToString(
+          $(this)
+        )
+      )
+    );
+  });
 
     var versions=getVersions();
     const N = versions.length;
