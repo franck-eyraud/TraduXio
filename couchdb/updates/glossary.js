@@ -2,6 +2,9 @@ function (work, req) {
   var doc=work;
   //!code lib/traduxio.js
   
+  work.glossary=work.glossary||{};
+  work.glossary.edits=work.glossary.edits||[];
+
   try {
     if (!work) {
       throw {code:404,message:"not found"};
@@ -34,7 +37,6 @@ function (work, req) {
     }
 
     function addEntry(src_language,src_sentence,target_language,target_sentence) {
-      work.glossary = work.glossary || {};
       work.glossary[src_language]=
           work.glossary[src_language] || {};
       work.glossary[src_language][src_sentence]=
@@ -56,7 +58,6 @@ function (work, req) {
         target_sentence:target_sentence,
         was:old
       };
-      work.glossary.edits=work.glossary.edits||[];
       var act={entry:glossaryEntry};
       act.action=old ? "modified" : "added";
       Traduxio.addActivity(work.glossary.edits,act);
