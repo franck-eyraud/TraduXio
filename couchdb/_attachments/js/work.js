@@ -894,7 +894,6 @@ $(document).ready(function() {
   $(".top").on("click", "#removeDoc", toggleRemoveDoc);
   $("#removePanel").on("click", removeDoc);
 
-  $(".top").on("click", "#addGlossary", toggleGlossaryEntry);
   $("#addGlossaryForm").on("submit", addGlossarySubmit);
 
   var versions=getVersions();
