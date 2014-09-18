@@ -211,12 +211,16 @@
       Traduxio.addCss("sessions");
       sessionPane=$("<div/>").attr("id","sessions");
       sessionPane.append($("<h1/>").text("Vous êtes")).append($("<div/>").addClass("me"));
-      sessionPane.append($("<h1/>").text("Collaborateur")).append($("<div/>").addClass("them"));
+      sessionPane.append($("<h1/>").text("Collaborateurs")).append($("<div/>").addClass("them"));
       sessionPane.hide();
       $(body).append(sessionPane);
-      var button=$("<span/>").attr("id","show-sessions").text("users").on("click",function() {
-        sessionPane.slideToggle();
-      }).css({cursor:"pointer",float:"right"}).insertBefore("#header form.concordance");
+      var button=$("<span/>").attr("id","show-sessions").
+        append(
+            $("<img>").attr("src",getPrefix()+"/shared/users.png").css({height:32,width:32}).attr("title","Collaborateurs")
+        )
+        .on("click",function() {
+          sessionPane.slideToggle();
+        }).css({cursor:"pointer",float:"right"}).insertBefore("#header form.concordance");
     }
   });
 

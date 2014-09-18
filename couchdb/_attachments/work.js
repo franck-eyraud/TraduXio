@@ -878,7 +878,6 @@
 	
 	$(".top").on("click", ".addVersion", toggleAddVersion);
 	$(".top").on("click", ".removeDoc", toggleRemoveDoc);
-  $(".top").on("click", ".addGlossary", toggleGlossaryEntry);
 	
 	$("#addPanel").on("submit", addVersion);
 	$("#removePanel").on("click", removeDoc);
@@ -935,7 +934,7 @@
         return false;
       });
 
-      $(".top h1,img.removeDoc,img.addVersion,img.addGlossary").hide();
+      $(".top h1,.top img").hide();
     }
     if (N==1) {
       $(".button.hide").remove();
