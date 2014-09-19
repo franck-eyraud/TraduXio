@@ -125,7 +125,7 @@
     if (activity.author)
       if (activity.entered || activity.action=="entered") {
         if (!activity.isPast) online(activity.author);
-        activity.message="est entrée dans la traduction";
+        activity.message="est entré dans la traduction";
       }
       if (activity.left || activity.action=="left") {
         activity.message="est sorti de la traduction";
@@ -162,10 +162,11 @@
   }
 
   function online(username) {
+    var added=false;
     var user=getUser(username);
     var userDiv=$("[id='session-"+username+"']",sessionPane,sessionPane);
     if (!userDiv.length) {
-      userDiv=$("<div/>").attr("id","session-"+username).append(username).prepend($("<span/>").addClass("colorcode")).hide();
+      userDiv=$("<div/>").attr("id","session-"+username).append(username).prepend($("<span/>").addClass("colorcode"));
       added=true;
     }
     $(".colorcode",userDiv).css({"background-color":user.color});
@@ -173,34 +174,39 @@
       if (me==username) {
         $(".me",sessionPane).empty().append(userDiv);
       } else {
-        $(".them",sessionPane).append(userDiv);
+        $(".them",sessionPane).append(userDiv.hide());
+        sessionPane.showPane(function(hide) {
+          userDiv.fadeIn(function() {
+            hide(500);
+          });
+        });
       }
-      sessionPane.showPane(function() {
-        userDiv.fadeIn();
-      });
     }
   }
 
   function offline(username) {
     if (username !== me && sessionPane.has("[id='session-"+username+"']")) {
-      sessionPane.showPane(function() {
-        $("[id='session-"+username+"']",sessionPane).fadeOut(function() {this.remove();});
+      sessionPane.showPane(function(hide) {
+        $("[id='session-"+username+"']",sessionPane).fadeOut(function() {
+          this.remove();
+          hide(500);
+        });
       });
     }
   }
 
   var defaultShowTime=5000;
-  $.fn.showPane=function (after,showtime) {
-    showtime=showtime || defaultShowTime;
+
+  $.fn.showPane=function (after) {
     var hideBack=this.is(":hidden");
     var self=this;
     this.slideDown(function() {
-      var queuename="showback";
-      if (typeof after=="function") after();
-      if (hideBack && showtime) {
-        self.clearQueue(queuename).
-        delay(showtime,queuename).slideUp({queue:queuename}).dequeue(queuename);
-      }
+      if (typeof after=="function") after(function(showtime) {
+        if (typeof showtime == "undefined") showTime=defaultShowTime;
+        if (hideBack && showtime) {
+          self.show().delay(showtime).slideUp();
+        }
+      });
     });
   };
 
