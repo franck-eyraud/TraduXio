@@ -169,7 +169,7 @@ function positionSplits(context) {
     var currTd=$(this).closest("td");
     var line=$(this).data("line");
     var position={};
-    var tableLine=$("tr#line-"+line);
+    var tableLine=findLine(line);
     if (tableLine.find("td:visible").length>0) {
       position=tableLine.find("td:visible").position();
       $(this).removeClass("dynamic");
@@ -251,6 +251,7 @@ $.fn.isEdited = function() {
 };
 
 function stringToHtml(formattedString) {
+  formattedString = formattedString || "";
   return formattedString
        .replace(/</g,"&lt")
        .replace(/>/g,"&gt;")
@@ -324,11 +325,7 @@ function toggleEdit (e) {
         $("#hexapla tbody tr.fulltext").hide();
         $("#hexapla tbody tr:not(.fulltext)").remove();
         lines.forEach(function(line,i) {
-          var newUnit=$("<div/>");
-          var text=$("<div>").addClass("text");
-          text.html(stringToHtml(line));
-          newUnit.append(text);
-          newUnit.addClass("unit").attr("data-version",version);
+          var newUnit=createUnit(line).attr("data-version",version);
           var newTd=$("<td>").addClass("pleat open").attr("data-version",version)
             .append($("<div>").addClass("box-wrapper").append(newUnit));
           newUnit.setSize(1);
@@ -743,6 +740,138 @@ function openContextMenu(glossaryEntry,position) {
   }
 };
 
+function unitContent(unit) {
+  return  $("textarea",unit).val();
+}
+
+function fillUnit(unit,content) {
+  var oldVal=unitContent(unit);
+  if (oldVal!=content) {
+    var element=$("textarea",unit).val(content);
+    autoSize.apply(element);
+    browseGlossary(displayGlossary,element);
+    return true;
+  }
+  return false;
+}
+
+$.fn.queueCss=function(properties) {
+  $(this).queue(function (next) {
+    $(this).css(properties);
+    next();
+  });
+};
+
+function highlightUnit(unit,color) {
+  var version=unit.getVersion("td");
+  var element=unit.isEdited() ? $("textarea",unit) : $(".text",unit);
+  if (element.is(":visible")) {
+    element.css({"background-color":color}).delay(1000).queueCss({"background-color":""});
+    find(version).css({"border-color":color,"border-width":"0px 2px"}).clearQueue().delay(1000).queueCss({"border-color":"","border-width":""});
+  } else {
+    findPleat(version).css({"border-color":color,"border-width":"0px 2px"}).clearQueue().delay(1000).queueCss({"border-color":"","border-width":""});
+  }
+}
+
+function createUnit(content) {
+  var newUnit = $("<div/>").addClass("unit");
+  var text = $("<div>").addClass("text");
+  newUnit.append(text);
+  var textarea=$("<textarea>").addClass("autosize");
+  newUnit.prepend(textarea);
+  fillUnit(newUnit,content);
+  return newUnit;
+}
+
+function findUnit(version,line) {
+  var unit=$("tr[data-line='"+line+"'] .unit[data-version='"+version+"']");
+  if (unit.length==0) return null;
+  if (unit.length==1) return unit;
+  return false;
+}
+
+function findLine(line) {
+  return $("tr[data-line='"+line+"']");
+}
+
+function updateOnScreen(version,line,content,color) {
+  var highlight=true;
+  var unit=findUnit(version,line);
+  if (unit) {
+    if (content !== null) {
+      if (!fillUnit(unit,content)) return false;
+    } else {
+      //join
+      var units=findUnits(version);
+      var previousUnit=units.eq(units.index(unit)-1);
+      var previousContent=previousUnit.find("textarea").val();
+      var thisContent=unit.find("textarea").val();
+      previousUnit.find("textarea").val(previousContent+"\n"+thisContent);
+      var thisLine=unit.getLine();
+      var prevLine=previousUnit.getLine();
+      var size=getSize(unit);
+      var newSpan=thisLine-prevLine+size;
+      previousUnit.closest("td").prop("rowspan",newSpan);
+      previousUnit.find(".text").css("min-height",(newSpan*32)+"px");
+      unit.closest("td").remove();
+      createSplits(previousUnit);
+      positionSplits();
+      unit=previousUnit;
+    }
+  } else {
+    if (content != null) { //otherwise, it is a join, which is already joined here
+      //potential split
+      var units=findUnits(version);
+      units.each(function() {
+        var cLine=$(this).getLine();
+        if (typeof cLine != "undefined") {
+          if (cLine<line) {
+            unit=$(this);
+          } else {
+            return false;
+        }
+        }
+      });
+      if (unit) {
+        // split
+        var size=getSize(unit);
+        var initialLine=unit.getLine();
+        var newUnit=createUnit(content).attr("data-version",version);
+        if (unit.isEdited()) newUnit.addClass("edit");
+        var newTd=$("<td>").addClass("pleat open").attr("data-version",version)
+          .append($("<div>").addClass("box-wrapper").append(newUnit));
+        newUnit.setSize(size-(line-initialLine));
+        unit.setSize(line-initialLine);
+        var versions=getVersions();
+        var versionIndex=versions.indexOf(version);
+        if (versionIndex==0) {
+          findLine(line).prepend(newTd);
+        } else {
+          var ok=false;
+          findLine(line).find(".unit").each(function() {
+            var currVersion=$(this).data("version");
+            if (versions.indexOf(currVersion) > versions.indexOf(version)) {
+              $(this).closest("td").before(newTd);
+              ok=true;
+              return false;
+            }
+          });
+          if (!ok) {
+            findLine(line).append(newTd);
+          }
+        }
+        createSplits(unit);
+        createJoins(newUnit);
+        createSplits(newUnit);
+        positionSplits();
+        $(".tosplit").removeClass("tosplit");
+        unit=unit.add(newUnit); //to highlight both units
+      }
+    }
+  }
+  return unit;
+}
+
 function getPreviousUnit(unit) {
   var version=unit.getVersion("td.open");
   var units=findUnits(version);
@@ -797,25 +926,14 @@ $(document).ready(function() {
   $("tr").on("click", ".join", function(e) {
     e.stopPropagation();
     var unit=$(this).closest(".unit");
-    var version=unit.getVersion("td.open");
-    var units=findUnits(version);
-    var previousUnit=units.eq(units.index(unit)-1);
-    if (previousUnit) {
+    var version=unit.getVersion("td");
+    if (findUnits(version).index(unit)>0) {
       editOnServer("null", $(this).closest(".unit").getReference())
         .done(function() {
-          var previousContent=previousUnit.find("textarea").val();
-          var thisContent=unit.find("textarea").val();
-          previousUnit.find("textarea").val(previousContent+"\n"+thisContent);
-          var thisLine=unit.getLine();
-          var prevLine=previousUnit.getLine();
-          var size=getSize(unit);
-          var newSpan=thisLine-prevLine+size;
-          previousUnit.closest("td").prop("rowspan",newSpan);
-          previousUnit.find(".text").css("min-height",(newSpan*32)+"px");
-          unit.closest("td").remove();
-          createSplits(previousUnit);
-          positionSplits();
-      });
+          updateOnScreen(version,unit.getLine(),null);
+        });
+    } else {
+      $(this).remove();
     }
   });
 
@@ -833,44 +951,7 @@ $(document).ready(function() {
       version:version,
       line: line
     }).done(function() {
-      var size=getSize(unit);
-      var initialLine=unit.getLine();
-      var newUnit=$("<div/>").append($("<textarea>").addClass("autosize"));
-      var text=$("<div>").addClass("text");
-      newUnit.append(text);
-      autoSize.apply($("textarea",newUnit));
-      newUnit.addClass("unit edit").attr("data-version",version);
-      $(this).remove();
-      var newTd=$("<td>").addClass("pleat open").attr("data-version",version)
-        .append($("<div>").addClass("box-wrapper").append(newUnit));
-      newUnit.setSize(size-(line-initialLine));
-      unit.setSize(line-initialLine);
-      var versions=getVersions();
-      var versionIndex=versions.indexOf(version);
-      if (versionIndex==0) {
-        $("tr#line-"+line).prepend(newTd);
-      } else {
-        var ok=false;
-        $("tr#line-"+line+" .unit").each(function() {
-          var currVersion=$(this).data("version");
-          if (versions.indexOf(currVersion) > versions.indexOf(version)) {
-            $(this).closest("td").before(newTd);
-            ok=true;
-            return false;
-          }
-          if (versions.indexOf($(this).data("version")) +1 == versions.length) {
-            $(this).closest("td").before(newTd);
-          }
-        });
-        if (!ok) {
-          $("tr#line-"+line).append(newTd);
-        }
-      }
-      createSplits(unit);
-      createJoins(newUnit);
-      createSplits(newUnit);
-      positionSplits();
-      $(".tosplit").removeClass("tosplit");
+
     });
   });
 
@@ -973,38 +1054,9 @@ $(document).ready(function() {
             if ("line" in edit && "content" in edit) {
               edit.message="Version <em>"+edit.version+"</em> modifiée à la ligne <a href='#"+edit.line+"'>"+edit.line+"</a>";
               if(!edit.isPast && version.length>0) {
-                var unit=$("tr[data-line='"+edit.line+"'] .unit[data-version='"+edit.version+"']");
-                if (unit) {
-                  var oldVal;
-                  if (unit.is(".edit")) {
-                    var element=$("textarea",unit);
-                    oldVal=element.val();
-                    if (oldVal!=edit.content) element.val(edit.content);
-                  } else {
-                    var element=$(".text",unit);
-                    oldVal=htmlToString(element);
-                    if (oldVal!=edit.content) {
-                      element.html(stringToHtml(edit.content));
-                      browseGlossary(displayGlossary,element);
-                    }
-                  }
-                  if (oldVal!=edit.content) {
-                    var color=edit.color;
-                    if (element.is(":visible")) {
-                      element.css({"background-color":color});
-                      version.css({"border-color":color,"border-width":"0px 2px"});
-                    } else {
-                      findPleat(edit.version).css({"border-color":color,"border-width":"0px 2px"});
-                    }
-                    setTimeout(function() {
-                      if (element.is(":visible")) {
-                        element.css({"background-color":""});
-                        version.css({"border-color":"","border-width":""});
-                      } else {
-                        findPleat(edit.version).css({"border-color":"","border-width":""});
-                      }
-                    },1000);
-                  }
+                var unit=updateOnScreen(edit.version,edit.line,edit.content,edit.me?edit.color:null);
+                if (unit && edit.color) {
+                  highlightUnit(unit,edit.color);
                 }
               }
             }
