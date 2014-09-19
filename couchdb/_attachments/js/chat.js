@@ -45,19 +45,21 @@
   }
 
   function addMessage(message) {
-    var div=$("<div/>").addClass("message");
-    var author=$("<span/>").addClass("chat-author").text(message.author || "anonyme");
-    var date=$("<span/>").addClass("date").attr("title",message.when || "date inconnue")
-      .text(new Date(message.when).toLocaleString());
-    div.append(date).append(author).append(message.message || "empty");
-    author.css({color:message.color});
+    if (message.message) {
+      var div=$("<div/>").addClass("message");
+      var author=$("<span/>").addClass("chat-author").text(message.author || "anonyme");
+      var date=$("<span/>").addClass("date").attr("title",message.when || "date inconnue")
+        .text(new Date(message.when).toLocaleString());
+      div.append(date).append(author).append(message.message || "empty");
+      author.css({color:message.color});
 
-    function _add() {
-      chatContent.append(div);
-      chatContent.clearQueue().animate({scrollTop:chatContent.get(0).scrollHeight});
+      function _add() {
+        chatContent.append(div);
+        chatContent.clearQueue().animate({scrollTop:chatContent.get(0).scrollHeight});
+      }
+      if (message.isMe) _add();
+      else (chatWindow.showPane(_add));
     }
-    if (message.isMe) _add();
-    else (chatWindow.showPane(_add));
   }
 
   $.extend(Traduxio,{
