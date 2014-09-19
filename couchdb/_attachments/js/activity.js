@@ -5,13 +5,15 @@
   var callbacks={};
   var activityInterval=null;
   var sessionLength=600000;
+  var initialWaitTime=500;
+  var maxWaitTime=60000;
 
   function resetInterval() {
     if (activityInterval) clearInterval(activityInterval);
     activityInterval=setInterval(presence,sessionLength);
   };
 
-  var waitPresence=initialWaitPresence=500;
+  var presenceWaitTime=initialWaitTime;
 
   function presence () {
     return $.ajax({
@@ -31,10 +33,11 @@
       if (result.sessionLength) {
         sessionLength=result.sessionLength;
       }
-      waitPresence=initialWaitPresence;
+      presenceWaitTime=initialWaitTime;
     }).fail(function(result) {
-      setTimeout(presence,waitPresence);
-      waitPresence*=2;
+      setTimeout(presence,presenceWaitTime);
+      presenceWaitTime*=2;
+      presenceWaitTime=Math.max(presenceWaitTime,maxWaitTime);
     });
   };
 
@@ -59,53 +62,74 @@
     }
   });
 
-  var changeWaitTime=initialTime=500;
+  var changeWaitTime=initialWaitTime;
+
   function listenChanges(id,seq) {
     $.ajax({
       url:id+"/changes/"+seq,
       dataType:"json"
     })
     .done(function(result) {
-      changeWaitTime=initialTime;
       if(result.last_seq!=seq) {
         seq=result.last_seq;
       }
       if (result.results && result.results.length>0) {
         checkActivity(id);
       }
+      if (changeWaitTime==maxWaitTime) {
+        Traduxio.chat.addMessage({message:"problème de connexion résolu",author:"Traduxio"});
+      }
+      changeWaitTime=initialWaitTime;
     })
     .fail(function() {
-       changeWaitTime*=2;
+      if (changeWaitTime<maxWaitTime) {
+        changeWaitTime*=2;
+      }
+      if (changeWaitTime>maxWaitTime) {
+        changeWaitTime=maxWaitTime;
+        Traduxio.chat.addMessage({message:"problème de connexion",author:"Traduxio"});
+      }
     })
     .always(function() {
-       setTimeout(listenChanges,changeWaitTime,id,seq);
+      setTimeout(listenChanges,changeWaitTime,id,seq);
     });
   };
 
-  function checkActivity(id,delay) {
+  function checkActivity(id,delay,callback) {
     var url=id+"/activity";
     if (delay) url+="?delay="+delay;
     else if (current) url+="?since="+current;
     else {
       return {done:function(){}};
     }
-    return $.ajax({
-      cache:delay?false:true,
-      url:url,
-      dataType:"json"})
-    .done(function(result) {
-      if (result.now) current=result.now;
-      if (result.activity) {
-        try {
-          result.activity.forEach(receivedActivity);
-        } catch (E) {
-          console.log(E);
+    var s=initialWaitTime;
+    function go(){ 
+      $.ajax({
+        cache:delay?false:true,
+        url:url,
+        dataType:"json"})
+      .done(function(result) {
+        if (result.now) current=result.now;
+        if (result.activity) {
+          try {
+            result.activity.forEach(receivedActivity);
+          } catch (E) {
+            console.log(E);
+          }
         }
-      };
-    })
-    .fail(function(a,b,c,f) {
-        alert("fail!");
-    });
+        if (typeof callback =="function") callback();
+      }).fail(function() {
+        if (typeof callback =="function") {
+          if (s>maxWaitTime) {
+            alert("problème de connexion apparemment, essayez plus tard");
+          } else {
+            setTimeout(go,s);
+            s*=2;
+          }
+        }
+      });
+    }
+    go();
   };
 
   function receivedActivity(activity) {
@@ -215,14 +239,23 @@
   $(document).ready(function(){
     var id = Traduxio.getId();
     if (id) {
-      presence();
-      resetInterval();
-      listenChanges(id,Traduxio.getSeqNum());
+      var p=initialWaitTime;
+      presence().done(function() {
+        Traduxio.activity.register("session",sessionInfo);
+        checkActivity(id,86600,function(){
+          listenChanges(id,Traduxio.getSeqNum());
+        });
+        resetInterval();
+      }).fail(function() {
+        if (p>maxWaitTime) {
+          alert("problème de connexion apparemment, essayez plus tard");
+          alert(JSON.stringify(arguments));
+        } else {
+          setTimeout(presence,p);
+          p*=2;
+        }
+      });
       $(window).on("beforeunload",leave);
-      Traduxio.activity.register("session",sessionInfo);
-      setTimeout(function() {
-        checkActivity(id,86600);
-      },500);
       Traduxio.addCss("sessions");
       sessionPane=$("<div/>").attr("id","sessions");
       sessionPane.append($("<h1/>").text("Vous êtes")).append($("<div/>").addClass("me"));
