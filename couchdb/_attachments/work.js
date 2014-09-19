@@ -153,7 +153,7 @@
       var currTd=$(this).closest("td");
       var line=$(this).data("line");
       var position={};
-      var tableLine=$("tr[data-line="+line+"]");
+      var tableLine=findLine(line);
       if (tableLine.find("td:visible").length>0) {
 	position=tableLine.find("td:visible").position();
         $(this).removeClass("dynamic");
@@ -624,32 +624,36 @@
 
 
   function createJoins(unit) {
-    unit.find(".join").remove();
-    var version=unit.getVersion("td.open");
-    var units=findUnits(version);
-    var currIndex=units.index(unit);
-    if (currIndex>0) {
-      var prevUnit=units.eq(currIndex-1);
-      createJoin(prevUnit,unit);
+    if (unit.isEdited()) {
+      unit.find(".join").remove();
+      var version=unit.getVersion("td.open");
+      var units=findUnits(version);
+      var currIndex=units.index(unit);
+      if (currIndex>0) {
+        var prevUnit=units.eq(currIndex-1);
+        createJoin(prevUnit,unit);
+      }
     }
   }
   function createSplits(unit) {
-    unit.find(".split").remove();
-    var reference=unit.getReference();
-    var version=reference.version;
-    var currLine=reference.line;
-    var units=findUnits(version);
-    var currIndex=units.index(unit);
-    var size=getSize(unit);
-    var lastLine=currLine+size-1;
-    var maxLines=$("#hexapla").data("lines");
-    var currPos=unit.position();
-    if (currLine<lastLine && currLine<maxLines) {
-      for (var i=currLine+1; i<=lastLine; ++i) {
-	var split=$("<span/>").addClass("split").attr("title","split line "+i).data("line",i);
-	unit.append(split);
+    if (unit.isEdited()) {
+      unit.find(".split").remove();
+      var reference=unit.getReference();
+      var version=reference.version;
+      var currLine=reference.line;
+      var units=findUnits(version);
+      var currIndex=units.index(unit);
+      var size=getSize(unit);
+      var lastLine=currLine+size-1;
+      var maxLines=$("#hexapla").data("lines");
+      var currPos=unit.position();
+      if (currLine<lastLine && currLine<maxLines) {
+        for (var i=currLine+1; i<=lastLine; ++i) {
+          var split=$("<span/>").addClass("split").attr("title","split line "+i).data("line",i);
+          unit.append(split);
+        }
+        positionSplits();
       }
-      positionSplits();
     }
   }
 
@@ -740,6 +744,145 @@
     }
   };
 
+  function unitContent(unit) {
+    return htmlToString(unit.find(".text"));
+  }
+
+  function fillUnit(unit,content) {
+    var oldVal=unitContent(unit);
+    if (oldVal!=content) {
+      if (unit.isEdited()) {
+        var element=$("textarea",unit).val(content);
+        autoSize.apply(element);
+      } else {
+        var element=$(".text",unit);
+        element.html(stringToHtml(content));
+        browseGlossary(displayGlossary,element);
+      }
+      return true;
+    }
+    return false;
+  }
+
+  $.fn.queueCss=function(properties) {
+    $(this).queue(function (next) {
+      $(this).css(properties);
+      next();
+    });
+  };
+
+  function highlightUnit(unit,color) {
+    var version=unit.getVersion("td");
+    var element=unit.isEdited() ? $("textarea",unit) : $(".text",unit);
+    if (element.is(":visible")) {
+      element.css({"background-color":color}).delay(1000).queueCss({"background-color":""});
+      find(version).css({"border-color":color,"border-width":"0px 2px"}).clearQueue().delay(1000).queueCss({"border-color":"","border-width":""});
+    } else {
+      findPleat(version).css({"border-color":color,"border-width":"0px 2px"}).clearQueue().delay(1000).queueCss({"border-color":"","border-width":""});
+    }
+  }
+
+  function createUnit(content,edit) {
+    var newUnit = $("<div/>").addClass("unit");
+    var text = $("<div>").addClass("text");
+    newUnit.append(text);
+    if (edit) {
+      var textarea=$("<textarea>").addClass("autosize");
+      newUnit.prepend(textarea).addClass("edit");
+    }
+    fillUnit(newUnit,content);
+    return newUnit;
+  }
+
+  function findUnit(version,line) {
+    var unit=$("tr[data-line='"+line+"'] .unit[data-version='"+version+"']");
+    if (unit.length==0) return null;
+    if (unit.length==1) return unit;
+    return false;
+  }
+
+  function findLine(line) {
+    return $("tr[data-line='"+line+"']");
+  }
+
+  function updateOnScreen(version,line,content,color) {
+    var highlight=true;
+    var unit=findUnit(version,line);
+    if (unit) {
+      if (content !== null) {
+        if (!fillUnit(unit,content)) return false;
+      } else {
+        //join
+        var units=findUnits(version);
+        var previousUnit=units.eq(units.index(unit)-1);
+        var content=[unitContent(previousUnit),unitContent(unit)].join("\n");
+        fillUnit(previousUnit,content);
+        var thisLine=unit.getLine();
+        var prevLine=previousUnit.getLine();
+        var size=getSize(unit);
+        var newSpan=thisLine-prevLine+size;
+        previousUnit.closest("td").attr("rowspan",newSpan);
+        previousUnit.find(".text").css("min-height",(newSpan*32)+"px");
+        unit.closest("td").remove();
+        createJoins(previousUnit);
+        createSplits(previousUnit);
+        unit=previousUnit;
+      }
+    } else {
+      if (content != null) { //otherwise, it is a join, which is already joined here
+        //potential split
+        var units=findUnits(version);
+        units.each(function() {
+          var cLine=$(this).getLine();
+          if (typeof cLine != "undefined") {
+            if (cLine<line) {
+              unit=$(this);
+            } else {
+              return false;
+          }
+          }
+        });
+        if (unit) {
+          var size = getSize(unit);
+          var initialLine = unit.getLine();
+          var edit=units.isEdited();
+          var newUnit=createUnit(content,edit).attr("data-version",version);
+
+          var newTd = $("<td>").addClass("pleat open").attr("data-version", version).append($("<div>").addClass("box-wrapper").append(newUnit));
+
+          newUnit.setSize(size - (line - initialLine));
+          unit.setSize(line - initialLine);
+          var versions = getVersions();
+          var versionIndex = versions.indexOf(version);
+          if (versionIndex == 0) {
+            findLine(line).prepend(newTd);
+          } else {
+            var ok = false;
+            findLine(line).find(".unit").each(function() {
+              var currVersion = $(this).data("version");
+              if (versions.indexOf(currVersion) > versions.indexOf(version)) {
+                $(this).closest("td").before(newTd);
+                ok = true;
+                return false;
+              }
+            });
+            if (!ok) {
+              findLine(line).append(newTd);
+            }
+          }
+          unit=unit.add(newUnit);
+          if (edit) {
+            createJoins(unit);
+            createSplits(unit);
+            createJoins(newUnit);
+            createSplits(newUnit);
+          }
+        }
+      }
+    }
+    return unit;
+  }
+
   function getPreviousUnit(unit) {
     var version=unit.getVersion("td.open");
     var units=findUnits(version);
@@ -801,25 +944,14 @@
     $("tr").on("click", ".join", function(e) {
       e.stopPropagation();
       var unit=$(this).closest(".unit");
-      var version=unit.getVersion("td.open");
-      var units=findUnits(version);
-      var previousUnit=units.eq(units.index(unit)-1);
-      if (previousUnit) {
-	editOnServer("null", $(this).closest(".unit").getReference())
-	  .done(function() {
-            var previousContent=previousUnit.find("textarea").val();
-            var thisContent=unit.find("textarea").val();
-            previousUnit.find("textarea").val(previousContent+"\n"+thisContent);
-            var thisLine=unit.getLine();
-            var prevLine=previousUnit.getLine();
-            var size=getSize(unit);
-            var newSpan=thisLine-prevLine+size;
-            previousUnit.closest("td").attr("rowspan",newSpan);
-            previousUnit.find(".text").css("min-height",(newSpan*32)+"px");
-            unit.closest("td").remove();
-            createJoins(previousUnit);
-            createSplits(previousUnit);
-        });
+      var version=unit.getVersion("td");
+      if (findUnits(version).index(unit)>0) {
+        editOnServer("null", $(this).closest(".unit").getReference())
+          .done(function() {
+            updateOnScreen(version,unit.getLine(),null);
+          });
+      } else {
+        $(this).remove();
       }
     });
 
@@ -836,43 +968,7 @@
         version:version,
         line: line
       }).done(function() {
-        var size=getSize(unit);
-        var initialLine=unit.getLine();
-        var newUnit=$("<div/>").append($("<textarea>").addClass("autosize"));
-        var text=$("<div>").addClass("text");
-        newUnit.append(text);
-        autoSize.apply($("textarea",newUnit));
-        newUnit.addClass("unit edit").attr("data-version",version);
-        $(this).remove();
-        var newTd=$("<td>").addClass("pleat open").attr("data-version",version).append($("<div>").addClass("box-wrapper").append(newUnit));
-        newUnit.setSize(size-(line-initialLine));
-        unit.setSize(line-initialLine);
-        var versions=getVersions();
-        var versionIndex=versions.indexOf(version);
-        if (versionIndex==0) {
-	  $("tr[data-line="+line+"]").prepend(newTd);
-        } else {
-	  var ok=false;
-	  $("tr[data-line="+line+"] .unit").each(function() {
-            var currVersion=$(this).data("version");
-	    if (versions.indexOf(currVersion) > versions.indexOf(version)) {
-	      $(this).closest("td").before(newTd);
-	      ok=true;
-	      return false;
-	    }
-	    if (versions.indexOf($(this).data("version")) +1 == versions.length) {
-	      $(this).closest("td").before(newTd);
-	    }
-	  });
-          if (!ok) {
-	    $("tr[data-line="+line+"]").append(newTd);
-          }
-        }
-        createJoins(unit);
-        createSplits(unit);
-        createJoins(newUnit);
-        createSplits(newUnit);
-        $(".tosplit").removeClass("tosplit");
+        updateOnScreen(version,line,"");
       });
     });
 
@@ -954,38 +1050,9 @@
               if ("line" in edit && "content" in edit) {
                 edit.message="Version <em>"+edit.version+"</em> modifiée à la ligne <a href='#"+edit.line+"'>"+edit.line+"</a>";                
                 if(!edit.isPast && version.length>0) {
-                  var unit=$("tr[data-line='"+edit.line+"'] .unit[data-version='"+edit.version+"']");
-                  if (unit) {
-                    var oldVal;
-                    if (unit.is(".edit")) {
-                      var element=$("textarea",unit);
-                      oldVal=element.val();
-                      if (oldVal!=edit.content) element.val(edit.content);
-                    } else {
-                      var element=$(".text",unit);
-                      oldVal=htmlToString(element);
-                      if (oldVal!=edit.content) {
-                        element.html(stringToHtml(edit.content));
-                        browseGlossary(displayGlossary,element);
-                      }
-                    }
-                    if (oldVal!=edit.content) {
-                      var color=edit.color;
-                      if (element.is(":visible")) {
-                        element.css({"background-color":color});
-                        version.css({"border-color":color,"border-width":"0px 2px"});
-                      } else {
-                        findPleat(edit.version).css({"border-color":color,"border-width":"0px 2px"});
-                      }
-                      setTimeout(function() {
-                        if (element.is(":visible")) {
-                          element.css({"background-color":""});
-                          version.css({"border-color":"","border-width":""});
-                        } else {
-                          findPleat(edit.version).css({"border-color":"","border-width":""});
-                        }
-                      },1000);
-                    }
+                  var unit=updateOnScreen(edit.version,edit.line,edit.content,edit.me?edit.color:null);
+                  if (unit && edit.color) {
+                    highlightUnit(unit,edit.color);
                   }
                 }
               }
