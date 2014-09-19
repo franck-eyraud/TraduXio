@@ -2,7 +2,7 @@
 
   var defaultMessage="Ceci est le chat traduxio pour ce texte";
 
-  var chatContent,chatWindow;
+  var chatContent,chatWindow,firstMessage;
 
   function createChat() {
     Traduxio.addCss("chat");
@@ -16,7 +16,18 @@
     chatOuter.append(header).append(chatWindow);
     chatWindow.append(chatContent).append(chatForm);
     header.on("click",function() {
-      chatWindow.clearQueue().slideToggle();
+      chatWindow.slideToggle(function(){
+        if (chatWindow.is(":visible")) {
+          if (unread.length) {
+            chatContent.clearQueue().animate({scrollTop:chatContent.scrollTop()+unread.filter(":first").position().top});
+            unread.delay(1000).queue(function() {
+              $(this).removeClass("unread");
+            });
+          }        
+          chatOuter.removeClass("unread");
+        }
+      });
+      var unread=chatOuter.find("div.message.unread");
     });
     chatForm.on("submit",function(e) {
       e.preventDefault();
@@ -41,7 +52,7 @@
       }
     });
     $("#body").append(chatOuter);
-    addMessage({author:"TraduXio",when:new Date().toISOString(),message:defaultMessage});
+    firstMessage=addMessage({author:"TraduXio",when:new Date().toISOString(),message:defaultMessage});
   }
 
   function addMessage(message) {
@@ -53,12 +64,23 @@
       div.append(date).append(author).append(message.message || "empty");
       author.css({color:message.color});
 
-      function _add() {
+      if (!message.isPast) {
         chatContent.append(div);
-        chatContent.clearQueue().animate({scrollTop:chatContent.get(0).scrollHeight});
+        if (!message.isMe) {
+          div.addClass("unread");
+          if (chatContent.is(":hidden")) {
+            $("#chat").addClass("unread");
+          }
+        }
+      } else {
+        div.insertBefore(firstMessage);
       }
-      if (message.isMe) _add();
-      else (chatWindow.showPane(_add));
+      if (chatContent.is(":visible")) {
+        chatContent.clearQueue().animate({scrollTop:chatContent.get(0).scrollHeight}).delay(1000).queue(function() {
+          $("#chat .unread").removeClass("unread");
+        });
+      }
+      return div;
     }
   }
 
