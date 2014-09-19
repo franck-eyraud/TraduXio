@@ -121,15 +121,22 @@
   function sessionInfo(activity) {
     if (activity.author)
       if (activity.entered || activity.action=="entered") {
-        online(activity.author);
+        if (!activity.isPast) online(activity.author);
+        activity.message="est entrée dans la traduction";
       }
       if (activity.left || activity.action=="left") {
-        if (activity.author==me) {
-          presence();
-          resetInterval();
-        } else {
-          offline(activity.author);
+        activity.message="est sorti de la traduction";
+        if (!activity.isPast) { 
+          if (activity.isMe) {
+            presence();
+            resetInterval();
+          } else {
+            offline(activity.author);
+          }
         }
+      }
+      if (Traduxio.chat && Traduxio.chat.addMessage) {
+        Traduxio.chat.addMessage(activity);
       }
   }
 
@@ -203,10 +210,9 @@
       resetInterval();
       listenChanges(id,Traduxio.getSeqNum());
       $(window).on("beforeunload",leave);
+      Traduxio.activity.register("session",sessionInfo);
       setTimeout(function() {
-        checkActivity(id,86600).done(function() {
-          Traduxio.activity.register("session",sessionInfo);
-        });
+        checkActivity(id,86600);
       },500);
       Traduxio.addCss("sessions");
       sessionPane=$("<div/>").attr("id","sessions");
