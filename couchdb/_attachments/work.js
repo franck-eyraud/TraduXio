@@ -234,11 +234,14 @@
   };
 
   function htmlToString(unit) {
-    return unit.clone().removeHighlight("glossary").html()
+    if (unit.length>0)
+      return unit.clone().removeHighlight("glossary").html()
           .replace(/<br\/?>\n*/g, "\n")
           .replace(/&lt;/g,"<")
           .replace(/&gt;/g,">")
-          .replace(/&nbsp;/g," ");
+          .replace(/&nbsp;/g," ")
+          .replace(/ $/,"");
+    return null;
   }
 
   function stringToHtml(formattedString) {
@@ -247,7 +250,8 @@
           .replace(/>/g,"&gt;")
           .replace(/^ /gm,"&nbsp;")
           .replace(/  /g," &nbsp;")
-          .replace(/\n/g, "<br>\n")
+          .replace(/$/,"&nbsp;") // because a single <br> at end of text does not increase div.text size 
+          .replace(/\n/g,"<br>\n")
           ;
   }
 
