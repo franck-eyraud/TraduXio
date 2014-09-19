@@ -86,6 +86,9 @@
     var url=id+"/activity";
     if (delay) url+="?delay="+delay;
     else if (current) url+="?since="+current;
+    else {
+      return {done:function(){}};
+    }
     return $.ajax({
       cache:delay?false:true,
       url:url,
