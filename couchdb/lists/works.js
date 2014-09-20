@@ -3,7 +3,7 @@
   // !code lib/path.js
   start({headers: {"Content-Type": "text/html;charset=utf-8"}});
   var data = {languages:[]};
-  var languageData = null; 
+  var languageData = null;
   var authorData = null;
   var lastLanguage = null;
   var lastAuthor = null;
@@ -37,7 +37,8 @@
       name: row.value
     });
   }
-  languageData.authors.push(authorData);
+  if (languageData)
+    languageData.authors.push(authorData);
   data.languages.push(languageData);
   data.name="works";
   data.scripts=["ul-close"];
