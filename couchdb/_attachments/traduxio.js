@@ -1,23 +1,23 @@
 $.fn.concordancify = function() {
-  
+
   default_language=$("body").data("language") || currentLanguage;
   default_query=$("body").data("query") || "";
 
   this.append('<input id="query" type="search" results="5" name="query" placeholder="Rechercher" value="'
     +  default_query + '" />');
   this.append('<select id="language" name="language"/>');
-  
-  var form=this; 
+
+  var form=this;
 
   getLanguageNames(function() {
     $.getJSON(getPrefix()+"/languages", function(result) {
       $.each(result.rows, function(i, o) {
-	$("#language").append("<option value=\""+o.key+"\">" + o.key + " - " + getLanguageName(o.key) + "</option>");
+        $("#language").append("<option value=\""+o.key+"\">" + o.key + " - " + getLanguageName(o.key) + "</option>");
       });
       $("#language").val(default_language);
-    }); 
+    });
   });
-  
+
   var submitForm=function(event) { //TODO jQuery 2
     event.preventDefault();
     var query = form.find('#query').val().toLowerCase();
@@ -34,7 +34,7 @@ $.fn.concordancify = function() {
   $(".submit",form).on("click",submitForm);
   $("#language",form).on("keypress",function(e) {
       if(e.which == 13) {
-	  submitForm(e);
+        submitForm(e);
       }
   });
 };
@@ -67,7 +67,7 @@ function getLanguageNames(callback) {
       callback(true);
     });
   } else {
-     callback(true);
+    callback(true);
   }
 }
 
@@ -86,10 +86,10 @@ $(document).ready(function() {
       var langID=$(lang).data("id");
       var langName=getLanguageName(langID);
       if ($(lang).is(".expand")) {
-	$(lang).text(langName);
-	$(lang).attr('title',langID);
+        $(lang).text(langName);
+        $(lang).attr('title',langID);
       } else {
-	$(lang).attr('title',langName);
+        $(lang).attr('title',langName);
       }
     });
   });
@@ -97,22 +97,21 @@ $(document).ready(function() {
 });
 
 Traduxio=$.extend({},{
-    version:"1.0",
-    getPrefix:getPrefix,
-    getLanguagesNames:getLanguageNames,
-    getLanguageName:getLanguageName,
-    addCss:function(name) {
-      $("<link/>", {
-         rel: "stylesheet",
-         type: "text/css",
-         href: Traduxio.getPrefix()+"/shared/"+name+".css"
-      }).appendTo("head");
-    },
-    getId:function() {
-      return $("#hexapla").data("id");
-    },
-    getSeqNum:function() {
-      return $(document.body).data("seq");
-    }
+  version:"1.0",
+  getPrefix:getPrefix,
+  getLanguagesNames:getLanguageNames,
+  getLanguageName:getLanguageName,
+  addCss:function(name) {
+    $("<link/>", {
+      rel: "stylesheet",
+      type: "text/css",
+      href: Traduxio.getPrefix()+"/shared/"+name+".css"
+    }).appendTo("head");
+  },
+  getId:function() {
+    return $("#hexapla").data("id");
+  },
+  getSeqNum:function() {
+    return $(document.body).data("seq");
   }
-);
+});

@@ -23,7 +23,7 @@
             unread.delay(1000).queue(function() {
               $(this).removeClass("unread");
             });
-          }        
+          }
           chatOuter.removeClass("unread");
         }
       });

@@ -103,7 +103,7 @@
       return {done:function(){}};
     }
     var s=initialWaitTime;
-    function go(){ 
+    function go(){
       $.ajax({
         cache:delay?false:true,
         url:url,
@@ -153,7 +153,7 @@
       }
       if (activity.left || activity.action=="left") {
         activity.message="est sorti de la traduction";
-        if (!activity.isPast) { 
+        if (!activity.isPast) {
           if (activity.isMe) {
             presence();
             resetInterval();
@@ -262,8 +262,8 @@
       sessionPane.append($("<h1/>").text("Collaborateurs")).append($("<div/>").addClass("them"));
       sessionPane.hide();
       $(body).append(sessionPane);
-      var button=$("<span/>").attr("id","show-sessions").
-        append(
+      var button=$("<span/>").attr("id","show-sessions")
+        .append(
             $("<img>").attr("src",getPrefix()+"/shared/users.png").css({height:32,width:32}).attr("title","Collaborateurs")
         )
         .on("click",function() {

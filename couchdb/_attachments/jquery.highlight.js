@@ -15,7 +15,7 @@ Johann Burkard
 */
 
 jQuery.fn.highlight = function(pat,classname) {
-  classname=classname || "highlight";
+ classname=classname || "highlight";
  function innerHighlight(node, pat) {
   var skip = 0;
   if (node.nodeType == 3) {
