@@ -7,6 +7,7 @@
   {{/css}} 
   <script src="{{prefix}}/shared/jquery.js"></script>  
   <script src="{{prefix}}/shared/traduxio.js"></script> 
+  <script src="{{prefix}}/shared/login.js"></script>
   {{#script}} 
   <script type="text/javascript" src="{{prefix}}/shared/{{name}}.js"></script>
   {{/script}} 
@@ -29,6 +30,7 @@
 	  <li class="myworks"><a href="#">Mes traductions</a></li>
 	  <li class="concordance"><a href="{{prefix}}/works/concordance">Concordance</a></li>
 	</ul>
+      <div id="session-info"></div>
       <form class="concordance"></form>
     </div>
     <div id="main" class="group">

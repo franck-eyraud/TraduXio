@@ -154,6 +154,26 @@ li.closed > ul {
   width:100%;
 }
 
+#session-info {
+  float:right;
+}
+
+#session-info .logout {
+  cursor:pointer;
+}
+
+#session-info input {
+  width:10em;
+}
+
+#session-info input[type=submit] {
+  width:3em;
+}
+
+#session-info input.bad {
+  border-color:red;
+}
+
 /* ====
 I hate when you have to hack CSS to render natural stuff...
 http://kizu.ru/en/fun/rotated-text/
