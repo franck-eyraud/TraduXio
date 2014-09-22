@@ -22,12 +22,18 @@
       dataType:"json"
     }).done(function(result){
       if (result.user) {
+        if (result.ok) online(me,result.anonymous);
         me=result.user;
-        if (result.ok) online(me);
       }
       if (result.users) {
         for (var user in result.users) {
-          online(user);
+          online(user,result.users.anonymous);
+        }
+        var names=Object.keys(result.users);
+        for (var user in result.users) {
+          if (names.indexOf(user)==-1) {
+            offline(user);
+          }
         }
       }
       if (result.sessionLength) {
@@ -58,7 +64,8 @@
       },
       getColor:function(user) {
         return getUser(user).color;
-      }
+      },
+      presence:presence
     }
   });
 
@@ -135,7 +142,9 @@
   function receivedActivity(activity) {
     if (activity.author) {
       if (activity.author==me) activity.isMe=true;
-      activity.color=getUser(activity.author).color;
+      var user=getUser(activity.author);
+      activity.color=user.color;
+      activity.anonymous=user.anonymous;
     }
     if (activity.seq && activity.seq < Traduxio.getSeqNum()) {
       activity.isPast=true;
@@ -147,11 +156,11 @@
 
   function sessionInfo(activity) {
     if (activity.author)
-      if (activity.entered || activity.action=="entered") {
-        if (!activity.isPast) online(activity.author);
+      if (activity.entered) {
+        if (!activity.isPast) online(activity.author,activity.anonymous);
         activity.message="est entré dans la traduction";
       }
-      if (activity.left || activity.action=="left") {
+      if (activity.left) {
         activity.message="est sorti de la traduction";
         if (!activity.isPast) {
           if (activity.isMe) {
@@ -161,6 +170,10 @@
             offline(activity.author);
           }
         }
+      }
+      if (activity.rename) {
+        activity.message="est maintenant connu comme "+activity.newname;
+        if (!activity.isPast) rename(activity.author,activity.newname);
       }
       if (Traduxio.chat && Traduxio.chat.addMessage) {
         Traduxio.chat.addMessage(activity);
@@ -185,7 +198,44 @@
     return user;
   }
 
-  function online(username) {
+  function rename(username,newname) {
+    if (!username in users) {
+      online(newname);
+    } else if (newname in users) {
+      offline(username);
+      online(newname);
+    } else {
+      user=users[username];
+      user.name=newname;
+      users[newname]=user;
+      delete users[username];
+      var userDiv=$("[id='session-"+username+"']",sessionPane,sessionPane);
+      sessionPane.showPane(function(hide) {
+        userDiv.fadeOut(function() {
+          userDiv.attr("id","session-"+newname).empty().append(newname).prepend($("<span/>").addClass("colorcode"));
+          $(".colorcode",userDiv).css({"background-color":user.color});
+          userDiv.fadeIn(function(){hide(500);});
+        });
+      });
+    }
+    return;
+    if (newname in users) {
+      offline(username);
+      online(newname);
+    } else {
+      var userDiv=$("[id='session-"+newname+"']",sessionPane,sessionPane);
+      if (userDiv.length) {
+        offline(username);
+        online(newname);
+      } else {
+        users[newname]=user;
+        user.name=newname;
+        delete users[username];
+      }
+    }
+  }
+
+  function online(username,anonymous) {
     var added=false;
     var user=getUser(username);
     var userDiv=$("[id='session-"+username+"']",sessionPane,sessionPane);
