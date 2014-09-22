@@ -1,7 +1,7 @@
 Traduxio= {
 
   sessionLength:30 * 60 * 1000, //1/2 hour
-  
+
   doc:doc,
   req:req,
 
@@ -30,8 +30,21 @@ Traduxio= {
     toQuit.forEach(function(user){log(user+" leaves for inactivity");Traduxio.userQuit(user);});
   },
 
+  userRename:function(oldName,newName,anonymous) {
+    if (this.doc.users && this.doc.users[oldName] && newName && oldName!=newName) {
+      this.doc.users[newName]=this.doc.users[oldName];
+      this.doc.users[newName].name=newName;
+      this.doc.users[newName].anonymous=anonymous;
+      delete this.doc.users[oldName];
+      this.doc.session=this.doc.session || [];
+      this.addActivity(this.doc.session,{rename:true,author:oldName,newname:newName,anonymous:anonymous},false);
+      delete this.doc.users[newName].active;
+      return true;
+    }
+    return false;
+  },
+
   userQuit:function(username) {
-    username=username || this.getUserName();
     if (this.doc.users && this.doc.users[username]) {
       this.doc.session=this.doc.session || [];
       this.addActivity(this.doc.session,{left:true,author:username},false);
@@ -43,11 +56,33 @@ Traduxio= {
   },
 
   userActivity:function(username) {
-    var washere=false;
     this.doc.users=this.doc.users || {};
-    username=username || this.getUserName();
-    var alreadyActive=this.doc.users[username] ? true : false;
-    this.doc.users[username]=this.doc.users[username]||{};
+
+    var washere=false;
+    var user;
+    if (username) {
+      user=this.doc.users[username];
+      //conversion from old format
+      if (!user.name) user.name=username;
+      //TODO remove when data is conform
+    } else {
+      user=this.getUser();
+      username=user.name;
+      if (this.doc.users[username] && this.doc.users[username].active) {
+        user.active=this.doc.users[username].active;
+      }
+      log(user);
+    }
+    if (!user) return false;
+    var alreadyActive=false;
+    if(this.doc.users[username]) {
+      alreadyActive=true;
+    } else {
+      this.doc.session=this.doc.session || [];
+      this.addActivity(this.doc.session,{entered:true,author:username,anonymous:user.anonymous},false);
+    }
+    this.doc.users[username]=user;
+    log(this.doc.users);
     var update=false;
     if (this.doc.users[username].active) {
       var activeDate=new Date(this.doc.users[username].active);
@@ -60,11 +95,7 @@ Traduxio= {
     }
     if (update) {
       this.doc.users[username].active=new Date();
-      if (!alreadyActive) {
-        this.doc.session=this.doc.session || [];
-        this.addActivity(this.doc.session,{entered:true,author:username});
-      }
-      if (username==this.getUserName()) this.checkActiveUsers();
+      if (username==this.getUser().name) this.checkActiveUsers();
     }
     return update;
   },
@@ -80,19 +111,61 @@ Traduxio= {
     }
   },
 
-  getUserName:function() {
+
+  getNewName:function() {
+
+    var generateName=function(i) {
+      return "anonym-"+this.req.uuid.substr(-6-i,6);
+    }.bind(this);
+
+    var exists=function (name) {
+      if (!this.doc.browsers) return false;
+      for (var f in this.doc.browsers) {
+        if (this.doc.browsers[f].name==name) return true;
+      }
+      return false;
+    }.bind(this);
+
+    var i=0,name;
+    do {
+      name=generateName(i++);
+    } while (exists(name) && i<this.req.uuid.length);
+    return exists(name) ? false : name;
+  },
+
+  getUser:function() {
     var user;
-    if (req.userCtx.name) user=req.userCtx.name;
-    else {
-      var signature=req.peer+"|"+req.headers["User-Agent"]+"|"+req.headers.Host;
-      this.doc.anonymous=this.doc.anonymous || {};
-      if (!this.doc.anonymous[signature]) {
-        var user="anonym-"+req.uuid.substr(-6,6);
-        this.doc.anonymous[signature]=user;
+    var footprint=this.req.peer+"|"+this.req.headers["User-Agent"]+"|"+this.req.headers.Host;
+
+    //conversion from old data
+    if (this.doc.anonymous) {
+      this.doc.browsers={};
+      for (var f in this.doc.anonymous) {
+        this.doc.browsers[f]={name:this.doc.anonymous[f],anonymous:true};
+      }
+      delete this.doc.anonymous;
+    }
+    //TODO remove when all data is converted
+
+    this.doc.browsers=this.doc.browsers || {};
+    if (this.req.userCtx.name) {
+      user={name:this.req.userCtx.name};
+      if (this.doc.browsers[footprint] && this.doc.browsers[footprint].name!=user.name) {
+        this.userRename(this.doc.browsers[footprint].name,user.name);
+      }
+    } else {
+      if (this.doc.browsers[footprint]) {
+        user=this.doc.browsers[footprint];
+        if (!user.anonymous) {
+          this.userQuit(user.name);
+          user.anonymous=true;
+          user.name=this.getNewName();
+        }
       } else {
-        var user=this.doc.anonymous[signature];
+        user={name:this.getNewName(),anonymous:true};
       }
     }
+    this.doc.browsers[footprint]=user;
     return user;
   },
 
@@ -100,8 +173,8 @@ Traduxio= {
     if (typeof active == "undefined") active=true;
     var activity=data || {};
     activity.when = activity.when || new Date();
-    activity.seq = req.info.update_seq;
-    activity.author = activity.author || this.getUserName();
+    activity.seq = this.req.info.update_seq;
+    activity.author = activity.author || this.getUser().name;
     activityList.push(activity);
     if (active) this.userActivity();
     this.fixActivity(activityList);
@@ -111,7 +184,7 @@ Traduxio= {
   fixActivity: function(activityList) {
     for (var i in activityList) {
       activityList[i].when=new Date(activityList[i].when);
-      activityList[i].seq=activityList[i].seq || req.info.update_seq;
+      activityList[i].seq=activityList[i].seq || this.req.info.update_seq;
     }
   },
 

@@ -41,7 +41,10 @@ function logout() {
     type:"DELETE"
   }).done(function(result){
     updateUserInfo(result);
-  });  
+    if (Traduxio && Traduxio.activity && Traduxio.activity.presence) {
+      Traduxio.activity.presence();
+    }
+  });
 }
 
 function login(name,password) {
@@ -52,6 +55,9 @@ function login(name,password) {
     data:"name="+encodeURIComponent(name)+"&password="+encodeURIComponent(password)
   }).done(function(result){
     updateUserInfo(result);
+    if (Traduxio && Traduxio.activity && Traduxio.activity.presence) {
+      Traduxio.activity.presence();
+    }
   });
 }
 
