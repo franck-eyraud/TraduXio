@@ -23,8 +23,8 @@
       dataType:"json"
     }).done(function(result){
       if (result.user) {
-        if (result.ok) online(me,result.anonymous);
         me=result.user;
+        if (result.ok) online(me,result.anonymous);
       }
       if (result.users) {
         for (var user in result.users) {
@@ -196,22 +196,24 @@
     if (!user.color) {
       user.color=currentColor();
     }
+    user.name=username;
     users[username]=user;
     return user;
   }
 
   function rename(username,newname) {
-    if (!username in users) {
-      online(newname);
-    } else if (newname in users) {
-      offline(username);
-      online(newname);
+    if (!username in users || newname in users) {
+      user=getUser(newname);
     } else {
-      user=users[username];
-      user.name=newname;
-      users[newname]=user;
-      delete users[username];
-      var userDiv=$("[id='session-"+username+"']",sessionPane,sessionPane);
+      user=getUser(username);
+    }
+    user.name=newname;
+    users[newname]=user;
+    delete users[username];
+
+    var oldUserDiv=$("[id='session-"+username+"']",sessionPane,sessionPane);
+    var newUserDiv=$("[id='session-"+newname+"']",sessionPane,sessionPane);
+    if (oldUserDiv.length && !newUserDiv.length) {
       sessionPane.showPane(function(hide) {
         userDiv.fadeOut(function() {
           userDiv.attr("id","session-"+newname).empty().append(newname).prepend($("<span/>").addClass("colorcode"));
@@ -219,21 +221,10 @@
           userDiv.fadeIn(function(){hide(500);});
         });
       });
-    }
-    return;
-    if (newname in users) {
-      offline(username);
+    } else if (!oldUserDiv.length) {
       online(newname);
     } else {
-      var userDiv=$("[id='session-"+newname+"']",sessionPane,sessionPane);
-      if (userDiv.length) {
-        offline(username);
-        online(newname);
-      } else {
-        users[newname]=user;
-        user.name=newname;
-        delete users[username];
-      }
+      offline(username);
     }
   }
 

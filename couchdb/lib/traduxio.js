@@ -115,7 +115,7 @@ Traduxio= {
   getNewName:function() {
 
     var generateName=function(i) {
-      return "anonym-"+this.req.uuid.substr(-6-i,6);
+      return "anonym-"+this.req.uuid.substr(-3-i,3);
     }.bind(this);
 
     var exists=function (name) {
