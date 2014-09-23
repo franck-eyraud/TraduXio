@@ -387,15 +387,30 @@ div.context-menu .action:hover {
   color:#AAAAAA;
 }
 
-.glossary {
+div.context-menu .forum a {
+  cursor:default;
+  display:block;
+}
+
+.unit .glossary {
     cursor:pointer;
     border-bottom: 1px dotted #08C;
 }
 
-.glossary:hover {
+.unit .glossary:hover {
     background-color: #FFD;
 }
 
 .temp {
     font-style: italic;
+}
+
+div.forum-link {
+  float:right;
+}
+
+div.forum-link a {
+  color:#0088CC;
+  font-weight:normal;
+  text-decoration:underline;
 }

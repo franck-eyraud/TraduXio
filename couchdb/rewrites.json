@@ -70,4 +70,52 @@
   "from":"works/:id/changes/:seq",
   "to":"../../_changes",
   "query":{"filter":"traduxio/docid","feed":"longpoll","since":":seq"}
+},{
+  "from":"works/:id/forum",
+  "to":"_list/forum/subjects",
+  "query":{
+    "startkey":[":id"],
+    "endkey":[":id",{}]
+  },
+  "method":"GET"
+},{
+  "from":"works/:id/forum/:subject",
+  "to":"_list/subject/forum",
+  "query":{
+    "startkey":[":id",":subject"],
+    "endkey":[":id",":subject",{}]
+  },
+  "method":"GET"
+},{
+  "from":"works/:id/forum/:subject/:offset",
+  "to":"_list/subject/forum",
+  "query":{
+    "limit":"11",
+    "skip":"1",
+    "startkey":[":id",":subject",":offset"],
+    "endkey":[":id",":subject",{}]
+  },
+  "formats": {
+    "offset": "int"
+  },
+  "method":"GET"
+},{
+  "from":"works/:id/forum/:subject/:offset/back",
+  "to":"_list/subject/forum",
+  "query":{
+    "descending":"true",
+    "limit":"11",
+    "skip":"1",
+    "startkey":[":id",":subject",":offset"],
+    "endkey":[":id",":subject"]
+  },
+  "formats": {
+    "offset": "int"
+  },
+  "method":"GET"
+},{
+  "from":"works/:id/forum/:subject",
+  "to":"_update/chat/:id",
+  "method":"POST"
+},{"from":"req","to":"_show/req"
 }]

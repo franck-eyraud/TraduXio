@@ -1,0 +1,51 @@
+#forum {
+  width:90%;
+  margin:auto;
+}
+
+#forum .message {
+  position:relative;
+  margin:2em 0em;
+  padding:1em 0em;
+  border:1px solid gray;
+}
+
+#forum .message .metadata {
+  font-size:0.8em;
+  padding:0.2em 0.5em;
+  float:left;
+  width:250px;
+}
+
+#forum .message .metadata span {
+  display:block;
+}
+
+#forum .message .metadata .author {
+  font-weight:bold;
+}
+
+#forum .message .metadata .date {
+  color:gray;
+}
+
+#forum .message .content {
+  padding:0.2em 0.5em;
+  border-left:1px dashed gray;
+  margin-left:250px;
+}
+
+#forum .message .link {
+  position:absolute;
+  top:0.5em;
+  right:0.5em;
+}
+
+#forum form#write textarea {
+  width:100%;
+  height:10em;
+}
+
+textarea.bad {
+  border-color: red;
+}

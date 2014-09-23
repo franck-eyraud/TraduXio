@@ -9,7 +9,7 @@ function(o, req) {
   function getTextLength() {
     if (o.text)
       return o.text.length;
-    for each (version in o.translations)
+    for (version in o.translations)
       return version.text.length;
   }
   function getLines(text,version) {
@@ -32,7 +32,7 @@ function(o, req) {
       line.space=lineNum-line.lineNum;
       lines[line.lineNum]=line;
     }
-    
+
   }
 
   var data = {
@@ -57,7 +57,7 @@ function(o, req) {
     });
     data.raw["original"]=o.text;
     data.headers.push({
-      id: "original",
+      version: "original",
       title: o.title,
       language: o.language,
       date: o.date,
@@ -74,7 +74,7 @@ function(o, req) {
     });
     data.raw[t]=translation.text;
     data.headers.push({
-      id:t,
+      version:t,
       title: translation.title,
 	  work_creator: translation.creator ? translation.creator : o.creator,
       creator: t,
@@ -104,6 +104,6 @@ function(o, req) {
   }
   delete glossary.edits;
   data.glossary=JSON.stringify(glossary);
- 
+
   return Mustache.to_html(this.templates.work, data, this.templates.partials);
 }

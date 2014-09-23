@@ -1,0 +1,38 @@
+{{>header}}
+<div id="forum" data-subject="{{subject}}">
+{{#work}}
+<h1><a href="{{prefix-correction}}../../{{work.id}}">{{work.creator}} - {{work.title}}</a></h1>
+<br/>
+{{/work}}
+
+{{^subject}}
+<h2>Nouveau sujet</h2>
+{{/subject}}
+
+{{#subject}}<a href="{{prefix-correction}}../forum">List des sujets</a>
+<h2>{{subject}}</h2>{{/subject}}
+{{#prev}}<a href="{{prev}}">prev page</a>{{/prev}}
+{{#next}}<a href="{{next}}">next page</a>{{/next}}
+{{#messages}}
+<div class="message" id="{{index}}">
+  <div class="metadata">
+    <span class="author">{{author}}</span>
+    <span class="date">{{when}}</span>
+  </div>
+  <div class="content">
+    {{{message}}}
+  </div>
+  <div class="link"><a href="#{{index}}">#{{index}}</a></div>
+</div>
+{{/messages}}
+{{#prev}}<a href="{{prev}}">prev page</a>{{/prev}}
+{{#next}}<a href="{{next}}">next page</a>{{/next}}
+
+<form id="write">
+  <input {{#subject}}type="hidden" {{/subject}}name="subject" value="{{subject}}"/>
+  <textarea name="message" placeholder="saisissez ici votre message"> </textarea>
+ <input type="submit" value="{{#messages.length}}Répondre{{/messages.length}}{{^messages.length}}Ouvrir le sujet{{/messages.length}}"/>
+</form>
+
+</div>
+{{>footer}}

@@ -91,7 +91,12 @@
   $(document).ready(function() {
     if (Traduxio.getId()) {
       createChat();
-      Traduxio.activity.register("forum",addMessage);
+      Traduxio.activity.register("forum",function(message) {
+        if (message.forum!="chat") {
+          message.message="écrit dans le forum "+message.forum+":"+message.message;
+        }
+        addMessage(message);
+      });
     }
   });
 })(jQuery,Traduxio);
