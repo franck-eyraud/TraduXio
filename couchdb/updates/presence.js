@@ -1,5 +1,6 @@
 function(doc,req) {
   //!code lib/traduxio.js
+  if (!doc) return [null,{code:404,body:JSON.stringify({error:"Not found"})}];
   var result={};
   var user=Traduxio.getUser();
   result.user=user.name;
