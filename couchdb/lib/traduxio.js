@@ -192,10 +192,14 @@ Traduxio= {
     data=data || {};
     var activity=activity || [];
     for (var i=activityList.length-1;i>=0 && this.age(activityList[i],since)<=0;i--) {
-      for (var t in data) {
-        activityList[i][t]=data[t];
+      var a={};
+      for (var t in activityList[i]) {
+        a[t]=activityList[i][t];
       }
-      activity.unshift(activityList[i]);
+      for (var t in data) {
+        a[t]=data[t];
+      }
+      activity.unshift(a);
     }
     return activity;
   }
