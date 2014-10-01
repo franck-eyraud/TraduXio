@@ -726,7 +726,7 @@ function openContextMenu(glossaryEntry,position) {
       });
     }
     menu.append($("<div/>").addClass("glossary").append("add a translation of <em>"+sentence+"</em> to the glossary"));
-    menu.append($("<div/>").addClass("forum").append(
+    menu.append($("<div/>").addClass("forum action").append(
       '<a href="'+Traduxio.getId()+'/forum/'+encodeURIComponent("Glossaire "+glossaryEntry.src_language+":"+sentence)+'">discuter</a>')
     );
     menu.css(position);
@@ -980,11 +980,11 @@ $(document).ready(function() {
 
   $(".top").on("click", ".addVersion", toggleAddVersion);
   $(".top").on("click", ".removeDoc", toggleRemoveDoc);
-  
+
   $("#addPanel").on("submit", addVersion);
   $("#removePanel").on("click", removeDoc);
   $("#addGlossary").on("submit", addGlossarySubmit);
-  
+
   $(".unit .text").each(function() {
     $(this).html(
       stringToHtml(
