@@ -292,7 +292,9 @@
       $(window).on("beforeunload",leave);
       Traduxio.addCss("sessions");
       sessionPane=$("<div/>").attr("id","sessions");
-      sessionPane.append($("<h1/>").text("Vous êtes")).append($("<div/>").addClass("me"));
+      sessionPane.append($("<h1/>").on("click",function() {
+        sessionPane.slideUp();
+      }).text("Vous êtes")).append($("<div/>").addClass("me"));
       sessionPane.append($("<h1/>").text("Collaborateurs")).append($("<div/>").addClass("them"));
       sessionPane.hide();
       $(body).append(sessionPane);

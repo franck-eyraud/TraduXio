@@ -28,6 +28,9 @@
           }
         });
       }).insertBefore("#header form.concordance");
+    header.on("click",function() {
+      chatOuter.slideUp();
+    });
 
     chatForm.on("submit",function(e) {
       e.preventDefault();
