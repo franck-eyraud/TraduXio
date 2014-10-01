@@ -113,7 +113,7 @@
       return {done:function(){}};
     }
     var s=initialWaitTime;
-    function go(){ 
+    function go(){
       $.ajax({
         cache:delay?false:true,
         url:url,
@@ -165,7 +165,7 @@
       }
       if (activity.left) {
         activity.message="est sorti de la traduction";
-        if (!activity.isPast) { 
+        if (!activity.isPast) {
           if (activity.isMe) {
             presence();
           } else {
@@ -296,13 +296,11 @@
       sessionPane.append($("<h1/>").text("Collaborateurs")).append($("<div/>").addClass("them"));
       sessionPane.hide();
       $(body).append(sessionPane);
-      var button=$("<span/>").attr("id","show-sessions").
-        append(
-            $("<img>").attr("src",getPrefix()+"/shared/users.png").css({height:32,width:32}).attr("title","Collaborateurs")
-        )
+      var button=$("<span/>").attr("id","show-sessions")
+        .attr("title","Collaborateurs")
         .on("click",function() {
           sessionPane.slideToggle();
-        }).css({cursor:"pointer",float:"right"}).insertBefore("#header form.concordance");
+        }).insertBefore("#header form.concordance");
     }
   });
 

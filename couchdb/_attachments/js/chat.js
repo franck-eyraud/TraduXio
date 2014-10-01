@@ -2,33 +2,33 @@
 
   var defaultMessage="Ceci est le chat traduxio pour ce texte";
 
-  var chatContent,chatWindow,firstMessage;
+  var chatContent,firstMessage;
 
   function createChat() {
     Traduxio.addCss("chat");
-    var chatOuter = $("<div/>").attr("id","chat");
+    var chatOuter = $("<div/>").attr("id","chat").hide();
     var header=$("<h1/>").text("Chat");
-    chatWindow=$("<div/>").addClass("chat").hide();
+    var chatWindow=$("<div/>").addClass("chat");
     chatContent=$("<div/>").addClass("chat-content");
     var chatForm=$("<form>")
       .append($("<input/>",{type:"text",name:"message"}))
       .append($("<input/>",{type:"submit",name:"submit"}));
     chatOuter.append(header).append(chatWindow);
     chatWindow.append(chatContent).append(chatForm);
-    header.on("click",function() {
-      chatWindow.slideToggle(function(){
-        if (chatWindow.is(":visible")) {
-          if (unread.length) {
+    var button=$("<span/>").attr("id","show-chat").attr("title","Chat")
+      .on("click",function() {
+        chatOuter.slideToggle(function(){
+          var unread=chatOuter.find("div.message.unread");
+          if (chatContent.is(":visible") && unread.length) {
             chatContent.clearQueue().animate({scrollTop:chatContent.scrollTop()+unread.filter(":first").position().top});
             unread.delay(1000).queue(function() {
               $(this).removeClass("unread");
+              button.removeClass("unread");
             });
-          }        
-          chatOuter.removeClass("unread");
-        }
-      });
-      var unread=chatOuter.find("div.message.unread");
-    });
+          }
+        });
+      }).insertBefore("#header form.concordance");
+
     chatForm.on("submit",function(e) {
       e.preventDefault();
       var input=$("input[name=message]",this);
@@ -69,7 +69,7 @@
         if (!message.isMe) {
           div.addClass("unread");
           if (chatContent.is(":hidden")) {
-            $("#chat").addClass("unread");
+            $("#show-chat").addClass("unread");
           }
         }
       } else {
