@@ -297,12 +297,10 @@
       sessionPane.hide();
       $(body).append(sessionPane);
       var button=$("<span/>").attr("id","show-sessions")
-        .append(
-            $("<img>").attr("src",getPrefix()+"/shared/users.png").css({height:32,width:32}).attr("title","Collaborateurs")
-        )
+        .attr("title","Collaborateurs")
         .on("click",function() {
           sessionPane.slideToggle();
-        }).css({cursor:"pointer",float:"right"}).insertBefore("#header form.concordance");
+        }).insertBefore("#header form.concordance");
     }
   });
 

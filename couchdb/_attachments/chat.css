@@ -12,12 +12,25 @@
 }
 
 #chat h1 {
-  cursor:pointer;
   font-size:1em;
   background:#AAA;
 }
 
-#chat.unread h1, .message.unread {
+#show-chat {
+  width:32px;
+  height:32px;
+  margin:2px 5px;
+  background-image:url(chat.png);
+  background-size: 32px 32px;
+  cursor:pointer;
+  float:right;
+}
+
+#show-chat.unread {
+  background-image:url(chat-unread.png);
+}
+
+.message.unread {
   background:#AAF;
 }
 
