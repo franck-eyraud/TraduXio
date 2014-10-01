@@ -68,7 +68,7 @@
         chatContent.append(div);
         if (!message.isMe) {
           div.addClass("unread");
-          if (chatContent.is(":hidden")) {
+          if (firstMessage && chatContent.is(":hidden")) {
             $("#show-chat").addClass("unread");
           }
         }
