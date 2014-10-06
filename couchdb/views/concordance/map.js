@@ -66,7 +66,7 @@ function(o) {
 
   function send_text(text,language,object) {
     const WORD_MATCHER = new RegExp(regex,"g");
-    if (text) {
+    if (text && text.length<1024) {
       var match;
       while ((match = WORD_MATCHER.exec(text))) {
         var begin = match.index;
