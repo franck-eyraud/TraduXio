@@ -61,7 +61,7 @@ function getLanguageName(id,target) {
 }
 
 function getLanguageNames(callback) {
-  if (! languagesNames) {
+  if (!languagesNames) {
     $.getJSON(getPrefix()+"/shared/languages.json",function(result) {
       languagesNames=result;
       callback(true);
@@ -79,9 +79,14 @@ function getPrefix() {
   return $("body").data("prefix");
 }
 
-$(document).ready(function() {
+function fixLanguages(container) {
   getLanguageNames(function() {
-    $(".language").each(function() {
+    if (container) {
+      var language=$(container).find(".language").andSelf().filter(".language");
+    } else {
+      language=$(".language");
+    }
+    language.each(function() {
       var lang=this;
       var langID=$(lang).data("id");
       var langName=getLanguageName(langID);
@@ -93,6 +98,10 @@ $(document).ready(function() {
       }
     });
   });
+}
+
+$(document).ready(function() {
+  fixLanguages();
   $("form.concordance").concordancify();
 });
 

@@ -14,12 +14,12 @@ function(o) {
     var nb_translations=Object.keys(o.translations).length;
 
     if (nb_translations) {
-      for (var i in o.text) {
+      if (o.language) for (var i in o.text) {
 	  send_text(o.text[i],o.language,{unit:i});
       }
       for (var t in o.translations) {
 	var translation = o.translations[t];
-	for (var i in translation.text) {
+	if (translation.language) for (var i in translation.text) {
 	  send_text(translation.text[i],translation.language,{unit:i,translation:t});
 	}
       }

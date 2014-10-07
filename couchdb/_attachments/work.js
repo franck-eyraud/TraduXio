@@ -351,12 +351,18 @@ function toggleEdit (e) {
         $("#hexapla tbody").append(tr);
     }
   }
-  setEditState(edited, top, "title", "Titre");
-  setEditState(edited, top, "work-creator", "Auteur");
-  if(version != "original")
-    setEditState(edited, top, "creator", "Traduction");
-  setLangEditState(edited, top);
-  setEditState(edited, top, "date", "Année");
+    if(version == "original") {
+      setEditState(edited, top, "title", "Titre");
+      setEditState(edited, top, "work-creator", "Auteur");
+      setEditState(edited, top, "date", "Date, année, ou siècle de l'oeuvre");
+      setLangEditState(edited, top, "Langue originale");
+    } else {
+      setEditState(edited, top, "title", "Titre traduit");
+      setEditState(edited, top, "work-creator", "Auteur (translittéré si nécessaire)");
+      setEditState(edited, top, "creator", "Traduction");
+      setEditState(edited, top, "date", "Date, année, ou siècle de la traduction");
+      setLangEditState(edited, top, "Langue de traduction");
+    }
   units.each(function() {
     var unit=$(this);
     if ($(this).isEdited()) {
@@ -407,7 +413,7 @@ function fillLanguages(control,callback) {
   }
 }
 
-function setLangEditState(isEdited, container) {
+function setLangEditState(isEdited, container, placeholder) {
   var target = container.find(".language");
   if(isEdited) {
     container.find("select").remove();
@@ -416,6 +422,10 @@ function setLangEditState(isEdited, container) {
     target.hide();
     var language = $("<select></select>");
     fillLanguages(language, function() {
+      if (placeholder) {
+        language.prepend("<option value=\"\">" + placeholder+"</option>");
+        language.attr("title",placeholder);
+      }
     language.val(target.data("id"));
     language.addClass("editedMeta").css("width", "50%");
     language.on("change", function() {
@@ -427,13 +437,10 @@ function setLangEditState(isEdited, container) {
         contentType: 'text/plain',
         data: JSON.stringify({"key":"language", "value": language.val()})
       }).done(function() {
-        var lang = language.find("option:selected").text();
-        var lang_id = lang.substring(0, 2);
-        var lang_text = lang.substring(4).split("-")[0];
-        target.data("id", lang_id).attr("data-id", lang_id);
-        target.text(lang_text);
-        $("#hexapla").find(".close[data-version='" + ref + "']").find(".language")
-          .attr("data-id", lang_id).data("id", lang_id).attr("title", lang_text).html(lang_id);
+				var lang_id = language.val();
+				fixLanguages(target.data("id",lang_id));
+				fixLanguages($("#hexapla").find(".close[data-version='" + ref + "']").find(".language")
+					.data("id", lang_id));
       }).fail(function() { alert("fail!"); });
     });
     target.addClass("edit");
@@ -710,7 +717,7 @@ function deleteGlossaryEntry(glossaryEntry,language) {
 
 function openContextMenu(glossaryEntry,position) {
   var sentence=glossaryEntry.src_sentence;
-  if (sentence.length<50) {
+  if (sentence && sentence.length<50 && glossaryEntry.src_language) {
     var menu=$("<div/>").addClass("context-menu");
     menu.append($("<div/>").addClass("concordance").append("search the concordance for <em>"+sentence+"</em>"));
     if(glossaryEntry.targets) {
@@ -922,7 +929,7 @@ $(document).ready(function() {
   $("tr").on("mouseup select",".unit", function (e) {
     //requires jquery.selection plugin
     var txt=$.selection();
-    if (txt) {
+		if (txt) {
       e.stopPropagation();
       openContextMenu({
         src_sentence:txt,
