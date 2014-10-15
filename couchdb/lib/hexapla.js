@@ -38,7 +38,7 @@ function Hexapla() {
 
   this.getLineVersion = function(version_number, line_number) {
     var version = this.versions[version_number];
-    if (version)
+    if (version && version.text)
       var string = version.text[line_number];
     else
       string=null;
