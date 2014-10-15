@@ -10,7 +10,7 @@ function(o, req) {
     if (o.text)
       return o.text.length;
     for (version in o.translations)
-      return version.text.length;
+      return o.translations[version].text.length;
   }
   function getLines(text,version) {
     var lines=[];
