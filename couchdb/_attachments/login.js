@@ -54,9 +54,12 @@ function login(name,password) {
     type:"POST",
     data:"name="+encodeURIComponent(name)+"&password="+encodeURIComponent(password)
   }).done(function(result){
-    updateUserInfo(result);
-    if (Traduxio && Traduxio.activity && Traduxio.activity.presence) {
-      Traduxio.activity.presence();
+    if (result.ok) {
+      result.name=result.name || name;
+      updateUserInfo(result);
+      if (Traduxio && Traduxio.activity && Traduxio.activity.presence) {
+        Traduxio.activity.presence();
+      }
     }
   });
 }
