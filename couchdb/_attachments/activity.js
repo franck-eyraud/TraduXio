@@ -247,7 +247,7 @@
     var user=getUser(username);
     var userDiv=$("[id='session-"+username+"']",sessionPane,sessionPane);
     if (!userDiv.length) {
-      userDiv=$("<div/>").attr("id","session-"+username).append(username).prepend($("<span/>").addClass("colorcode"));
+      userDiv=$("<div/>").attr("id","session-"+username).append($("<span>").addClass("name").append(username)).prepend($("<span/>").addClass("colorcode"));
       added=true;
     } else {
       if (me==username && !userDiv.parents().is(".me")
@@ -325,6 +325,32 @@
       }).text("Vous êtes")).append($("<div/>").addClass("me"));
       sessionPane.append($("<h1/>").text("Collaborateurs")).append($("<div/>").addClass("them"));
       sessionPane.hide();
+      sessionPane.on("click",".me div.anonymous span.name",function () {
+        var me=$(this);
+        $("<input/>").val(me.hide().text()).insertAfter(me).on("focusout",function() {
+          var input=$(this);
+          var newname=input.val().trim();
+          function abort() {
+            input.remove();
+            me.show();
+          }
+          if (newname!=me.text()) {
+            $.ajax({
+              url:Traduxio.getId()+"/presence",
+              type:"POST",
+              data:JSON.stringify({changename:newname}),
+              dataType:"json"
+            }).done(function(result) {
+              if (result.ok) {
+                me.text(newname).show();
+                input.remove();
+              } else abort();
+            }).fail(abort);
+          } else {
+            abort();
+          }
+        });
+      });
       $(body).append(sessionPane);
       var button=$("<span/>").attr("id","show-sessions")
         .attr("title","Collaborateurs")

@@ -160,6 +160,9 @@ Traduxio= {
       if (this.doc.browsers[footprint] && this.doc.browsers[footprint].name!=user.name) {
         this.userRename(this.doc.browsers[footprint].name,user.name);
       }
+      if (this.doc.users[user.name] && this.doc.users[user.name].anonymous && this.doc.users[user.name].footprint && this.doc.users[user.name].footprint!=footprint) {
+        this.userRename(user.name,this.getNewName());
+      }
     } else {
       if (this.doc.browsers[footprint]) {
         user=this.doc.browsers[footprint];
