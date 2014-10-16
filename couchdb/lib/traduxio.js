@@ -31,14 +31,18 @@ Traduxio= {
   },
 
   userRename:function(oldName,newName,anonymous) {
-    if (this.doc.users && this.doc.users[oldName] && newName && oldName!=newName) {
-      this.doc.users[newName]=this.doc.users[oldName];
-      this.doc.users[newName].name=newName;
-      this.doc.users[newName].anonymous=anonymous;
+    if (this.doc.users && this.doc.users[oldName] && newName && oldName!=newName && !this.doc.users[newName]) {
+      user=this.doc.users[oldName];
+      user.name=newName;
+      user.anonymous=anonymous;
+      this.doc.users[newName]=user;
       delete this.doc.users[oldName];
       this.doc.session=this.doc.session || [];
       this.addActivity(this.doc.session,{rename:true,author:oldName,newname:newName,anonymous:anonymous},false);
-      delete this.doc.users[newName].active;
+      delete user.active;
+      if (user.footprint && this.doc.browsers) {
+        this.doc.browsers[user.footprint]=user;
+      }
       return true;
     }
     return false;
@@ -70,6 +74,8 @@ Traduxio= {
       username=user.name;
       if (this.doc.users[username] && this.doc.users[username].active) {
         user.active=this.doc.users[username].active;
+      } else {
+        delete user.active;
       }
       log(user);
     }
@@ -77,9 +83,6 @@ Traduxio= {
     var alreadyActive=false;
     if(this.doc.users[username]) {
       alreadyActive=true;
-    } else {
-      this.doc.session=this.doc.session || [];
-      this.addActivity(this.doc.session,{entered:true,author:username,anonymous:user.anonymous},false);
     }
     this.doc.users[username]=user;
     log(this.doc.users);
@@ -96,6 +99,10 @@ Traduxio= {
     if (update) {
       this.doc.users[username].active=new Date();
       if (username==this.getUser().name) this.checkActiveUsers();
+    }
+    if (!alreadyActive) {
+      this.doc.session=this.doc.session || [];
+      this.addActivity(this.doc.session,{entered:true,author:username,anonymous:user.anonymous},false);
     }
     return update;
   },
@@ -135,7 +142,6 @@ Traduxio= {
 
   getUser:function() {
     var user;
-    var footprint=this.req.peer+"|"+this.req.headers["User-Agent"]+"|"+this.req.headers.Host;
 
     //conversion from old data
     if (this.doc.anonymous) {
@@ -147,6 +153,7 @@ Traduxio= {
     }
     //TODO remove when all data is converted
 
+    var footprint=this.req.peer+"|"+this.req.headers["User-Agent"]+"|"+this.req.headers.Host;
     this.doc.browsers=this.doc.browsers || {};
     if (this.req.userCtx.name) {
       user={name:this.req.userCtx.name};
@@ -161,10 +168,15 @@ Traduxio= {
           user.anonymous=true;
           user.name=this.getNewName();
         }
+        if (!user.name || this.doc.users[user.name] && this.doc.users[user.name].footprint && this.doc.users[user.name].footprint!=footprint) {
+          user.name=this.getNewName();
+        }
       } else {
         user={name:this.getNewName(),anonymous:true};
       }
     }
+    if (user.anonymous) user.footprint=footprint;
+    else delete user.footprint;
     this.doc.browsers[footprint]=user;
     return user;
   },
@@ -174,7 +186,11 @@ Traduxio= {
     var activity=data || {};
     activity.when = activity.when || new Date();
     activity.seq = this.req.info.update_seq;
-    activity.author = activity.author || this.getUser().name;
+    if (!activity.author) {
+      var user=this.getUser();
+      activity.author=user.name;
+      if (user.anonymous) activity.anonymous=true;
+    }
     activityList.push(activity);
     if (active) this.userActivity();
     this.fixActivity(activityList);
@@ -183,8 +199,17 @@ Traduxio= {
 
   fixActivity: function(activityList) {
     for (var i in activityList) {
-      activityList[i].when=new Date(activityList[i].when);
-      activityList[i].seq=activityList[i].seq || this.req.info.update_seq;
+      var activity=activityList[i];
+      activity.when=new Date(activity.when);
+      activity.seq=activity.seq || this.req.info.update_seq;
+      if (!activity.seq || activity.seq > this.req.info.update_seq) {
+        activity.seq=this.req.info.update_seq-1;
+      }
+      //for old data
+      if (!activity.anonymous && (!activity.author || (activity.author.indexOf("anonym-")==0)) ) {
+        activity.anonymous=true;
+      }
+      //TODO remove when all data is converted
     }
   },
 
