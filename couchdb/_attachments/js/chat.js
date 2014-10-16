@@ -62,6 +62,7 @@
     if (message.message) {
       var div=$("<div/>").addClass("message");
       var author=$("<span/>").addClass("chat-author").text(message.author || "anonyme");
+      if (message.anonymous || !message.author) author.addClass("anonymous");
       var date=$("<span/>").addClass("date").attr("title",message.when || "date inconnue")
         .text(new Date(message.when).toLocaleString());
       div.append(date).append(author).append(message.message || "empty");

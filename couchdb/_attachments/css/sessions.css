@@ -37,3 +37,9 @@
   cursor:pointer;
   float:right;
 }
+
+.anonymous {
+  font-style:italic;
+  font-weight:normal !important;
+  text-shadow:1px gray;
+}

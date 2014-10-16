@@ -21,14 +21,14 @@
       url:Traduxio.getId()+"/presence",
       type:"POST",
       dataType:"json"
-    }).done(function(result){
+    }).done(function(result) {
       if (result.user) {
         me=result.user;
         if (result.ok) online(me,result.anonymous);
       }
       if (result.users) {
         for (var user in result.users) {
-          online(user,result.users.anonymous);
+          online(user,result.users[user].anonymous);
         }
         var names=Object.keys(result.users);
         for (var user in result.users) {
@@ -50,7 +50,9 @@
     });
   };
 
+  var leaving=false;
   function leave() {
+    leaving=true;
     $.ajax({
       url:Traduxio.getId()+"/presence",
       type:"DELETE"
@@ -143,14 +145,14 @@
   };
 
   function receivedActivity(activity) {
-    if (activity.author) {
-      if (activity.author==me) activity.isMe=true;
-      var user=getUser(activity.author);
-      activity.color=user.color;
-      activity.anonymous=user.anonymous;
-    }
     if (activity.seq && activity.seq < Traduxio.getSeqNum()) {
       activity.isPast=true;
+    }
+    if (activity.author==me) activity.isMe=true;
+    if (activity.type!="session" && activity.author) {
+      var user=getUser(activity.author);
+      activity.anonymous=activity.anonymous || user.anonymous;
+      activity.color=user.color;
     }
     if (activity.type && callbacks[activity.type]) {
       callbacks[activity.type](activity);
@@ -167,7 +169,7 @@
         activity.message="est sorti de la traduction";
         if (!activity.isPast) {
           if (activity.isMe) {
-            presence();
+            leaving ? null : presence();
           } else {
             offline(activity.author);
           }
@@ -175,9 +177,11 @@
       }
       if (activity.rename) {
         activity.message="est maintenant connu comme "+activity.newname;
-        if (!activity.isPast) rename(activity.author,activity.newname);
+        var user=rename(activity.author,activity.newname,activity.anonymous,!activity.isPast);
       }
       if (Traduxio.chat && Traduxio.chat.addMessage) {
+        user=user || getUser(activity.author);
+        activity.color=user.color;
         Traduxio.chat.addMessage(activity);
       }
   }
@@ -185,10 +189,11 @@
   var users={};
   var offlineUsers={};
   var me="";
+  var offset=0;
   var colors=["blue","peru","green","red","orangered","lightskyblue","purple","seagreen","tomato"];
 
   function currentColor() {
-    return colors[Object.keys(users).length % colors.length];
+    return colors[offset++ % colors.length];
   }
 
   function getUser(username) {
@@ -201,31 +206,40 @@
     return user;
   }
 
-  function rename(username,newname) {
+  function rename(username,newname,anonymous,update) {
     if (!username in users || newname in users) {
       user=getUser(newname);
     } else {
       user=getUser(username);
     }
     user.name=newname;
+    if (anonymous) user.anonymous=true;
+    else delete user.anonymous;
     users[newname]=user;
     delete users[username];
 
-    var oldUserDiv=$("[id='session-"+username+"']",sessionPane,sessionPane);
-    var newUserDiv=$("[id='session-"+newname+"']",sessionPane,sessionPane);
-    if (oldUserDiv.length && !newUserDiv.length) {
-      sessionPane.showPane(function(hide) {
-        userDiv.fadeOut(function() {
-          userDiv.attr("id","session-"+newname).empty().append(newname).prepend($("<span/>").addClass("colorcode"));
-          $(".colorcode",userDiv).css({"background-color":user.color});
-          userDiv.fadeIn(function(){hide(500);});
+    if (update) {
+      var oldUserDiv=$("[id='session-"+username+"']",sessionPane,sessionPane);
+      var newUserDiv=$("[id='session-"+newname+"']",sessionPane,sessionPane);
+      if (oldUserDiv.length && !newUserDiv.length) {
+        userDiv=oldUserDiv;
+        sessionPane.showPane(function(hide) {
+          userDiv.fadeOut(function() {
+            userDiv.attr("id","session-"+newname).empty().append($("<span>").addClass("name").append(newname)).prepend($("<span/>").addClass("colorcode"));
+            $(".colorcode",userDiv).css({"background-color":user.color});
+            if (user.anonymous) userDiv.addClass("anonymous");
+            else userDiv.removeClass("anonymous");
+            if (user.name == me) userDiv.remove().insertInto($(".me",sessionPane));
+            userDiv.fadeIn(function(){hide(500);});
+          });
         });
-      });
-    } else if (!oldUserDiv.length) {
-      online(newname);
-    } else {
-      offline(username);
+      } else if (!oldUserDiv.length) {
+        online(newname,anonymous);
+      } else {
+        offline(username);
+      }
     }
+    return user;
   }
 
   function online(username,anonymous) {
@@ -235,8 +249,22 @@
     if (!userDiv.length) {
       userDiv=$("<div/>").attr("id","session-"+username).append(username).prepend($("<span/>").addClass("colorcode"));
       added=true;
+    } else {
+      if (me==username && !userDiv.parents().is(".me")
+        || me != username && !userDiv.parents().is(".them")) {
+          userDiv.remove();
+          added=true;
+      }
+      userDiv.show();
     }
     $(".colorcode",userDiv).css({"background-color":user.color});
+    if (anonymous) {
+      userDiv.addClass("anonymous");
+      user.anonymous=true;
+    } else {
+      userDiv.removeClass("anonymous");
+      delete user.anonymous;
+    }
     if (added) {
       if (me==username) {
         $(".me",sessionPane).empty().append(userDiv);
@@ -255,7 +283,7 @@
     if (username !== me && sessionPane.has("[id='session-"+username+"']")) {
       sessionPane.showPane(function(hide) {
         $("[id='session-"+username+"']",sessionPane).fadeOut(function() {
-          this.remove();
+          $(this).remove();
           hide(500);
         });
       });
