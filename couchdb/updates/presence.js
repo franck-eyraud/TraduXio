@@ -11,7 +11,7 @@ function(doc,req) {
   result.user=user.name;
   result.anonymous=user.anonymous;
   if (req.method=="DELETE") {
-    if (Traduxio.userQuit()) {
+    if (Traduxio.userQuit(user.name)) {
       result.ok="left correctly";
     } else {
       result.error=user.name+" was not registered";
