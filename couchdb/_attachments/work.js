@@ -507,6 +507,7 @@ function changeVersion(oldVersion, newVersion) {
   $("#hexapla").find("*[data-version='" + oldVersion + "']")
     .attr("data-version", newVersion).data("version", newVersion)
     .find(".creator").html(newVersion);
+  updateUrl();
 }
 
 function toggleHeader(item) {
@@ -569,8 +570,8 @@ function addVersion() {
     url: "work/"+id+"/"+ref,
     contentType: 'text/plain',
     data: JSON.stringify({"key": "creator", "value": ref})
-    }).done(function() {
-    window.location.href = id + "?edit=" + ref;
+    }).done(function(result) {
+    window.location.href = id + "?edit=" + result;
     }).fail(function() { alert("fail!"); });
   }
   return false;

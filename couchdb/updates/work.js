@@ -23,17 +23,23 @@ function(work, req) {
     Traduxio.addActivity(work.edits,{action:"created"});
     return [work, JSON.stringify({ok:"created",id:work._id})];
   }
+
+  Traduxio.fixTranslations();
+
+  work.edits=work.edits||[];
+
   var version = req.query.version;
+  if (version) version=version.trim();
   if(args.key == "delete") {
 	delete work.translations[version];
   Traduxio.addActivity(work.edits,{action:"deleted",version:version});
 	return [work, version + " deleted"];
   }
   var doc;
-  work.edits=work.edits || [];
   if(version == "original") {
 	doc = work;
   } else {
+    if (args.key=="creator" && args.value.trim()==version) args.value=version=Traduxio.unique_version_name(version);
 	if(!work.translations[version]) {
 	  var l = 1;
 	  if (work.text) l=work.text.length;
@@ -60,11 +66,11 @@ function(work, req) {
 	var name = args.value;
 	if(name == undefined) {
 	  name = "Unnamed document";
+	} else {
+	  name=name.trim();
 	}
 	if(name != version) {
-	  while(work.translations[name] || name == "original" || name.length == 0) {
-		name += "(2)";
-	  }
+	  name=Traduxio.unique_version_name(name);
 	  work.translations[name] = doc;
 	  delete work.translations[version];
 	  return [work, name];

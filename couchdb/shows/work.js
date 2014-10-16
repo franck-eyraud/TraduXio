@@ -6,6 +6,9 @@ function(o, req) {
       o={translations:{}};
   }
 
+  var doc=o;
+  // !code lib/traduxio.js
+
   function getTextLength() {
     if (o.text)
       return o.text.length;
@@ -66,6 +69,9 @@ function(o, req) {
     opened: (opened_versions.indexOf("original")!=-1)
     });
   }
+
+  Traduxio.fixTranslations();
+
   for (var t in o.translations) {
     var translation = o.translations[t];
     hexapla.addVersion({
