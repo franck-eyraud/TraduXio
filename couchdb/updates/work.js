@@ -17,6 +17,8 @@ function(work, req) {
   var result={};
   if (["PUT","DELETE"].indexOf(req.method)!=-1) {
     var version_name = req.query.version;
+    if (version_name) version_name=version_name.trim();
+
     if (work===null) {
       return [null,{code:404,body:"Not found"}];
     }
@@ -88,6 +90,8 @@ function(work, req) {
 
   }
 
+  Traduxio.fixTranslations();
+
   work.edits=work.edits||[];
 
   if (req.method=="DELETE") {
@@ -124,12 +128,7 @@ function(work, req) {
           new_name = version_name;
         }
         if(new_name != version_name) {
-          var i=2, targetName=new_name;
-          while(work.translations[targetName] || targetName == "original") {
-            targetName = new_name + " ("+i+")";
-            i++;
-          }
-          new_name=targetName;
+          new_name=Traduxio.unique_version_name(new_name);
           work.translations[new_name] = doc;
           delete work.translations[version_name];
           actions.push("changed version name from "+version_name+" to "+new_name);
