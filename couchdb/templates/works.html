@@ -7,13 +7,13 @@
 <div id="works-list">
 	<ul>
 	  {{#languages}}
-		<li class="language"><span class="language expand" data-id="{{code}}">{{code}}</span>
+		<li class="language"><span class="language expand" data-id="{{code}}">{{^code}}<i>Pas de language</i>{{/code}}{{code}}</span>
 		<ul>
 		  {{#authors}}
 			<li class="author foldable closed">{{name}}
 			<ul>
 			  {{#works}}
-				<li><a href="{{id}}">{{name}}</a></li>
+				<li><a href="{{id}}">{{^name}}<i>Pas de titre</i>{{/name}}{{name}}</a></li>
 			  {{/works}}
 			</ul>
 			</li>

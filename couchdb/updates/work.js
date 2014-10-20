@@ -12,16 +12,20 @@ function(work, req) {
     work._id=work.id || req.id || req.uuid;
     work.creator=work["work-creator"];
     delete work["work-creator"];
+    var version="Changez-moi";
+    work.text=work.text || [];
     if (work.original) {
-        work.text=work.text || [];
         work.translations={};
+        version="original";
     } else {
+        work.translations={};
+        work.translations[version]={text:work.text};
+        work.text=[];
         delete work.text;
-        work.translations={"first":{text:[]}};
     }
     work.edits=[];
     Traduxio.addActivity(work.edits,{action:"created"});
-    return [work, JSON.stringify({ok:"created",id:work._id})];
+    return [work, JSON.stringify({ok:"created",id:work._id,version:version})];
   }
 
   Traduxio.fixTranslations();

@@ -347,7 +347,9 @@ function toggleEdit (e) {
         });
         $("#hexapla tbody tr").remove();
         var textarea=$("<textarea/>").addClass("fulltext").val(fulltext);
-        var tr=$("<tr/>").append($("<td/>").append($("<div>").addClass("unit edit").append(textarea)));
+        var tr=$("<tr/>").append($("<td/>").append($("<div>").addClass("unit edit").append(textarea).prepend(
+          "Entrez le texte complet, et séparez les blocs de traductions par un double retour chariot. Vous pouvez répéter cette manipulation tant qu'aucune traduction n'est ajoutée. Repassez en mode lecture pour enregistrer."
+          )));
         $("#hexapla tbody").append(tr);
     }
   }
@@ -397,9 +399,17 @@ var languages=null;
 
 function fillLanguages(control,callback) {
   function updateSelect() {
+    var v=control.val();
     $.each(languages, function(key, o) {
       control.append("<option value=\""+key+"\">" + key + " (" + o.fr + " - " + o.en + " - " + o[key] + ")</option>");
     });
+    control.each(function() {
+      var ph;
+      if (ph=$(this).attr("placeholder")) {
+        $(this).prepend("<option value=\"\">"+ph+"</option>").attr("title",ph);
+      }
+    });
+    control.val(v);
     if (typeof callback=="function")
       callback();
   };
@@ -420,12 +430,8 @@ function setLangEditState(isEdited, container, placeholder) {
     target.removeClass("edit").show();
   } else {
     target.hide();
-    var language = $("<select></select>");
+    var language = $("<select></select>").attr("placeholder",placeholder);
     fillLanguages(language, function() {
-      if (placeholder) {
-        language.prepend("<option value=\"\">" + placeholder+"</option>");
-        language.attr("title",placeholder);
-      }
     language.val(target.data("id"));
     language.addClass("editedMeta").css("width", "50%");
     language.on("change", function() {
@@ -720,7 +726,7 @@ function openContextMenu(glossaryEntry,position) {
   var sentence=glossaryEntry.src_sentence;
   if (sentence && sentence.length<50 && glossaryEntry.src_language) {
     var menu=$("<div/>").addClass("context-menu");
-    menu.append($("<div/>").addClass("concordance").append("search the concordance for <em>"+sentence+"</em>"));
+    menu.append($("<div/>").addClass("concordance").append("Cherchez <em>"+sentence+"</em> dans la concordance"));
     if(glossaryEntry.targets) {
       $.each(glossaryEntry.targets,function(language,sentence) {
         menuItem=$("<div/>").addClass("glossaryEntry").append("<em>"+language+"</em>:"+sentence);
@@ -733,9 +739,9 @@ function openContextMenu(glossaryEntry,position) {
         menu.append(menuItem);
       });
     }
-    menu.append($("<div/>").addClass("glossary").append("add a translation of <em>"+sentence+"</em> to the glossary"));
+    menu.append($("<div/>").addClass("glossary").append("Ajouter une traduction de <em>"+sentence+"</em> dans le glossaire"));
     menu.append($("<div/>").addClass("forum action").append(
-      '<a href="'+Traduxio.getId()+'/forum/'+encodeURIComponent("Glossaire "+glossaryEntry.src_language+":"+sentence)+'">discuter</a>')
+      '<a href="'+Traduxio.getId()+'/forum/'+encodeURIComponent("Glossaire "+glossaryEntry.src_language+":"+sentence)+'">Discuter</a>')
     );
     menu.css(position);
     $("body .context-menu").remove();
@@ -929,7 +935,7 @@ $(document).ready(function() {
 
   $("tr").on("mouseup select",".unit", function (e) {
     //requires jquery.selection plugin
-    var txt=$.selection();
+    var txt=$.selection().trim();
 		if (txt) {
       e.stopPropagation();
       openContextMenu({
@@ -1036,7 +1042,9 @@ $(document).ready(function() {
         dataType:"json"
       }).done(function(result) {
         if (result.ok && result.id) {
-          window.location.href=result.id;
+          var url=result.id;
+          if (result.version) url+="?edit="+result.version;
+          window.location.href=url;
         } else {
           alert("fail");
         }
@@ -1141,6 +1149,11 @@ $(document).ready(function() {
 });
 
 $(window).load(function() {
+  $(window).on("beforeunload",function() {
+    if ($(".dirty").length>0) {
+      return false;
+    }
+  });
   if (window.location.hash) {
     $("tr"+window.location.hash+" .unit").addClass("highlight");
     setTimeout(function() {$("tr"+window.location.hash+" .unit").removeClass("highlight");},500);
