@@ -106,6 +106,7 @@ function fixLanguages(container) {
 $(document).ready(function() {
   fixLanguages();
   $("form.concordance").concordancify();
+  $("#nav li."+$(document.body).attr("id")).addClass("active");
 });
 
 Traduxio=$.extend({},{

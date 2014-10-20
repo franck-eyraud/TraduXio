@@ -113,6 +113,12 @@ body,html,input,textarea {
   box-shadow: 0 0 8px white;
 }
 
+#nav li.active {
+    border-top: 1px darkgrey solid;
+    background-color: #888;
+    border-bottom: 6px #888 solid;
+}
+
 #header form.concordance {
   float:right;
   margin-right:2em;
