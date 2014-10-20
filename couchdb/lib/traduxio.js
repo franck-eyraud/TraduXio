@@ -49,7 +49,7 @@ Traduxio= {
     for (var user in this.doc.users) {
       var activeDate=new Date(this.doc.users[user].active);
       var expirationDate=new Date(activeDate.getTime()+this.sessionLength);
-      if (expirationDate < new Date()) {
+      if (expirationDate=="Invalid Date" || expirationDate < new Date()) {
         toQuit.push(user);
       }
     }
