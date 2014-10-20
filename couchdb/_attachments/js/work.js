@@ -403,10 +403,12 @@ function fillLanguages(controls,callback) {
     });
     controls.each(function(i,c) {
       var control=$(c);
+      var v=control.val();
       control.val(control.data("language"));
       if (control.prop("placeholder")) {
         control.prepend($("<option>").val("").text(control.prop("placeholder")));
       }
+      control.val(v);
     });
     if (typeof callback=="function")
       callback();
@@ -722,7 +724,7 @@ function openContextMenu(glossaryEntry,position) {
         menu.append(menuItem);
       });
     }
-    menu.append($("<div/>").addClass("glossary").append("add a translation of <em>"+sentence+"</em> to the glossary"));
+    menu.append($("<div/>").addClass("glossary").append("Ajouter une traduction de <em>"+sentence+"</em> dans le glossaire"));
     menu.css(position);
     $("body .context-menu").remove();
     $("body").append(menu);
@@ -900,7 +902,7 @@ $(document).ready(function() {
 
   $("tr").on("mouseup select",".unit", function (e) {
     //requires jquery.selection plugin
-    var txt=$.selection(),language;
+    var txt=$.selection().trim(),language;
     var unit=$(this);
     if (txt && (language=unit.getLanguage())) {
       e.stopPropagation();
@@ -1012,6 +1014,9 @@ $(document).ready(function() {
       }).done(function(result) {
         if (result.id) {
           window.location.href=result.id;
+          var url=result.id;
+          if (result.version) url+="?edit="+result.version;
+          window.location.href=url;
         } else {
           alert("fail");
         }
@@ -1135,6 +1140,11 @@ $(document).ready(function() {
 });
 
 $(window).load(function() {
+  $(window).on("beforeunload",function() {
+    if ($(".dirty").length>0) {
+      return false;
+    }
+  });
   if (window.location.hash) {
     $("tr"+window.location.hash+" .unit").addClass("highlight");
     setTimeout(function() {
