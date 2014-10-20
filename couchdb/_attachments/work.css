@@ -359,12 +359,6 @@ textarea.autosize {
     display:none
 }
 
-#nav li.works {
-    border-top: 1px darkgrey solid;
-    background-color: #888;
-    border-bottom: 6px #888 solid;
-}
-
 div.context-menu {
   position:absolute;
   background: #AAAAAA;
