@@ -229,7 +229,7 @@
             $(".colorcode",userDiv).css({"background-color":user.color});
             if (user.anonymous) userDiv.addClass("anonymous");
             else userDiv.removeClass("anonymous");
-            if (user.name == me) userDiv.remove().insertInto($(".me",sessionPane));
+            if (user.name == me) userDiv.remove().appendTo($(".me",sessionPane).empty());
             userDiv.fadeIn(function(){hide(500);});
           });
         });
