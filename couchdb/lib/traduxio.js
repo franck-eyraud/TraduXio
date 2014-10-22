@@ -169,6 +169,8 @@ Traduxio= {
   getUser:function() {
     var user;
 
+    this.doc.users=this.doc.users||{};
+
     //conversion from old data
     if (this.doc.anonymous) {
       this.doc.browsers={};
