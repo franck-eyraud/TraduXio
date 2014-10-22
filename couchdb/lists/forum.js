@@ -24,7 +24,12 @@ function(head,req) {
 
   data.prefix_correction="";
 
-  var path=req.headers["x-couchdb-requested-path"].split("?")[0];
+  var path=req.path.join("/");
+  if (req.headers["x-couchdb-requested-path"]) {
+    path=req.headers["x-couchdb-requested-path"].split("?")[0];
+  } else if (req.raw_path) {
+    path=req.raw_path;
+  }
   if (path.substr(path.length-1,1)=="/") {
     data.prefix_correction+="../";
   }

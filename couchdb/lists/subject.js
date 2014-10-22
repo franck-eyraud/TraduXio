@@ -36,9 +36,10 @@ function(head,req) {
   }
 
   var path;
+  var path=req.path.join("/");
   if (req.headers["x-couchdb-requested-path"]) {
     path=req.headers["x-couchdb-requested-path"].split("?")[0];
-  } else {
+  } else if (req.raw_path) {
     path=req.raw_path;
   }
   data.prefix="../../..";
