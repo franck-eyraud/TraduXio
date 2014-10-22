@@ -25,12 +25,19 @@
 <body id="{{name}}" data-language="{{language}}" data-prefix="{{prefix}}" data-query="{{query}}" {{#seq}}data-seq="{{seq}}"{{/seq}}>
   <div id="body">
     <div id="header" class="group">
-	<ul id="nav">
-	  <li class="work works"><a href="{{prefix}}/works/">Œuvres</a></li>
-	  <li class="myworks"><a href="#">Mes traductions</a></li>
-	  <li class="concordance"><a href="{{prefix}}/works/concordance">Concordance</a></li>
-	</ul>
-      <div id="session-info"></div>
-      <form class="concordance"></form>
+      <div id="logo">
+        <a href="http://transeuropeennes.eu"><img src="{{prefix}}/shared/logoTE.png"/></a>
+        <div id="controls">
+          <div id="session-info"></div>
+        </div>
+      </div>
+      <div id="navigation">
+        <form class="concordance"></form>
+        <ul id="nav">
+          <li class="work works"><a href="{{prefix}}/works/">Œuvres</a></li>
+          <li class="myworks"><a href="#">Mes traductions</a></li>
+          <li class="concordance"><a href="{{prefix}}/works/concordance">Concordance</a></li>
+        </ul>
+      </div>
     </div>
     <div id="main" class="group">

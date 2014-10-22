@@ -50,8 +50,20 @@ body,html,input,textarea {
   top: 0;
   width: 100%;
   font-size:0.85em;
+}
+
+#header #logo {
+  background-image:url(logoTE.png);
+  background-repeat:no-repeat;
+  background-color:#BE1F47;
+  height:45px;
+  clear:both;
   color:#fff;
-  background: linear-gradient(to bottom, grey 0%, #333 100%);
+}
+
+#header #navigation {
+  color:#fff;
+  background: #333;
 }
 
 #footer {
@@ -73,34 +85,24 @@ body,html,input,textarea {
   font-weight:bold;
 }
 
-#header ul#nav {
-  float:left;
-  padding:0px;
-  padding-top: 3px;
-}
-
-/*textarea {
-  width:100%;
-  box-sizing:border-box;
-  border:none;
-}*/
-
-#header li,
-#header div {
-  padding:0.5em;
+#nav li:first-child {
+  margin-left:50px;
 }
 
 #nav li {
   display:inline-block;
   list-style:none;
-  margin-left:1em;
-  padding:0.5em;
+  padding:2px;
+  margin:10px;
   font-weight:bold;
+  font-size: 15px;
 }
 
 #nav li a {
   text-decoration:none;
-  font-weight: normal;
+  font-weight: bold;
+  font-family: arial;
+  text-transform: uppercase;
 }
 
 #nav li:hover {
@@ -108,23 +110,23 @@ body,html,input,textarea {
 }
 
 #nav li.active {
-    border-top: 1px darkgrey solid;
-    background-color: #888;
-    border-bottom: 6px #888 solid;
+  background-color: #fff;
+  color:#000;
 }
 
 #header form.concordance {
   float:right;
-  margin-right:2em;
-  font-size:1.2em;
-  font-weight:bold;
+  margin-right:1em;
 }
 
 form.concordance input#query {
-  border-radius:0.7em;
   border-style:solid;
-  height:1.5em;
-  margin:0.5em;
+  border-width:1px;
+  height:24px;
+  width:200px;
+  margin:9px;
+  font-size:11px;
+  padding:3px;
 }
 
 #header #language  {
@@ -159,7 +161,22 @@ li.closed > ul {
   width:100%;
 }
 
-#session-info {
+#controls {
+  float:right;
+  margin:5px 5px 0px 5px;
+}
+
+#controls #session-info {
+  float:left;
+}
+
+
+#controls > span {
+  width:36px;
+  height:36px;
+  background-position:center;
+  margin:2px 5px;
+  cursor:pointer;
   float:right;
 }
 
@@ -167,12 +184,31 @@ li.closed > ul {
   cursor:pointer;
 }
 
+#session-info span {
+  line-height:30px;
+  padding:5px;
+}
+
 #session-info input {
-  width:10em;
+  width:15em;
+  background:transparent;
+  color:#fff;
+  border:#fff solid 1px;
+  margin:5px;
+  font-size:11px;
+  padding:5px;
 }
 
 #session-info input[type=submit] {
   width:3em;
+  background-color:#000;
+  color:#fff;
+  border:none;
+}
+
+#session-info input[type=submit]:hover{
+  background-color:#ccc;
+  color:#000;
 }
 
 #session-info input.bad {

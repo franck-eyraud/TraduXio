@@ -27,7 +27,7 @@
             });
           }
         });
-      }).insertBefore("#header form.concordance");
+      }).insertAfter("#session-info");
     header.on("click",function() {
       chatOuter.slideUp();
     });

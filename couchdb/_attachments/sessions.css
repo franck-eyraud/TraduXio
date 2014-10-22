@@ -29,13 +29,11 @@
 }
 
 #show-sessions {
-  width:32px;
-  height:32px;
-  margin:2px 5px;
-  background-image:url("users.png");
-  background-size: 32px 32px;
-  cursor:pointer;
-  float:right;
+  background-image:url(utilisateur_off.png);
+}
+
+#show-sessions:hover {
+  background-image:url(utilisateur_roll.png);
 }
 
 .anonymous {

@@ -190,7 +190,7 @@
   var offlineUsers={};
   var me="";
   var offset=0;
-  var colors=["blue","peru","green","red","orangered","lightskyblue","purple","seagreen","tomato"];
+  var colors=["#941837","#0b9eb3","#f06600","#b9ce2f","#6d2d80","#36586e","#be6c1c","#3acbd4","#da0f42","#7ba151","#a1109f","#ca3400"];
 
   function currentColor() {
     return colors[offset++ % colors.length];
@@ -356,7 +356,7 @@
         .attr("title","Collaborateurs")
         .on("click",function() {
           sessionPane.slideToggle();
-        }).insertBefore("#header form.concordance");
+        }).insertAfter("#session-info");
     }
   });
 

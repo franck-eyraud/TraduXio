@@ -1058,7 +1058,7 @@ $(document).ready(function() {
       return false;
     });
 
-    $(".top h1,.top img").hide();
+    $(".top h1,.top span").hide();
   }
   if (N==1) {
     $(".button.hide").remove();

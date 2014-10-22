@@ -32,7 +32,7 @@ body {
     border-radius:15px 15px 0px 0px;
     border-bottom:0px;
     position:relative;
-    color: #C11C1C;
+    color: #BE1F47;
     border-color: darkgrey;
 }
 
@@ -73,7 +73,7 @@ div.metadata {
 }
 
 .editedMeta {
-    color: #C11C1C;
+    color: #BE1F47;
     font-weight:bold;
     text-align:center;
     border-radius:0.5em;
@@ -95,11 +95,31 @@ div.metadata {
     margin:0 auto;
 }
 
-#work img {
-    float: right;
-    display: inline;
-    cursor: pointer;
+#work .top span {
+  width:25px;
+  height:25px;
+  float: right;
+  cursor: pointer;
+  margin-top: -3px;
+  margin-right:9px;
 }
+
+#work .top span.addVersion {
+  background-image: url(plus_off.png);
+}
+
+#work .top span.removeDoc {
+  background-image: url(x_off.png);
+}
+
+#work .top span.addVersion:hover {
+  background-image: url(plus_roll.png);
+}
+
+#work .top span.removeDoc:hover {
+  background-image: url(x_roll.png);
+}
+
 
 #work .top form input {
     display: inline-block;
@@ -113,10 +133,6 @@ div.metadata {
 #work .top button {
     padding-left: 5px;
     padding-right: 5px;
-}
-
-#work .top .removeDoc, #work .top .addVersion {
-    margin-top: -3px;
 }
 
 #work .top form, #removePanel {
@@ -196,7 +212,7 @@ div.metadata {
 }
 
 #hexapla div.unit.highlight {
-    background-color:#C11C1C;
+    background-color:#BE1F47;
 }
 
 #hexapla div.unit div.text,
@@ -339,21 +355,25 @@ textarea.autosize {
 }
 
 #work .top {
-    background-color:#888;
-    color:#fff;
-    padding:0.5em;
-    margin: 0 0.5em 0.5em;
-    font-size: 0.75em;
-    border-radius: 0.5em;
+    background-color:#e4e4e4;
+    color:#666;
     clear: both;
+    padding:9px;
+    padding-left:50px;
+    padding-right:15px;
 }
 
 #work .top  h1{
-    font-weight: normal;
-    font-size: 1.2em;
+    font-weight: bold;
+    font-size: 15px;
+    font-family: arial;
     display: inline;
-    margin-right: 50px;
-    margin-left: 15px;
+    list-style-type: circle;
+}
+
+#work .top h1:before {
+  content:"●";
+  margin-right:4px;
 }
 
 #work .top #work-info {
@@ -405,7 +425,7 @@ div.forum-link {
 }
 
 div.forum-link a {
-  color:#0088CC;
+  color:#0b9eb3;
   font-weight:normal;
 }
 
@@ -414,11 +434,11 @@ div.forum-link a:hover {
 }
 
 div.unit *::selection {
-  background:#333;
+  background:#BE1F47;
   color:#fff;
 }
 
 div.unit *::-moz-selection {
-  background:#333;
+  background:#BE1F47;
   color:#fff;
 }

@@ -18,17 +18,17 @@
 }
 
 #show-chat {
-  width:32px;
-  height:32px;
-  margin:2px 5px;
-  background-image:url(chat.png);
-  background-size: 32px 32px;
-  cursor:pointer;
-  float:right;
+  background-image:url(chat_off.png);
+  width:46px;
+}
+
+#show-chat:hover,
+#show-chat.unread:hover {
+  background-image:url(chat_roll.png);
 }
 
 #show-chat.unread {
-  background-image:url(chat-unread.png);
+  background-image:url(chat_roll.png);
 }
 
 .message.unread {
