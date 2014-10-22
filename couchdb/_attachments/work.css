@@ -3,12 +3,12 @@ table#hexapla {
     border-spacing:0;
     empty-cells:show;
     height:80%;
-    margin: 0 0.5em;
+    padding: 15px;
+    box-sizing:border-box;
 }
 
 table#hexapla.full {
-    margin: 0 auto;
-    width:99%;
+  width:100%;
 }
 
 #hexapla thead:first-child tr {
@@ -345,6 +345,7 @@ textarea.autosize {
     margin: 0 0.5em 0.5em;
     font-size: 0.75em;
     border-radius: 0.5em;
+    clear: both;
 }
 
 #work .top  h1{
@@ -406,5 +407,18 @@ div.forum-link {
 div.forum-link a {
   color:#0088CC;
   font-weight:normal;
-  text-decoration:underline;
+}
+
+div.forum-link a:hover {
+  text-decoration: underline;
+}
+
+div.unit *::selection {
+  background:#333;
+  color:#fff;
+}
+
+div.unit *::-moz-selection {
+  background:#333;
+  color:#fff;
 }

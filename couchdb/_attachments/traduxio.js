@@ -106,6 +106,7 @@ $(document).ready(function() {
   fixLanguages();
   $("form.concordance").concordancify();
   $("#nav li."+$(document.body).attr("id")).addClass("active");
+  Traduxio.headerPos();
 });
 
 Traduxio=$.extend({},{
@@ -125,5 +126,8 @@ Traduxio=$.extend({},{
   },
   getSeqNum:function() {
     return $(document.body).data("seq");
+  },
+  headerPos:function() {
+    $("#main").css("top",$("#header").height()).css("padding-bottom",$("#footer").height());
   }
 });

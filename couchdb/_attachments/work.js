@@ -1158,5 +1158,7 @@ $(window).load(function() {
     $("tr"+window.location.hash+" .unit").addClass("highlight");
     setTimeout(function() {$("tr"+window.location.hash+" .unit").removeClass("highlight");},500);
   }
+  $("div.top").appendTo("#header");
+  Traduxio.headerPos();
 });
 

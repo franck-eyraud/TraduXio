@@ -29,7 +29,7 @@
       authorData  = {
         name: a,
         works: []
-      }
+      };
       lastAuthor= a;
     }
     authorData.works.push({
