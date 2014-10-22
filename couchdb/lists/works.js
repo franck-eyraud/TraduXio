@@ -37,9 +37,10 @@
       name: row.value
     });
   }
-  if (languageData)
+  if (authorData) {
     languageData.authors.push(authorData);
-  data.languages.push(languageData);
+    data.languages.push(languageData);
+  }
   data.name="works";
   data.scripts=["ul-close"];
   data.script=true;
