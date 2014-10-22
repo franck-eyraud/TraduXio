@@ -21,6 +21,7 @@ function(head,req) {
   data.css=true;
   data.script=true;
   data.prefix="../..";
+  data.work_id=req.query.id;
 
   data.prefix_correction="";
 

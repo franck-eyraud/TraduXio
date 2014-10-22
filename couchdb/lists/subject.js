@@ -57,6 +57,7 @@ function(head,req) {
   if (data.next) data.next=data.prefix_correction+data.next;
   if (data.prefix) data.prefix=data.prefix_correction+data.prefix;
 
+  data.work_id=req.query.id;
   data.name="subject";
   data.css=true;
   data.script=true;
