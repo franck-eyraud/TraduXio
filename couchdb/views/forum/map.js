@@ -6,6 +6,7 @@ function(doc) {
         var timestamp=new Date(t.when).getTime();
         emit([doc._id,s,timestamp,i],{
           message:t,
+          index:i,
           work:{
             creator:doc.creator?doc.creator:"Anonymus",
             title:doc.title,

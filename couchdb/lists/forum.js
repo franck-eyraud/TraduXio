@@ -11,6 +11,7 @@ function(head,req) {
         subject:subject,
         count:row.value.count,
         last_message:row.value.last_message,
+        last_index:row.value.last_index,
         link:encodeURIComponent(subject)
       });
     data.work=row.value.work;
