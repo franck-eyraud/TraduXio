@@ -5,11 +5,11 @@
   background:#fff;
   position:fixed;
   top:3em;
-  right:1em;
+  right:15px;
   width:20%;
   min-width:150px;
   z-index:400;
-  height:80%;
+  bottom:2em;
 }
 
 #sessions h1 {

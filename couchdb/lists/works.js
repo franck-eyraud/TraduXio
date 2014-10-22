@@ -30,7 +30,7 @@ function(head, req) {
       authorData  = {
         name: a,
         works: []
-      }
+      };
       lastAuthor= a;
     }
     authorData.works.push({

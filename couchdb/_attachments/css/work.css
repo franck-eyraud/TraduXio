@@ -3,12 +3,12 @@ table#hexapla {
   border-spacing:0;
   empty-cells:show;
   height:80%;
-  margin: 0 0.5em;
+  padding: 15px;
+  box-sizing:border-box;
 }
 
 table#hexapla.full {
-  margin: 0 auto;
-  width:99%;
+  width:100%;
 }
 
 #hexapla thead tr {
@@ -379,6 +379,7 @@ textarea.autosize {
   margin: 0 0.5em 0.5em;
   font-size: 0.75em;
   border-radius: 0.5em;
+  clear: both;
 }
 
 .top  h1{
@@ -426,4 +427,14 @@ div.context-menu .action:hover {
 
 .temp {
     font-style: italic;
+}
+
+div.unit *::selection {
+  background:#333;
+  color:#fff;
+}
+
+div.unit *::-moz-selection {
+  background:#333;
+  color:#fff;
 }
