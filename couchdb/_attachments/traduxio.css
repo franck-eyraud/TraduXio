@@ -74,12 +74,21 @@ body,html,input,textarea {
   position:fixed;
   z-index:99;
   bottom:0px;
-  font-size: 0.8em;
-  height:2.1em;
+  font-size: 12px;
+  height: 32px;
+}
+
+#footer .border {
+  background-image: url('fond_texturepoints.gif');
+  height:11px;
+  clear: both;
+  bottom:0px;
+  position:absolute;
+  width:100%;
 }
 
 #footer > div {
-  padding:0.4em;
+  padding:4px;
 }
 
 #footer span {
