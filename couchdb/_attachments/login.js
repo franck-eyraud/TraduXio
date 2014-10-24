@@ -14,7 +14,7 @@ function updateUserInfo(ctx) {
     var logoutSpan=$("<span>").addClass("logout").text("logout").on("click",function(){
       logout();
     });
-    sessionInfo.empty().append(userSpan).append(" - ").append(logoutSpan);
+    sessionInfo.empty().append("Connecté: ").append(userSpan).append(" (").append(logoutSpan).append(")");
   } else {
     var form=$("<form>").addClass("login");
     var username=$("<input>").addClass("username").attr("placeholder","username");

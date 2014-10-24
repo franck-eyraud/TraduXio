@@ -50,6 +50,7 @@ body,html,input,textarea {
   top: 0;
   width: 100%;
   font-size:0.85em;
+  min-width:750px;
 }
 
 #header #logo {
@@ -68,7 +69,7 @@ body,html,input,textarea {
 
 #footer {
   color:#fff;
-  background-color: #333;
+  background-color: #BE1F47;
   width:100%;
   position:fixed;
   z-index:99;
@@ -85,30 +86,22 @@ body,html,input,textarea {
   font-weight:bold;
 }
 
-#nav li:first-child {
-  margin-left:50px;
-}
-
 #nav li {
   display:inline-block;
   list-style:none;
-  padding:2px;
+  padding:2px 5px;
   margin:10px;
   font-weight:bold;
   font-size: 15px;
-}
-
-#nav li a {
-  text-decoration:none;
-  font-weight: bold;
   font-family: arial;
   text-transform: uppercase;
 }
 
-#nav li:hover {
-  box-shadow: 0 0 8px white;
+#nav li a {
+  text-decoration:none;
 }
 
+#nav li:hover,
 #nav li.active {
   background-color: #fff;
   color:#000;
@@ -131,6 +124,12 @@ form.concordance input#query {
 
 #header #language  {
   border-radius: 0.5em;
+}
+
+#header ul#nav {
+  padding:0px;
+  margin:0px;
+  padding-left:65px;
 }
 
 ul {
@@ -167,7 +166,9 @@ li.closed > ul {
 }
 
 #controls #session-info {
-  float:left;
+  float:right;
+  width:275px;
+  text-align: center;
 }
 
 
@@ -177,7 +178,7 @@ li.closed > ul {
   background-position:center;
   margin:2px 5px;
   cursor:pointer;
-  float:right;
+  float:left;
 }
 
 #session-info .logout {
@@ -185,12 +186,12 @@ li.closed > ul {
 }
 
 #session-info span {
-  line-height:30px;
+  line-height:35px;
   padding:5px;
 }
 
 #session-info input {
-  width:15em;
+  width:100px;
   background:transparent;
   color:#fff;
   border:#fff solid 1px;
@@ -200,7 +201,7 @@ li.closed > ul {
 }
 
 #session-info input[type=submit] {
-  width:3em;
+  width:auto;
   background-color:#000;
   color:#fff;
   border:none;
