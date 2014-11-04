@@ -180,7 +180,6 @@ li.closed > ul {
   text-align: center;
 }
 
-
 #controls > span {
   width:36px;
   height:36px;
@@ -192,10 +191,11 @@ li.closed > ul {
 
 #session-info .logout {
   cursor:pointer;
+  font-style:italic;
 }
 
 #session-info span {
-  line-height:35px;
+  line-height:17px;
   padding:5px;
 }
 

@@ -11,10 +11,10 @@ function updateUserInfo(ctx) {
   var sessionInfo=$("#session-info");
   if (ctx.name) {
     var userSpan=$("<span>").addClass("user").text(ctx.name);
-    var logoutSpan=$("<span>").addClass("logout").text("logout").on("click",function(){
+    var logoutSpan=$("<span>").addClass("logout").text("(logout)").on("click",function(){
       logout();
     });
-    sessionInfo.empty().append("Connecté: ").append(userSpan).append(" (").append(logoutSpan).append(")");
+    sessionInfo.empty().append(userSpan).append("<br/>").append(logoutSpan);
   } else {
     var form=$("<form>").addClass("login");
     var username=$("<input>").addClass("username").attr("placeholder","username");
