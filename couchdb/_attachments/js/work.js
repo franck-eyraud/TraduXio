@@ -982,7 +982,15 @@ $(document).ready(function() {
   var versions=getVersions();
   const N = versions.length;
   for (var i = N-1; i>=0; i--) {
-    addPleat(versions[i]);
+    var version=versions[i];
+    addPleat(version);
+    var language=find(version).find(".language").first().data("id");
+    if (language) {
+      getLanguageNames(function() {
+        if (languagesNames[language] && languagesNames[language].rtl)
+          find(version).find(".unit").css("direction","rtl");
+      });
+    }
   }
   if ($("th.pleat.opened,th.pleat.edited").length==0) {
     //hide all translations except the 2 first ones
