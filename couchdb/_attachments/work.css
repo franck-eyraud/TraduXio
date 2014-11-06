@@ -409,7 +409,7 @@ div.context-menu .forum a {
 
 .unit .glossary {
     cursor:pointer;
-    border-bottom: 1px dotted #08C;
+    border-bottom: 2px dotted #08C;
 }
 
 .unit .glossary:hover {
