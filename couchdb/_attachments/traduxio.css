@@ -12,6 +12,7 @@ table, td, tr, th {
 a {color:inherit; text-decoration:none; }
 .align-left { float:left; }
 .align-right { float:right; }
+.align-center { margin:0 auto; clear:none; text-align:center;}
 
 .group:before,
 .group:after {
@@ -50,7 +51,7 @@ body,html,input,textarea {
   top: 0;
   width: 100%;
   font-size:0.85em;
-  min-width:950px;
+  min-width:820px;
 }
 
 #header #logo {
@@ -66,14 +67,14 @@ body,html,input,textarea {
   float: left;
 }
 #header #logo .name {
-  line-height: 22px;
+  line-height: 45px;
   font-family: arial;
   float:left;
 }
 
 #header #logo .name .logo {
   font-weight: bold;
-  font-size:16px;
+  font-size:24px;
 }
 
 #header #logo .name .subtitle {
@@ -94,6 +95,7 @@ body,html,input,textarea {
   bottom:0px;
   font-size: 12px;
   height: 32px;
+  min-width:700px;
 }
 
 #footer .border {
