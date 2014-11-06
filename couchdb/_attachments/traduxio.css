@@ -50,7 +50,7 @@ body,html,input,textarea {
   top: 0;
   width: 100%;
   font-size:0.85em;
-  min-width:750px;
+  min-width:950px;
 }
 
 #header #logo {
@@ -60,6 +60,24 @@ body,html,input,textarea {
   height:45px;
   clear:both;
   color:#fff;
+}
+
+#header #logo .image {
+  float: left;
+}
+#header #logo .name {
+  line-height: 22px;
+  font-family: arial;
+  float:left;
+}
+
+#header #logo .name .logo {
+  font-weight: bold;
+  font-size:16px;
+}
+
+#header #logo .name .subtitle {
+  font-size:13px;
 }
 
 #header #navigation {
