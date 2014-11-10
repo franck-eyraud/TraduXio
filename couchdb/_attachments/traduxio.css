@@ -51,7 +51,7 @@ body,html,input,textarea {
   top: 0;
   width: 100%;
   font-size:0.85em;
-  min-width:820px;
+  min-width:830px;
 }
 
 #header #logo {
@@ -74,7 +74,10 @@ body,html,input,textarea {
 
 #header #logo .name .logo {
   font-weight: bold;
-  font-size:24px;
+  font-size:29px;
+  font-family:arial;
+  padding:0px 10px;
+  color:#e5a5b5;
 }
 
 #header #logo .name .subtitle {
