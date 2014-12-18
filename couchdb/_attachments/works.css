@@ -25,6 +25,7 @@ div#citation span.author {
   min-height:80%;
   height:100%;
   position:fixed;
+  top:86px;
   float:none;
   margin-top:0px;
 }
