@@ -3,6 +3,7 @@ body#works #main {
 }
 
 div#citation {
+  margin:0px 20px;
   padding: 0 10px 0 25px;
   text-align: justify;
   font-size: 0.7em;
@@ -20,7 +21,7 @@ div#citation span.author {
 #main div#lead {
   border-right: 2px dotted;
   text-align: center;
-  width:400px;
+  width:275px;
   min-height:80%;
   height:100%;
   position:fixed;
@@ -36,8 +37,17 @@ div#lead div#traduxio_heading {
 }
 
 div#lead div#supports {
+  border-top:2px solid #444;
   position:fixed;
   bottom:45px;
+  width:235px;
+  margin:0 20px;
+  padding:15px 0;
+}
+
+div#supports img {
+  height:50px;
+  margin:0 7px;
 }
 
 #lead .welcome {
@@ -54,7 +64,7 @@ div#traduxio-heading > * {
 
 #lead #traduxio_heading img {
   width:100%;
-  max-width:269px;
+  max-width:232px;
 }
 
 #main > *{
