@@ -97,8 +97,16 @@ def find_translation(version)
   find("thead.header th.pleat[data-version='#{version}']")
 end
 
+def find_translation_footer(version)
+  find("thead.footer th.pleat[data-version='#{version}']")
+end
+
 def find_open_translation(version)
   find("thead.header th.pleat.open[data-version='#{version}']")
+end
+
+def find_open_translation_footer(version)
+  find("thead.footer th.pleat.open[data-version='#{version}']")
 end
 
 def has_translation?(version)
@@ -146,7 +154,6 @@ end
 
 def open_translation(version)
   if not is_open?(version)
-    save_screenshot "closed.png"
     find_translation(version).find("span.button.show").click
   end
 end
@@ -157,16 +164,24 @@ def close_translation(version)
   end
 end
 
-def delete_translation(version)
-  if has_translation? version then
-    open_translation version
-    edit_translation version
+def delete_full_work
+  click_on "removeDoc"
+  click_on "remove-confirm"
+  accept_alert
+end
 
-    debug "delete #{version}"
-    find_open_translation(version).find("span.delete").click
-    debug "confirm deletion if #{version}"
-    accept_alert
-  end
+def delete_translation(version)
+  open_translation version
+  edit_translation version
+
+  debug "delete #{version}"
+  find_open_translation(version).find("span.delete").click
+  debug "confirm deletion if #{version}"
+  accept_alert
+end
+
+def change_license(version)
+  find_open_translation_footer(version).find("div.button.edit-license").click
 end
 
 def edit_translation_metadata(version,options)
