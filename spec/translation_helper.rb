@@ -26,10 +26,6 @@ def edit_translation_metadata(version,options)
       edited=fill_field(:'work-creator',options[:author]) if options.has_key?(:author)
     end
   end
-  if edited then
-    debug :blur
-    edited.trigger(:blur)
-  end
   if options.has_key?(:author)
     version=options[:author]
   end
@@ -82,7 +78,6 @@ def fill_block(version,row,text)
     debug "filling block #{row} of #{version} with #{text}"
     ta=find('textarea')
     ta.set(text)
-    ta.trigger(:blur)
     wait_for_ajax
   end
 end
