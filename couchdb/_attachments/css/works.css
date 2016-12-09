@@ -8,11 +8,12 @@ div#main > *{
 }
 
 div#citation {
-  padding: 0 25px;
+  padding: 0 10px 0 25px;
   text-align: justify;
   font-size: 0.7em;
   height: 15%;
   background-image: url("../img/citation-mark.gif");
+  margin-top:10px;
   background-repeat: no-repeat;
 }
 
@@ -21,15 +22,33 @@ div#citation span.author {
   text-align: right;
 }
 
-div#lead {
+#main div#lead {
   border-right: 2px dotted;
+  text-align: center;
+  width:400px;
+  min-height:80%;
+  height:100%;
+  position:fixed;
+  float:none;
+  margin-top:0px;
+}
+
+div#lead div#traduxio_heading {
   padding-left: 1%;
   padding-right: 1%;
   margin: 1%;
-  text-align: center;
-  width:25%;
-  min-height:60%;
-  top:10%;
+  margin-top:25px;
+}
+
+div#lead div#supports {
+  position:fixed;
+  bottom:45px;
+  text-align:center;
+  width:400px;
+}
+
+div#supports img {
+  max-width:350px;
 }
 
 #lead .welcome {
@@ -38,21 +57,32 @@ div#lead {
   text-align: right;
 }
 
-div #lead > * {
+div#traduxio-heading > * {
   max-width:400px;
   display:inline-block;
   margin:5px 0;
 }
 
-#lead img {
+#lead #traduxio_heading img {
   width:100%;
   max-width:269px;
+}
+
+#main > *{
+  margin-top: 25px;
+  float:left;
 }
 
 #works-list {
   width: 50%;
   margin: 0;
-  margin-left: 1%;
+  margin-left: 420px;
+  margin-right:200px;
+}
+
+#aside {
+  position:fixed;
+  right:50px;
 }
 
 #works-list li{
