@@ -329,7 +329,7 @@ function fillLanguages(controls,callback) {
       var control=$(c);
       control.val(control.data("language"));
       if (control.prop("placeholder")) {
-        control.prepend($("<option>").text(control.prop("placeholder")));
+        control.prepend($("<option>").val("").text(control.prop("placeholder")));
       }
     });
     if (typeof callback=="function")
