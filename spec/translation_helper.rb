@@ -4,7 +4,7 @@ def create_translation(version)
   debug "fill the creator #{version}"
   fill_input "[name='work-creator']", version
   begin
-    wait_for_ajax
+    #wait_for_ajax
     debug "click on create button"
     page.find('input[name=do-create]').trigger(:click)
     debug "wait #{version} to appear"
