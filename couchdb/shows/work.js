@@ -96,7 +96,9 @@ function(o, req) {
   data.name="work";
   data.css=true;
   data.script=true;
-  data.scripts=["jquery.selection","jquery.ajax-retry","activity","chat","jquery.highlight"];
+  data.scripts=["jquery.selection","jquery.ajax-retry","activity","jquery.highlight"];
+  if (this.couchapp.traduxio.chat) data.scripts.push("chat");
+  log(this.couchapp.traduxio);
   data.language=data.work_language;
   data.prefix="..";
   if (o.glossary) {

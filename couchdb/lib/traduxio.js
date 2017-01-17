@@ -1,3 +1,10 @@
+var defaultConfig = {
+  chat:true
+}
+
+this.couchapp=this.couchapp || {};
+this.couchapp.traduxio=this.couchapp.traduxio || defaultConfig;
+
 Traduxio= {
 
   sessionLength:30 * 60 * 1000, //1/2 hour
