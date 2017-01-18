@@ -98,6 +98,7 @@ function(o, req) {
   data.script=true;
   data.scripts=["jquery.selection","jquery.ajax-retry","activity","jquery.highlight"];
   if (this.couchapp.traduxio.chat) data.scripts.push("chat");
+  if (this.couchapp.traduxio.sessions) data.scripts.push("sessions");
   log(this.couchapp.traduxio);
   data.language=data.work_language;
   data.prefix="..";
