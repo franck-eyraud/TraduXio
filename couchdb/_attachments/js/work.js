@@ -106,9 +106,15 @@ function findPleat(version) {
 }
 
 function getTranslated(name) {
+  var args=Array.slice ? Array.slice(arguments) : Array.prototype.slice.call(arguments);
+  args.shift();
   //show function only sends requested i18n elements, so need to modify the
   //js_i18n_elements array to get them here (and load them inside the template)
-  return i18n[name] || name;
+  var translation=i18n[name] || name;
+  args.forEach(function(arg,i) {
+    translation=translation.replace("{"+i+"}",arg);
+  });
+  return translation;
 }
 
 $.fn.getHeight = function() {
@@ -724,7 +730,9 @@ function openContextMenu(glossaryEntry,position) {
         menu.append(menuItem);
       });
     }
-    menu.append($("<div/>").addClass("glossary").append("Ajouter une traduction de <em>"+sentence+"</em> dans le glossaire"));
+    menu.append($("<div/>").addClass("glossary").append(
+      getTranslated("i_glossary_add_translation","<em>"+sentence+"</em>"))
+    );
     menu.css(position);
     $("body .context-menu").remove();
     $("body").append(menu);

@@ -10,7 +10,12 @@
     "i_search_translations_description": "TraduXio offers you the possibility to search translations of one or several words through a works library simply and effectively.",
     "i_work_together": "Work together",
     "i_work_together_description": "TraduXio provides a collaborative environment. It includes a tool that allows multiple contributors to translate the same text simultaneously.",
+    "i_project": "The project",
+    "i_contact": "Contact",
     "i_start": "Start",
+
+    "i_glossary_add_entry": "Add a glossary entry",
+    "i_glossary_add_translation": "Add a translation of {0} into the glossary",
 
     "i_works": "Works",
     "i_my_translations": "My translations",
@@ -80,7 +85,6 @@
     "i_translator": "Translation author",
     "i_title": "Title",
     "i_translated_title": "Translated title",
-    "i_add_glossary_entry": "Add a glossary entry",
     "i_enter_text": "Enter your text here"
   },
   "fr": {
@@ -94,7 +98,12 @@
     "i_search_translations_description": "TraduXio vous offre la possibilité de rechercher la traduction d'un ou plusieurs termes au travers d'une bibliothèque d'œuvres de manière simple et efficace.",
     "i_work_together": "Travaillez à plusieurs",
     "i_work_together_description": "TraduXio propose un environnement collaboratif. Il comprend un outil de traduction permettant à plusieurs collaborateurs de traduire une même œuvre en simultané.",
+    "i_project": "Le projet",
+    "i_contact": "Contact",
     "i_start": "Commencer",
+
+    "i_glossary_add_translation": "Ajouter une traduction de {0} dans le glossaire",
+    "i_glossary_add_entry": "Ajouter une entrée du glossaire",
 
     "i_works": "Œuvres",
     "i_my_translations": "Mes traductions",
@@ -163,7 +172,6 @@
     "i_version_author": "Auteur (translittéré si nécessaire)",
     "i_translator": "Auteur de la traduction",
     "i_title": "Titre",
-    "i_add_glossary_entry": "Ajouter une entrée du glossaire",
     "i_translated_title": "Titre traduit"
   },
   "pt": {
