@@ -808,7 +808,7 @@ function updateOnScreen(version,line,content,color) {
       var previousUnit=units.eq(units.index(unit)-1);
       var previousContent=previousUnit.find("textarea").val();
       var thisContent=unit.find("textarea").val();
-      previousUnit.find("textarea").val(previousContent+"\n"+thisContent);
+      fillUnit(previousUnit,previousContent+"\n"+thisContent);
       var thisLine=unit.getLine();
       var prevLine=previousUnit.getLine();
       var size=getSize(unit);
@@ -831,7 +831,7 @@ function updateOnScreen(version,line,content,color) {
             unit=$(this);
           } else {
             return false;
-        }
+          }
         }
       });
       if (unit) {
@@ -953,7 +953,7 @@ $(document).ready(function() {
       version:version,
       line: line
     }).done(function() {
-
+      updateOnScreen(version,line,"");
     });
   });
 
@@ -1077,10 +1077,10 @@ $(document).ready(function() {
           case "edited":
             if (edit.key=="creator") {
               edit.message="version "+edit.version+" renomée";
-            if (!edit.isPast) edit.message+=", svp rafraîchir la page pour voir les changements";
+              if (!edit.isPast) edit.message+=", svp rafraîchir la page pour voir les changements";
             } else {
               edit.message="informations de la version "+edit.version+" modifiées";
-            if (!edit.isPast) edit.message+=", svp rafraîchir la page pour voir les changements";
+              if (!edit.isPast) edit.message+=", svp rafraîchir la page pour voir les changements";
             }
             break;
           case "created":
