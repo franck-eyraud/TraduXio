@@ -172,12 +172,9 @@ li.closed > ul {
   cursor:pointer;
 }
 
-#session-info input {
+#session-info input.username,
+#session-info input.password {
   width:10em;
-}
-
-#session-info input[type=submit] {
-  width:3em;
 }
 
 #session-info input.bad {

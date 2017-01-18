@@ -1,18 +1,17 @@
 function(o, req) {
-  // !code lib/mustache.js
-  // !code lib/hexapla.js
-  // !code lib/path.js
-  // !code localization.js
 
   var js_i18n_elements=[
     "i_read","i_edit","i_show","i_search_concordance",
     "i_confirm_delete","i_delete_version","i_delete_original", "i_no_title", "i_no_author",
     "i_glossary_add_translation"
   ];
-  var i18n=localized();
 
   var doc=o;
   // !code lib/traduxio.js
+  // !code lib/mustache.js
+  // !code lib/hexapla.js
+
+  var i18n=localized();
 
   function getTextLength() {
     if (o.text)
@@ -40,13 +39,8 @@ function(o, req) {
     headers: [],
     units: [],
     rows:[],
-    lang:i18n.lang,
     i18n:i18n
   };
-  var js_i18n={};
-  js_i18n_elements.forEach(function (item) {
-    if (i18n[item]) js_i18n[item]=i18n[item];
-  });
 
   if (!newWork) {
     var hexapla = new Hexapla();
@@ -112,7 +106,6 @@ function(o, req) {
   data.glossary=JSON.stringify(glossary);
   data.notext=o.text ? false : true;
   data.original=o.text ? true : (newWork ? true : false);
-  data.i18n_str=JSON.stringify(js_i18n);
   if (data.headers.length==1) {
     data.justOneText=true;
     data.fulltext=data.headers[0].raw;

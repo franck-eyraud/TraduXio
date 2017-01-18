@@ -5,11 +5,20 @@ var defaultConfig = {
 this.couchapp=this.couchapp || {};
 this.couchapp.traduxio=this.couchapp.traduxio || defaultConfig;
 
+var js_i18n_elements=js_i18n_elements || [];
+js_i18n_elements.push("i_username");
+js_i18n_elements.push("i_password");
+js_i18n_elements.push("i_login");
+js_i18n_elements.push("i_logout");
+js_i18n_elements.push("i_search");
+
+// !code lib/path.js
+// !code lib/localization.js
+
 Traduxio= {
 
   sessionLength:30 * 60 * 1000, //1/2 hour
 
-  doc:doc,
   req:req,
 
   compareActivities:function(a1,a2) {
@@ -268,3 +277,5 @@ Traduxio= {
   }
 
 };
+
+if (typeof doc != "undefined") Traduxio.doc=doc;

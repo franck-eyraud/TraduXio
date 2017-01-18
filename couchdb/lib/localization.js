@@ -26,11 +26,18 @@ function localized(language) {
   var available = "en";
   var language=language || getPreferredLanguage();
   var items=i18n[language];
-  i18n.lang=language;
+  items.lang=language;
   if (language != available) {
     for (var item in i18n[available]) {
       if (!items[item]) items[item]=i18n[available][item];
     }
+  }
+  if (js_i18n_elements) {
+    var js_i18n={};
+    js_i18n_elements.forEach(function (item) {
+      if (items[item]) js_i18n[item]=items[item];
+    });
+    items.str=JSON.stringify(js_i18n);
   }
   return items;
 }

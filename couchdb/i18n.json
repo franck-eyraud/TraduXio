@@ -13,6 +13,10 @@
     "i_project": "The project",
     "i_contact": "Contact",
     "i_start": "Start",
+    "i_username": "Username",
+    "i_password": "Password",
+    "i_login": "Log in",
+    "i_login": "Log out",
 
     "i_glossary_add_entry": "Add a glossary entry",
     "i_glossary_add_translation": "Add a translation of {0} into the glossary",
@@ -101,6 +105,10 @@
     "i_project": "Le projet",
     "i_contact": "Contact",
     "i_start": "Commencer",
+    "i_username": "Nom de connexion",
+    "i_password": "Mot de passe",
+    "i_login": "Connexion",
+    "i_logout": "Se déconnecter",
 
     "i_glossary_add_translation": "Ajouter une traduction de {0} dans le glossaire",
     "i_glossary_add_entry": "Ajouter une entrée du glossaire",

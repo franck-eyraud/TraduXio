@@ -11,15 +11,15 @@ function updateUserInfo(ctx) {
   var sessionInfo=$("#session-info");
   if (ctx.name) {
     var userSpan=$("<span>").addClass("user").text(ctx.name);
-    var logoutSpan=$("<span>").addClass("logout").text("logout").on("click",function(){
+    var logoutSpan=$("<span>").addClass("logout").text(Traduxio.getTranslated("i_logout")).on("click",function(){
       logout();
     });
     sessionInfo.empty().append(userSpan).append(" - ").append(logoutSpan);
   } else {
     var form=$("<form>").addClass("login");
-    var username=$("<input>").addClass("username").attr("placeholder","username");
-    var password=$("<input>").addClass("password").attr("type","password").attr("placeholder","password");
-    var go=$("<input>").addClass("go").attr("type","submit").val("login");
+    var username=$("<input>").addClass("username").attr("placeholder",Traduxio.getTranslated("i_username"));
+    var password=$("<input>").addClass("password").attr("type","password").attr("placeholder",Traduxio.getTranslated("i_password"));
+    var go=$("<input>").addClass("go").attr("type","submit").val(Traduxio.getTranslated("i_login"));
     form.append(username).append(password).append(go).on("submit",function(e) {
       e.preventDefault();
       var name=username.val();
