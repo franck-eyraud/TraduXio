@@ -400,12 +400,11 @@ function fillLanguages(controls,callback) {
     });
     controls.each(function(i,c) {
       var control=$(c);
-      var v=control.val();
       control.val(control.data("language"));
       if (control.prop("placeholder")) {
         control.prepend($("<option>").val("").text(control.prop("placeholder")));
       }
-      control.val(v);
+      control.val(control.data("language"));
     });
     if (typeof callback=="function")
       callback();
@@ -688,6 +687,7 @@ function saveMetadata() {
       }
       if (name=="language") {
         var lang_id = elem.val();
+        elem.data("language",lang_id);
         fixLanguages(target.data("id",lang_id));
         fixLanguages($(".pleat.close[data-version='" + ref + "']")
           .find(".metadata.language").data("id", lang_id).text(lang_id));
