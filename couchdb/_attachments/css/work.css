@@ -281,6 +281,7 @@ textarea.autosize {
 #hexapla .unit.edit .split,
 #hexapla .unit.edit .join {
   display: inline;
+  right: -32px;
 }
 
 .dirty {
