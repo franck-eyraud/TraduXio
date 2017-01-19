@@ -110,6 +110,7 @@ function(o, req) {
   if (data.headers.length==1) {
     data.justOneText=true;
     data.fulltext=data.headers[0].raw;
+    data.version=data.headers[0].id
   }
 
   return Mustache.to_html(this.templates.work, data, this.templates.partials);

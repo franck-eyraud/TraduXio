@@ -310,6 +310,7 @@ function toggleEdit (e) {
       top.css("width",doc.first().outerWidth()+"px");
     }
     doc.find("input.edit").toggleName(getTranslated("i_read"), getTranslated("i_edit"));
+    fixScriptDirection(version);
   }
   if (getVersions().length==1) {
     if (edited) {
@@ -426,6 +427,17 @@ function updateDocInfo(data) {
     $(".top h1 span.creator").text(data["work-creator"]?data["work-creator"]:getTranslated("i_no_author"));
   if (data.hasOwnProperty("language")) {
     fixLanguages($(".top h1 span.language").data("id",data.language));
+  }
+}
+
+function fixScriptDirection(version,language) {
+  language=language || find(version).find(".language").first().data("id");
+  if (language) {
+    getLanguageNames(function() {
+      if (languagesNames[language] && languagesNames[language].rtl)
+        findUnits(version).css("direction","rtl");
+      else findUnits(version).css("direction","ltr");
+    });
   }
 }
 
@@ -679,6 +691,7 @@ function saveMetadata() {
         fixLanguages(target.data("id",lang_id));
         fixLanguages($(".pleat.close[data-version='" + ref + "']")
           .find(".metadata.language").data("id", lang_id).text(lang_id));
+        fixScriptDirection(ref,lang_id);
       }
     });
   }
@@ -837,6 +850,8 @@ function updateOnScreen(version,line,content,color) {
         var size=getSize(unit);
         var initialLine=unit.getLine();
         var newUnit=createUnit(content).attr("data-version",version);
+        var direction=unit.css("direction");
+        if (direction) newUnit.css("direction",direction);
         if (unit.isEdited()) newUnit.addClass("edit");
         var newTd=$("<td>").addClass("pleat open").attr("data-version",version)
           .append($("<div>").addClass("box-wrapper").append(newUnit));
@@ -982,13 +997,7 @@ $(document).ready(function() {
   for (var i = N-1; i>=0; i--) {
     var version=versions[i];
     addPleat(version);
-    var language=find(version).find(".language").first().data("id");
-    if (language) {
-      getLanguageNames(function() {
-        if (languagesNames[language] && languagesNames[language].rtl)
-          find(version).find(".unit").css("direction","rtl");
-      });
-    }
+    fixScriptDirection(version);
   }
   if ($("th.pleat.opened,th.pleat.edited").length==0) {
     //hide all translations except the 2 first ones
