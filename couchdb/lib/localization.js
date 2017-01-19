@@ -39,5 +39,16 @@ function localized(language) {
     });
     items.str=JSON.stringify(js_i18n);
   }
+  items.getTranslated=function(item) {
+    var args=Array.slice ? Array.slice(arguments) : Array.prototype.slice.call(arguments);
+    args.shift();
+    //show function only sends requested i18n elements, so need to modify the
+    //js_i18n_elements array to get them here (and load them inside the template)
+    var translation=items[item] || item;
+    args.forEach(function(arg,i) {
+      translation=translation.replace("{"+i+"}",arg);
+    });
+    return translation;
+  }
   return items;
 }

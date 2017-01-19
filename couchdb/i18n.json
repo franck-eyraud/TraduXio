@@ -13,6 +13,7 @@
     "i_project": "The project",
     "i_contact": "Contact",
     "i_start": "Start",
+    "i_works_list": "Works list",
     "i_username": "Username",
     "i_password": "Password",
     "i_login": "Log in",
@@ -42,6 +43,7 @@
     "i_email_optional_": "Email (optional):",
     "i_anti_spam_system_": "Anti-spam system:",
 
+    "i_license_for": "License of {1} ({0})",
     "i_license_characteristics": "License characteristics",
     "i_allow_changes_question": "Do you allow changes to your creation?",
     "i_yes": "Yes",
@@ -105,6 +107,7 @@
     "i_project": "Le projet",
     "i_contact": "Contact",
     "i_start": "Commencer",
+    "i_works_list": "Liste des œuvres",
     "i_username": "Nom de connexion",
     "i_password": "Mot de passe",
     "i_login": "Connexion",
@@ -134,6 +137,7 @@
     "i_email_optional_": "Adresse de courrier électronique (optionnel) :",
     "i_anti_spam_system_": "Système anti-spam :",
 
+    "i_license_for": "Licence pour {1} ({0})",
     "i_license_characteristics": "Caractéristiques de la licence",
     "i_allow_changes_question": "Autorisez-vous les modifications de votre création ?",
     "i_yes": "Oui",

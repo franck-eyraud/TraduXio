@@ -89,6 +89,7 @@ function(o, req) {
   }
 
   data.name="work";
+  data.page_title=data.work_creator+" : "+data.work_title;
   data.css=true;
   data.script=true;
   data.scripts=["jquery.selection","jquery.ajax-retry","activity","jquery.highlight"];

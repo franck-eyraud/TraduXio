@@ -99,6 +99,7 @@ function(head, req) {
   data.script=true;
   data.prefix="..";
   data.i18n=localized();
+  data.page_title=data.i18n["i_concordance"];
 
   return Mustache.to_html(this.templates.concordance, data, this.templates.partials);
 }

@@ -30,6 +30,7 @@ function(work, req) {
   data.css=true;
   data.script=true;
   data.prefix="../../..";
+  data.page_title=data.i18n.getTranslated("i_license_for",data.text.creator,data.text.title);
 
   return Mustache.to_html(this.templates.license, data, this.templates.partials);
 }
