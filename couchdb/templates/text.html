@@ -1,0 +1,13 @@
+{{> header}}
+<h1>
+  {{work_title}} – {{work_creator}} – {{text.date}} <br/>
+  {{text.creator}}
+</h1>
+
+{{#work}}
+{{#text}}
+<p>{{.}}</p>
+{{/text}}
+{{/work}}
+
+{{> footer}}
