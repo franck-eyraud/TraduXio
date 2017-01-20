@@ -14,7 +14,7 @@
       <input type="radio" name="add-type" value="translation" checked="checked" /> {{i_translation_}}
     {{/original}}
     {{#original}}
-    <h3>{{i_translation_}} </h3>
+    <h3>{{i_translation_}}</h3>
     {{/original}}
     <input name="work-creator" placeholder="{{i_author}}"/>
     <select class="language" name="language" placeholder="{{i_version_language}}"></select>
@@ -41,7 +41,7 @@
 <table id="hexapla" data-lines="{{lines}}" data-id="{{id}}" class="full">
   <thead><tr>
     {{#headers}}
-      <th class="pleat open{{#edited}} edited{{/edited}}{{#opened}} opened{{/opened}}" data-version="{{id}}"><div class="relative-wrapper">
+      <th class="pleat open{{#edited}} edited{{/edited}}{{#opened}} opened{{/opened}}" data-version="{{version}}"><div class="relative-wrapper">
       {{^justOneText}}<span class="button delete"></span>{{/justOneText}}
       {{#is_original}}
         <div class="metadata title"  title="{{i_title}}">{{work_title}}</div>
@@ -115,7 +115,7 @@
   </tbody>
   <tfoot><tr>
   {{#headers}}
-    <th class="pleat open" data-version="{{id}}">
+    <th class="pleat open" data-version="{{version}}">
       <div class="relative-wrapper">
         <input type="button" class="edit" value="{{i_edit}}" />
         <div class="button edit-license" title="{{i_edit_license}}"></div>
@@ -129,6 +129,7 @@
           {{i_all_rights_reserved}}.
         {{/creativeCommons}}
         </div>
+        <div class="link"><a href="{{prefix}}/works/{{id}}/print/{{version}}">{{i_print}}</a></div>
         <div class="button hide">{{i_hide}}</div>
       </div>
     </th>

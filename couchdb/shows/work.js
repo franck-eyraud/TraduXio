@@ -16,7 +16,7 @@ function(o, req) {
   function getTextLength() {
     if (o.text)
       return o.text.length;
-    for each (version in o.translations)
+    for each (var version in o.translations)
       return version.text.length;
   }
 
@@ -52,7 +52,7 @@ function(o, req) {
         text: o.text
       });
       data.headers.push({
-        id: "original",
+        version: "original",
         is_original: true,
         title: o.title,
         language: o.language,
@@ -71,7 +71,7 @@ function(o, req) {
         text: translation.text
       });
       data.headers.push({
-        id:t,
+        version:t,
         title: translation.title,
         work_creator: translation.creator || "",
         creator: t,
@@ -107,7 +107,7 @@ function(o, req) {
   data.original=o.text ? true : (newWork ? true : false);
   if (data.headers.length==1) {
     data.justOneText=true;
-    data.version=data.headers[0].id
+    data.version=data.headers[0].version
   }
 
   return Mustache.to_html(this.templates.work, data, this.templates.partials);

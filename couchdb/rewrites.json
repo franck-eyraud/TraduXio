@@ -47,6 +47,10 @@
   "to": "_show/license/:id",
   "method": "GET"
 },{
+  "from": "works/:id/print/:version",
+  "to": "_show/text/:id",
+  "method": "GET"
+},{
   "from": "glossary/:id",
   "to": "_update/glossary/:id",
   "method": "POST"
