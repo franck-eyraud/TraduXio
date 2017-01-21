@@ -447,3 +447,25 @@ div.unit *::-moz-selection {
   background:#333;
   color:#fff;
 }
+
+@media print {
+  .pleat.close,
+  tfoot div.link,
+  input[type=button], #hexapla .pleat.open .button,
+  .unit.edit textarea, .edit .editedMeta,
+  .top a.workButton {
+    display: none;
+  }
+
+  .edit div.metadata,
+  .unit.edit div.text {
+    display: inherit !important;
+    visibility: visible;
+  }
+
+  #hexapla td.pleat.open,
+  #hexapla td.pleat.open .box-wrapper,
+  #hexapla div.unit .text {
+    padding:2px;
+  }
+}
