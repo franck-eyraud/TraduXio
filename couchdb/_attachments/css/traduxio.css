@@ -209,3 +209,20 @@ http://kizu.ru/en/fun/rotated-text/
    margin-top: 100%;
  }
 /* ==== */
+
+@media print {
+  #header > *,
+  #header div.top > *,
+  #footer {
+    display: none;
+  }
+  #header .top,
+  #header div.top h1 {
+    display: inherit;
+  }
+  #header div.top h1 {
+    background-color: none;
+    font-size: 3em;
+    font-weight: bold;
+  }
+}
