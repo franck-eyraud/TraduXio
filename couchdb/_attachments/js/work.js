@@ -349,7 +349,7 @@ function toggleEdit (e) {
     } else {
       $("#hexapla tbody tr:not(.fulltext)").hide();
       $("#hexapla tbody tr.fulltext").show();
-      $("textarea.fulltext").prop("disabled",false);
+      autoSize.apply($("textarea.fulltext").prop("disabled",false));
       applyToggle();
     }
   } else {

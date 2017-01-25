@@ -251,11 +251,16 @@ tr.fulltext {
 .unit.edit textarea,
 .edit textarea.fulltext {
   display:inherit;
+  overflow: auto;
 }
 
 textarea.autosize {
   overflow: hidden;
   position: absolute;
+}
+
+.edit textarea.fulltext {
+  overflow: auto;
 }
 
 .unit.edit div.text {
