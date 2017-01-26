@@ -1,1 +1,12 @@
+h1, h2 {
+  text-align: center;
+}
 
+h2 {
+  font-style: italic;
+}
+
+p {
+  padding:0.5em;
+  text-indent: 2em;
+}
