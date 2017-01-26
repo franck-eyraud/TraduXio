@@ -681,7 +681,7 @@ function saveMetadata() {
       }
       if (inputType=="INPUT") {
         var displayText=newValue;
-        if (name=="work-creator" && ref=="original") displayText=i18n["i_no_author"];
+        if (!displayText && name=="work-creator" && ref=="original") displayText=Traduxio.getTranslated("i_no_author");
         target.text(displayText);
         elem.removeClass("dirty");
       }

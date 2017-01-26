@@ -92,14 +92,12 @@ function fixLanguages(container) {
     language.each(function() {
       var lang=this;
       var langID=$(lang).data("id");
-      if (langID) {
-        var langName=getLanguageName(langID);
-        if ($(lang).is(".expand")) {
-          $(lang).text(langName);
-          $(lang).prop('title',langID);
-        } else {
-          $(lang).prop('title',langName);
-        }
+      var langName=langID?getLanguageName(langID):"";
+      if ($(lang).is(".expand")) {
+        $(lang).text(langName);
+        $(lang).prop('title',langID);
+      } else {
+        $(lang).prop('title',langName);
       }
     });
   });

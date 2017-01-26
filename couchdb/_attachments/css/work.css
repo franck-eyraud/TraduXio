@@ -67,6 +67,10 @@ div.metadata {
   padding:0.5em 2em;
 }
 
+div.metadata::after {
+  content: '\200b';
+}
+
 .edit div.metadata {
   display: none;
 }
@@ -248,8 +252,7 @@ tr.fulltext {
   display:none;
 }
 
-.unit.edit textarea,
-.edit textarea.fulltext {
+.edit textarea {
   display:inherit;
   overflow: auto;
 }
@@ -276,7 +279,7 @@ textarea.autosize {
   border:1px solid black;
   z-index:99;
   right:0px;
-  display: none;
+  visibility: hidden;
 }
 
 #hexapla .unit .join{
@@ -285,7 +288,7 @@ textarea.autosize {
 
 #hexapla .unit.edit .split,
 #hexapla .unit.edit .join {
-  display: inline;
+  visibility: visible;
   right: -32px;
 }
 
