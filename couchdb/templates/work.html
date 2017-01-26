@@ -16,7 +16,9 @@
     {{#original}}
     <h3>{{i_translation_}} </h3>
     {{/original}}
-    <input name="work-creator" placeholder="{{i_author}}"/><input type="submit" value="{{i_create}}" name="do-create" />
+    <input name="work-creator" placeholder="{{i_author}}"/>
+    <select class="language" name="language" placeholder="{{i_version_language}}"></select>
+    <input type="submit" value="{{i_create}}" name="do-create" />
   </form>
   <form id="addGlossaryForm"><h3>{{i_glossary_add_entry}}</h3>
     <select class="language" name="src_language"></select><input name="src"/>

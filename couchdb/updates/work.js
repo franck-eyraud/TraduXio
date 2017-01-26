@@ -71,11 +71,6 @@ function(work, req) {
         actions.push("created original version");
         Traduxio.addActivity(work.edits,{action:"created",version:"original"});
         created=true;
-      } else if (created) {
-        work.translations["first"] = { text: emptyText(work) };
-        actions.push("created first version");
-        Traduxio.addActivity(work.edits,{action:"created",version:"first"});
-        created=true;
       }
       delete args.original;
     } else if (version_name) {

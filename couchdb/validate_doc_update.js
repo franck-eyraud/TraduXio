@@ -99,6 +99,7 @@ function (newDoc, oldDoc, userCtx, secObj) {
     for (var t in newDoc.translations) {
       var translation=newDoc.translations[t];
       mandatory(translation,"text");
+      mandatory(translation,"language");
       shouldBeArray(translation,"text");
     }
   }

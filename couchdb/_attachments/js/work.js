@@ -537,8 +537,10 @@ function toggleEditDoc() {
 function addPanelFormUpdate() {
   if($("#addPanel input[name='add-type']:checked").val()=="original") {
     $("#addPanel input[name='work-creator']").prop("disabled",true);
+    $("#addPanel select[name='language']").prop("disabled",true);
   } else {
     $("#addPanel input[name='work-creator']").prop("disabled",false);
+    $("#addPanel select[name='language']").prop("disabled",false);
   }
 }
 
@@ -546,12 +548,14 @@ function addVersion() {
   var id = Traduxio.getId(),
       ref,
       data = {};
-  if ($("#addPanel input[name='add-type']:checked").val()=="original") {
+  if ($("input[name='add-type']:checked",this).val()=="original") {
     ref="original";
     data.original=true;
   } else {
-    ref = $("#addPanel").find("input[name='work-creator']").val();
+    ref = $("input[name='work-creator']",this).val();
     data.creator=ref;
+    data.language=$("select[name='language']",this).val();
+    if (!data.language) return false;
   }
   if(ref != "") {
     request({
@@ -665,16 +669,31 @@ function saveUnit(callback) {
   }
 }
 
+function checkValid(field,value) {
+  var mandatoryFields=["language"]
+  if (mandatoryFields.indexOf(field)!=-1 && !value) {
+    return false;
+  }
+  return true;
+}
+
 function saveMetadata() {
   var elem=$(this);
   var inputType=elem.prop("tagName");
   if(inputType!="INPUT" || elem.hasClass("dirty")) {
-    var id = Traduxio.getId();
-    var ref = elem.closest("th").data("version");
-    var modify={};
     var newValue=elem.val();
     var name=elem.prop("name");
+    if (!checkValid(name,newValue)) {
+      //abort
+      if ($(this).hasClass("language")) {
+        $(this).val($(this).data("language"));
+      }
+      return;
+    }
+    var modify={};
     modify[name]=newValue;
+    var id = Traduxio.getId();
+    var ref = elem.closest("th").data("version");
     request({
       type: "PUT",
       url: "work/"+id+"/"+ref,
@@ -1022,7 +1041,7 @@ $(document).ready(function() {
 
   fillLanguages($("select.language"));
 
-  if(N==0) {
+  if(!Traduxio.getId()) {
     $("#work-info").show().on("submit",function(e) {
       e.preventDefault();
       var data={};
