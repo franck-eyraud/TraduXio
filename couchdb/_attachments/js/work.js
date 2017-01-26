@@ -349,28 +349,38 @@ function toggleEdit (e) {
     } else {
       $("#hexapla tbody tr:not(.fulltext)").hide();
       $("#hexapla tbody tr.fulltext").show();
+      var fulltext=[];
+      findUnits(version).find("textarea").not(".fulltext").each(function() {
+        fulltext.push($(this).val());
+      });
+      $("textarea.fulltext").val(fulltext.join("\n\n"));
       autoSize.apply($("textarea.fulltext").prop("disabled",false));
       applyToggle();
     }
   } else {
     if (edited) {
-      var unitsOk=0;
       function finish() {
         units.find(".split").remove();
         units.removeClass("edit");
         applyToggle();
       }
-      units.each(function() {
-        var unit=$(this);
-        var textarea=unit.find("textarea");
-        saveUnit.apply(textarea,[function () {
-          unit.find(".text").html(stringToHtml(textarea.val()));
-          unitsOk++;
-          if (unitsOk==units.length) {
-            finish();
-          }
-        }]);
-      });
+      var unitsOk=0,
+          toSave=units.find("textarea.dirty"),
+          length=toSave.length;
+      if (length) {
+        toSave.each(function() {
+          var textarea=$(this);
+          saveUnit.apply(textarea,[function () {
+            textarea.parents(".unit").find(".text").html(stringToHtml(textarea.val()));
+            unitsOk++;
+            if (unitsOk==length) {
+              finish();
+            }
+          }]);
+        });
+      } else {
+        finish();
+      }
     } else {
       units.find("textarea").prop("disabled",false);
       units.addClass("edit");
@@ -379,7 +389,7 @@ function toggleEdit (e) {
             createSplits($(this));
           });
       }
-      positionSplits();
+      positionSplits(units);
       applyToggle();
     }
   }
