@@ -21,8 +21,8 @@
     <input type="submit" value="{{i_create}}" name="do-create" />
   </form>
   <form id="addGlossaryForm"><h3>{{i_glossary_add_entry}}</h3>
-    <select class="language" name="src_language"></select><input name="src"/>
-    <select class="language" name="target_language"></select><input name="target"/>
+    <select class="language" name="src_language" placeholder="{{i_glossary_source_language}}"></select><input name="src"/>
+    <select class="language" name="target_language" placeholder="{{i_glossary_target_language}}"></select><input name="target"/>
     <input type="hidden" name="num" />
     <input type="submit" value="{{i_save}}" />
   </form>
@@ -56,8 +56,8 @@
           <input type="text" class="editedMeta date" name="date"
             title="{{i_year_original}}" value="{{date}}" />
           <div class="metadata language expand" title="{{i_original_language}}" data-id="{{language}}">{{language}}</div>
-          <select class="editedMeta language" name="language"
-            title="{{i_original_language}}" value="{{language}}" data-language="{{language}}"></select>
+          <select class="editedMeta language" name="language" placeholder="{{i_original_language}}"
+            value="{{language}}" data-language="{{language}}"></select>
         </div>
       {{/is_original}}
       {{^is_original}}
@@ -75,8 +75,8 @@
           <input type="text" class="editedMeta date" name="date"
             title="{{i_year_version}}" value="{{date}}" />
           <div class="metadata language expand" title="{{i_version_language}}" data-id="{{language}}">{{language}}</div>
-          <select class="editedMeta language" name="language"
-            title="{{i_version_language}}" value="{{language}}" data-language="{{language}}"></select>
+          <select class="editedMeta language" name="language" placeholder="{{i_version_language}}"
+            value="{{language}}" data-language="{{language}}"></select>
         </div>
       {{/is_original}}
         <input type="button" class="edit" value="{{i_edit}}" />

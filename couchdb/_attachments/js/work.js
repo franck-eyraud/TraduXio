@@ -410,9 +410,8 @@ function fillLanguages(controls,callback) {
     });
     controls.each(function(i,c) {
       var control=$(c);
-      control.val(control.data("language"));
-      if (control.prop("placeholder")) {
-        control.prepend($("<option>").val("").text(control.prop("placeholder")));
+      if (control.attr("placeholder")) {
+        control.prepend($("<option>").val("").text(control.attr("placeholder")).prop("disabled",true));
       }
       control.val(control.data("language"));
     });
@@ -1006,8 +1005,13 @@ $(document).ready(function() {
   $("thead").on("change","select.editedMeta", saveMetadata);
   $("#hexapla").on("click","span.delete", clickDeleteVersion);
 
-  $(".editedMeta").each(function() {
-    $(this).prop("placeholder",$(this).prop("title"));
+  $("input[type=text],select").each(function() {
+    if (!$(this).prop("placeholder")) {
+      $(this).prop("placeholder",$(this).prop("title"));
+    }
+    if (!$(this).prop("title")) {
+      $(this).prop("title",$(this).prop("placeholder") || $(this).attr("placeholder"));
+    }
   });
 
   $(".top").on("click", "#addVersion", toggleAddVersion);

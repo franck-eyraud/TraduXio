@@ -87,17 +87,19 @@ function fixLanguages(container) {
     if (container) {
       var language=$(container).find(".language").andSelf().filter(".language");
     } else {
-      language=$(".language");
+      language=$(".language").not("select");
     }
     language.each(function() {
-      var lang=this;
-      var langID=$(lang).data("id");
-      var langName=langID?getLanguageName(langID):"";
-      if ($(lang).is(".expand")) {
-        $(lang).text(langName);
-        $(lang).prop('title',langID);
-      } else {
-        $(lang).prop('title',langName);
+      var lang=$(this);
+      var langID=lang.data("id");
+      if (langID) {
+        var langName=langID?getLanguageName(langID):"";
+        if (lang.is(".expand")) {
+          lang.text(langName);
+          lang.prop('title',langID);
+        } else {
+          lang.prop('title',langName);
+        }
       }
     });
   });

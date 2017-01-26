@@ -21,6 +21,8 @@
 
     "i_glossary_add_entry": "Add a glossary entry",
     "i_glossary_add_translation": "Add a translation of {0} into the glossary",
+    "i_glossary_source_language": "Source language",
+    "i_glossary_target_language": "Target language",
 
     "i_works": "Works",
     "i_my_translations": "My translations",
@@ -115,6 +117,8 @@
 
     "i_glossary_add_translation": "Ajouter une traduction de {0} dans le glossaire",
     "i_glossary_add_entry": "Ajouter une entrée du glossaire",
+    "i_glossary_source_language": "Depuis la langue",
+    "i_glossary_target_language": "Vers la langue",
 
     "i_works": "Œuvres",
     "i_my_translations": "Mes traductions",
