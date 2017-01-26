@@ -449,26 +449,35 @@ function fixScriptDirection(version,language) {
   }
 }
 
-function updateUrl() {
-  var opened=$("thead th.open:visible").not(".edit")
-    .map(function() {
-      return $(this).getVersion("th");
-    }).toArray().join("|");
-  var edited=$("thead th.edit:visible")
-    .map(function() {
-      return $(this).getVersion("th");
-    }).toArray().join("|");
+function getUrlOptions(opened,edited) {
   var suffix="";
   if (opened) {
-    suffix+="open="+encodeURIComponent(opened);
+    suffix+="open="+encodeURIComponent(opened.join("|"));
   }
   if (edited) {
     suffix = suffix ? suffix + "&" :"";
-    suffix+="edit="+encodeURIComponent(edited);
+    suffix+="edit="+encodeURIComponent(edited.join("|"));
   }
   suffix = suffix ? "?"+suffix:"";
+  return suffix;
+}
 
-  window.history.pushState("object or string","",Traduxio.getId()+suffix);
+function getOpenedVersions() {
+  return $("thead th.open:visible").not(".edit")
+    .map(function() {
+      return $(this).getVersion("th");
+    }).toArray();
+}
+
+function getEditedVersions() {
+  return $("thead th.edit:visible")
+    .map(function() {
+      return $(this).getVersion("th");
+    }).toArray();
+}
+
+function updateUrl() {
+  window.history.pushState("object or string","",Traduxio.getId()+getUrlOptions(getOpenedVersions(),getEditedVersions()));
 }
 
 function changeVersion(oldVersion, newVersion) {
@@ -564,7 +573,9 @@ function addVersion() {
       dataType: "json",
       data: JSON.stringify(data)
     }).done(function(result) {
-      window.location.href = id + "?edit=" + ref;
+      var edited=getEditedVersions();
+      edited.push(ref);
+      window.location.href = id + getUrlOptions(getOpenedVersions(),edited);
     });
   }
   return false;
