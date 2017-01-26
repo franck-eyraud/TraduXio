@@ -410,9 +410,8 @@ function fillLanguages(controls,callback) {
     });
     controls.each(function(i,c) {
       var control=$(c);
-      control.val(control.data("language"));
-      if (control.prop("placeholder")) {
-        control.prepend($("<option>").val("").text(control.prop("placeholder")));
+      if (control.attr("placeholder")) {
+        control.prepend($("<option>").val("").text(control.attr("placeholder")));
       }
       control.val(control.data("language"));
     });
@@ -1005,10 +1004,6 @@ $(document).ready(function() {
   $("thead").on("focusout","input.editedMeta", saveMetadata);
   $("thead").on("change","select.editedMeta", saveMetadata);
   $("#hexapla").on("click","span.delete", clickDeleteVersion);
-
-  $(".editedMeta").each(function() {
-    $(this).prop("placeholder",$(this).prop("title"));
-  });
 
   $(".top").on("click", "#addVersion", toggleAddVersion);
   $(".top").on("click", "#editDoc", toggleEditDoc);
