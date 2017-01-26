@@ -63,6 +63,7 @@
     "i_not_free_license": "This is not a free cultural License",
 
     "i_print": "Print",
+    "i_back": "Back",
 
     "i_language": "Language",
     "i_language_": "Language:",
@@ -159,6 +160,9 @@
     "i_cancel": "Annuler",
     "i_selected_license": "Licence sélectionnée",
     "i_not_free_license": "Ce n'est pas une licence culturelle gratuite",
+
+    "i_print": "Imprimer",
+    "i_back": "Retour",
 
     "i_language": "Langue",
     "i_language_": "Langue :",
