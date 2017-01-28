@@ -51,7 +51,7 @@ def create_work(options)
   edit_work options
   debug "Created #{options[:title]} – #{options[:author]}"
   if options.has_key?(:no_original) && options[:no_original] then
-    edit_translation_metadata "first",random_translation_metadata
+    create_random_translation
   end
 end
 
