@@ -19,4 +19,4 @@ install:
   - pip install --user couchapp
   - gem install poltergeist rspec
 
-script: ./test.sh
+script: TEST_DEBUG=true ./test.sh
