@@ -11,10 +11,6 @@ table#hexapla.full {
   width:100%;
 }
 
-#hexapla thead tr {
-  height:30%;
-}
-
 body {
   background-color: black;
 }
@@ -336,10 +332,6 @@ textarea.autosize {
   left:10px;
 }
 
-.edit .license {
-  display:none;
-}
-
 .button.hide {
   background-image: url(../img/pleat-open.png);
   width:32px;
@@ -449,6 +441,7 @@ div.unit *::-moz-selection {
 }
 
 @media print {
+
   .pleat.close,
   tfoot div.link,
   input[type=button], #hexapla .pleat.open .button,
@@ -463,9 +456,35 @@ div.unit *::-moz-selection {
     visibility: visible;
   }
 
+  #hexapla th,
+  #hexapla td {
+    background-color: white;
+    border-style: none;;
+  }
+
+  #hexapla th.pleat.close,
+  #hexapla td.pleat.close {
+    display: none !important;
+  }
+
   #hexapla td.pleat.open,
   #hexapla td.pleat.open .box-wrapper,
   #hexapla div.unit .text {
     padding:2px;
   }
+
+  #hexapla .unit.edit .join,
+  #hexapla .unit.edit .split {
+    display: none;
+  }
+
+  #hexapla th.pleat.open .relative-wrapper {
+    padding: 0px;
+    margin: 0px;
+  }
+
+  #hexapla {
+    margin-top: 2em;
+  }
+
 }
