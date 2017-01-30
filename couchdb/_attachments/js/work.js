@@ -539,7 +539,7 @@ function addGlossarySubmit() {
 }
 
 function toggleEditDoc() {
-  $("#work-info").slideToggle(200);
+  toggleHeader("#work-info");
 }
 
 function addPanelFormUpdate() {
