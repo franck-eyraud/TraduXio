@@ -226,7 +226,7 @@ function fixWidths() {
   if (nbOpen==0) {
     $("#hexapla").removeClass("full");
   } else {
-    $("#hexapla").addClass("full");
+    $("#hexapla").addClass("full").css({height:"100%"}).css({height:null});
     $("thead tr:first-child th.pleat.open:visible").css("width",100/nbOpen+"%");
   }
 }
@@ -1214,5 +1214,4 @@ $(window).load(function() {
     },500);
   }
   $("div.top").appendTo("#header");
-  Traduxio.headerPos();
 });
