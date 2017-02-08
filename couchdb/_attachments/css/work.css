@@ -495,4 +495,8 @@ div.unit *::-moz-selection {
     margin-top: 2em;
   }
 
+  #hexapla div.unit .text {
+    padding: 5px;
+  }
+
 }
