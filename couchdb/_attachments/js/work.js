@@ -1214,5 +1214,4 @@ $(window).load(function() {
     },500);
   }
   $("div.top").appendTo("#header");
-  Traduxio.headerPos();
 });
