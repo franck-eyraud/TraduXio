@@ -27,28 +27,13 @@ Traduxio= {
 
   unique_version_name:function(version) {
     var i=2;
+    version=version.trim();
     var newname=version;
     while (this.doc.translations && newname in this.doc.translations || newname == "original" || newname.length == 0) {
       newname=version+" ("+i+")";
       i++;
     }
     return newname;
-  },
-
-  fixTranslations:function() {
-    //fix spaces around version names
-    if (this.doc.translations) {
-      for (var version in this.doc.translations) {
-        var correct_version=version.trim();
-        if (correct_version!=version) {
-          correct_version=this.unique_version_name(correct_version);
-          this.doc.translations[correct_version]=this.doc.translations[version];
-          delete this.doc.translations[version];
-        }
-      }
-    }
-    //TODO remove when all data is clean
-
   },
 
   age:function(activity,r) {

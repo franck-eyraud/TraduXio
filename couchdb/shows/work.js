@@ -64,8 +64,6 @@ function(o, req) {
       });
     }
 
-    Traduxio.fixTranslations();
-
     for (var t in o.translations) {
       var translation = o.translations[t];
       hexapla.addVersion({

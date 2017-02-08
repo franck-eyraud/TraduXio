@@ -17,7 +17,6 @@ function(work, req) {
   var result={};
   if (["PUT","DELETE"].indexOf(req.method)!=-1) {
     var version_name = req.query.version;
-    if (version_name) version_name=version_name.trim();
 
     if (work===null) {
       return [null,{code:404,body:"Not found"}];
@@ -85,8 +84,6 @@ function(work, req) {
 
   }
 
-  Traduxio.fixTranslations();
-
   work.edits=work.edits||[];
 
   if (req.method=="DELETE") {
@@ -117,7 +114,7 @@ function(work, req) {
         delete args["work-creator"];
       }
       if(args.hasOwnProperty("creator")) {
-        var new_name = args["creator"];
+        var new_name = args["creator"].trim();
         delete args["creator"];
         if(!new_name || typeof new_name != "string" || new_name.length == 0) {
           new_name = version_name;
