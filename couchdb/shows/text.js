@@ -2,6 +2,11 @@ function(work, req) {
   // !code lib/traduxio.js
   // !code lib/mustache.js
 
+  const NEW_LINE = /\n/g;
+  function toHtml(text) {
+    return text.replace("<","&lt").replace(">","&gt;").replace(NEW_LINE, "<br/>\n");
+  }
+
   var version=req.query.version;
 
   var data={};
@@ -25,6 +30,15 @@ function(work, req) {
       data.work.creator=data.i18n["i_trad"]+" "+version;
       data.isTrad=true;
     }
+    data.text=[];
+    if (data.work.text && data.work.text.forEach) {
+      data.work.text.forEach(function (line) {
+        if (line !== null) {
+          data.text.push(toHtml(line));
+        }
+      });
+    }
+
   }
 
   return Mustache.to_html(this.templates.text, data, this.templates.partials);
