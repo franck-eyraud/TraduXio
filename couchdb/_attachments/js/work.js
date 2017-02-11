@@ -575,8 +575,9 @@ function addVersion() {
       dataType: "json",
       data: JSON.stringify(data)
     }).done(function(result) {
+      var version=result.version || ref;
       var edited=getEditedVersions();
-      edited.push(ref);
+      edited.push(version);
       window.location.href = id + getUrlOptions(getOpenedVersions(),edited);
     });
   }

@@ -69,6 +69,7 @@ function(work, req) {
         doc.text=emptyText(work);
         actions.push("created original version");
         Traduxio.addActivity(work.edits,{action:"created",version:"original"});
+        result.version="original";
         created=true;
       }
       delete args.original;
