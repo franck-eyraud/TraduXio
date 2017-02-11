@@ -94,8 +94,10 @@ function editGlossaryEntry(glossaryEntry,language) {
 function request(options) {
   return $.ajax(options)
     .retry({times:3,statusCodes:[0,409]})
-    .fail(function () {
-      alert("request failed");
+    .fail(function (jqXHR) {
+      if (jqXHR.responseText) {
+        alert("request failed "+jqXHR.responseText);
+      }
     });
 }
 
@@ -337,7 +339,7 @@ function toggleEdit (e) {
           type:"PUT",
           data:JSON.stringify({text:lines}),
           contentType: "text/plain",
-          url:"work/"+id+"?version="+version
+          url:"work/"+id+"?version="+encodeURIComponent(version)
         })
         .done(update)
         .always(function() {
@@ -519,7 +521,7 @@ function addGlossarySubmit() {
   };
   if (glossaryEntry.src_sentence && glossaryEntry.src_language &&
     glossaryEntry.target_sentence && glossaryEntry.target_language) {
-    var url="work/"+id+"/glossary/"+glossaryEntry.src_language+"/"+glossaryEntry.src_sentence+"/"+glossaryEntry.target_language;
+    var url="work/"+id+"/glossary/"+glossaryEntry.src_language+"/"+encodeURIComponent(glossaryEntry.src_sentence)+"/"+glossaryEntry.target_language;
     $.ajax({
       type: "PUT",
       url: url,
@@ -610,7 +612,7 @@ function deleteVersion(version) {
   var id = Traduxio.getId();
   request({
     type: "DELETE",
-    url: "work/"+id+"/"+version,
+    url: "work/"+id+"/"+encodeURIComponent(version),
     contentType: 'text/plain'
   }).done(function() {
     window.location.reload(true);
@@ -706,7 +708,7 @@ function saveMetadata() {
     var ref = elem.closest("th").data("version");
     request({
       type: "PUT",
-      url: "work/"+id+"/"+ref,
+      url: "work/"+id+"/"+encodeURIComponent(ref),
       contentType: 'text/plain',
       data: JSON.stringify(modify),
       dataType: "json"
@@ -739,7 +741,7 @@ function saveMetadata() {
 function deleteGlossaryEntry(glossaryEntry,language) {
   var id = $("#hexapla").data("id");
   if (glossaryEntry.src_sentence && glossaryEntry.src_language && language) {
-    var url="work/"+id+"/glossary/"+glossaryEntry.src_language+"/"+glossaryEntry.src_sentence+"/"+language;
+    var url="work/"+id+"/glossary/"+glossaryEntry.src_language+"/"+encodeURIComponent(glossaryEntry.src_sentence)+"/"+language;
     $.ajax({
       type: "DELETE",
       url: url,

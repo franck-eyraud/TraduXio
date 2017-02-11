@@ -10,7 +10,7 @@ function(work, req) {
     try {
       args = JSON.parse(req.body);
     } catch (e) {
-      return [null,{code:400,body:"Method "+req.method+" not allowed"}];
+      return [null,{code:400,body:"Couldn't parse JSON body"}];
     }
   }
   var actions=[];
@@ -39,7 +39,7 @@ function(work, req) {
     }
     if (work!==null) {
       if (args.creator) {
-        version_name=args.creator;
+        version_name=args.creator.trim();
         if (version_name=="original") {
           return [null,{code:400,body:"reserved name 'original'"}];
         }
@@ -79,6 +79,8 @@ function(work, req) {
         actions.push("created "+version_name+" version");
         Traduxio.addActivity(work.edits,{action:"created",version:version_name});
         created=true;
+      } else {
+        return [null,{code:403,body:"Version "+version_name+" already exists"}];
       }
     }
 
