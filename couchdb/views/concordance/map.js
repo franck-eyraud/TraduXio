@@ -3,7 +3,7 @@ function(o) {
   const NB_WORDS = 10;
 
   var ideograms=["\\u3400-\\u9FFF","\\u3040-\\u30FF"].join("");
-  var punctuation_signs=["'","`","\\-","\\uff0c","\\u3002"].join("");
+  var punctuation_signs=["'","`","\\-","\\uff0c","\\u3002","\\(","\\)"].join("");
 
   var regex="["+ideograms+"]|[^\\s"+punctuation_signs+ideograms+"]+";
 
