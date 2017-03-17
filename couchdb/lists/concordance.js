@@ -23,12 +23,15 @@ function(head, req) {
     };
   }
 
+  var MAXRESULTS=100;
+
   function push(occurrences, context, mapping, line_number, original_header, translation_header) {
     var hexapla = new Hexapla();
     hexapla.addVersion(context);
     hexapla.addVersion(mapping);
     var unit = hexapla.getUnitVersions(line_number,true).versions;
-    if (unit[1] && unit[1].trim()!=="") {
+    if (unit[1] && unit[1].trim()!=="" && occurrences.length<MAXRESULTS) {
+      log("pushing "+line_number);
       var html = hexapla.getUnitVersions(line_number,false).versions;
       occurrences.push({
         context: highlight(html[0], req.query.query),

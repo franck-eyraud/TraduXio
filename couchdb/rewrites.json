@@ -3,7 +3,6 @@
   "to": "_list/concordance/concordance",
   "query": {
     "include_docs": "true",
-    "limit":"100",
     "stale":"update_after"
   }
 },{
