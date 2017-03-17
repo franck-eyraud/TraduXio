@@ -3,9 +3,14 @@ function(head, req) {
   // !code lib/mustache.js
   // !code lib/hexapla.js
 
+  //https://github.com/benjamingr/RegExp.escape
+  RegExp.escape = function(str) {
+      return String(str).replace(/[.?*+^$[\]\\(){}|-]/g, "\\$&");
+  };
+
   function highlight(context, pattern) {
     //TODO safer so that HTML is not matched
-    const regexp = new RegExp("("+pattern+")", "gi");
+    const regexp = new RegExp("("+RegExp.escape(pattern)+")", "gi");
     return context.replace(regexp, "<b>$1</b>");
   }
 
