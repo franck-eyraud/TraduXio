@@ -48,6 +48,8 @@ function(work, req) {
         original=true;
       }
 
+      work.edits=work.edits||[];
+
     } else {
       created=true;
       original=true;
@@ -84,7 +86,6 @@ function(work, req) {
         return [null,{code:403,body:"Version "+version_name+" already exists"}];
       }
     }
-
   }
 
   work.edits=work.edits||[];
