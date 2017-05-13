@@ -55,6 +55,15 @@ function(work, req) {
       original=true;
       version_name="original";
       Traduxio.doc=doc=work={};
+      doc.privileges={};
+      log("getting user");
+      if (!Traduxio.getUser().anonymous) {
+        log("getting name");
+        doc.privileges.owner=Traduxio.getUser().name;
+        doc.privileges.public=false;
+      } else {
+        doc.privileges.public=true;
+      }
       work._id=work.id || req.uuid;
       delete work.id;
       work.edits=[];
@@ -89,6 +98,12 @@ function(work, req) {
   }
 
   work.edits=work.edits||[];
+
+  work.privileges=work.privileges || {public:true};
+
+  if (!Traduxio.canEdit(work)) {
+    return [null,{code:403,body:"Forbidden"}];
+  }
 
   if (req.method=="DELETE") {
     if (!version_name && original) {

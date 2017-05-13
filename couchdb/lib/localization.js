@@ -1,5 +1,5 @@
+var i18n={"en":{},fr:{}};
 // !json i18n
-
 function getMyLanguage() {
   if (req.headers["Accept-Language"]) {
     return req.headers["Accept-Language"].split(",")[0];

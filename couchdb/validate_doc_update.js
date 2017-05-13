@@ -1,4 +1,7 @@
 function (newDoc, oldDoc, userCtx, secObj) {
+  var req={userCtx:userCtx,secObj:secObj};
+  var doc=oldDoc;
+  //!code lib/traduxio.js
 
   function mandatory(doc,attribute) {
     if (!doc.hasOwnProperty(attribute)) {
@@ -21,6 +24,19 @@ function (newDoc, oldDoc, userCtx, secObj) {
   function shouldBeObject(doc,attribute) {
     if (doc.hasOwnProperty(attribute) && !isObject(doc[attribute])) {
       throw({forbidden:attribute+" must be an object"});
+    }
+  }
+
+  function shouldBeEqual(obj1,obj2,attribute) {
+    if ((typeof obj1==typeof obj2) && (typeof obj1=="object")) {
+      log("obj1 and obj2 are both objects");
+      if (!obj1.hasOwnProperty(attribute) && !obj2.hasOwnProperty(attribute))
+        return;
+      if (obj1.hasOwnProperty(attribute) && obj2.hasOwnProperty(attribute) &&
+          !compare(obj1[attribute],obj2[attribute])
+        || !obj1.hasOwnProperty(attribute) || !obj2.hasOwnProperty(attribute)) {
+        throw({forbidden:attribute+" can't be changed"});
+      }
     }
   }
 
@@ -72,6 +88,20 @@ function (newDoc, oldDoc, userCtx, secObj) {
     });
   }
 
+  function ensureUnchangedFields(fields,obj1,obj2) {
+    log ("testing ["+fields.join(",")+"] with "+(typeof obj1)+","+(typeof obj2));
+    obj1=obj1 || oldDoc;
+    obj2=obj2 || newDoc;
+    if (obj1 && obj2 && obj1!=obj2) {
+      log ("really testing");
+      fields.forEach(function(attribute) {
+        shouldBeEqual(obj1,obj2,attribute);
+      });
+    }
+    return true;
+  }
+
+
   function testArray(array,callback,nullok) {
     var ok=false;
     if (isArray(array)) {
@@ -88,6 +118,33 @@ function (newDoc, oldDoc, userCtx, secObj) {
     return ok;
   }
 
+  function compare(obj1,obj2) {
+    if (typeof obj1 != typeof obj2) return false;
+    if (typeof obj1 == 'object') {
+      for (var k in obj1) {
+        if (!compare(obj1[k],obj2[k])) return false;
+      }
+      for (var k in obj2) {
+        if (! k in obj1) return false;
+      }
+      return true;
+    } else {
+      return obj1===obj2;
+    }
+  }
+
+  if (!Traduxio.canAccess(oldDoc)) {
+    throw({forbidden:"Access denied"});
+  }
+
+  if (!Traduxio.canAccess(newDoc)) {
+    throw({forbidden:"Access denied to modified doc"});
+  }
+
+  if (!Traduxio.canEdit(oldDoc)) {
+    ensureUnchangedFields(["title","language","creator","date"]);
+  }
+
   if (newDoc.hasOwnProperty("title")) {
     ensureArrays(["text"]);
     if (newDoc.text && !testArray(newDoc.text,isString)) {
@@ -98,9 +155,22 @@ function (newDoc, oldDoc, userCtx, secObj) {
     ensureObjects(["translations","glossary"]);
     for (var t in newDoc.translations) {
       var translation=newDoc.translations[t];
+      log("plop");
+      if (!Traduxio.canEdit(oldDoc) && oldDoc.translations) {
+        if (!(t in oldDoc.translations)) {
+          throw({forbidden:"Can't add translation"});
+        }
+      }
       mandatory(translation,"text");
       mandatory(translation,"language");
       shouldBeArray(translation,"text");
+      log("check translation "+t);
+      if (!Traduxio.canEdit(oldDoc)) {
+        if (oldDoc && !Traduxio.canEdit(oldDoc.translations[t]) &&
+          !compare(oldDoc.translations[t],newDoc.translations[t])) {
+          throw({forbidden:"Can't modify translation "+t});
+        }
+      }
     }
   }
 }
