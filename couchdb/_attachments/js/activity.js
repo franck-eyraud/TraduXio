@@ -85,8 +85,8 @@
       wasActive:function() {
         resetTimeout();
       },
-      getColor:function(user) {
-        return getUser(user).color;
+      getColor:function(activity) {
+        return getUser(activity).color;
       },
       presence:presence
     }
@@ -169,8 +169,8 @@
     var user;
     if (activity.type=="session") {
       user=sessionInfo(activity);
-    } else if (activity.author) {
-      user=getUser(activity.author);
+    } else {
+      user=getUser(activity);
     }
     if (activity.author==me) {
       activity.isMe=true;
@@ -199,12 +199,7 @@
       }
     }
     var user;
-    if (activity.rename) {
-      activity.message="est maintenant connu comme "+activity.newname;
-      user=rename(activity.author,activity.newname,activity.anonymous,!activity.isPast);
-    } else {
-      user=getUser(activity.author);
-    }
+    user=getUser(activity);
     if (Traduxio.chat && Traduxio.chat.addMessage) {
       Traduxio.chat.addMessage(activity);
     }
@@ -221,7 +216,14 @@
     return colors[offset++ % colors.length];
   }
 
-  function getUser(username) {
+  function getUser(activity) {
+    var username=activity.author;
+    if (!username) {
+      username="anonym";
+      if (activity.anonymous && (typeof activity.anonymous == "string")) {
+        username+="-"+activity.anonymous.substr(0,3);
+      }
+    }
     var user=users[username] || {};
     if (!user.color) {
       user.color=currentColor();
@@ -230,22 +232,6 @@
     users[username]=user;
     return user;
   }
-
-  function rename(username,newname,anonymous,update) {
-    if (!username in users || newname in users) {
-      user=getUser(newname);
-    } else {
-      user=getUser(username);
-    }
-    user.name=newname;
-    if (anonymous) user.anonymous=true;
-    else delete user.anonymous;
-    users[newname]=user;
-    delete users[username];
-
-    return user;
-  }
-
   var defaultShowTime=5000;
 
   $.fn.showPane=function (after) {

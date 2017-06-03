@@ -8,30 +8,19 @@ function(doc,req) {
   }
   var result={};
   var user=Traduxio.getUser();
+  var ok=true,error,msg;
   result.user=user.name;
   result.anonymous=user.anonymous;
   if (req.method=="DELETE") {
     if (Traduxio.userQuit(user.name)) {
-      result.ok="left correctly";
+      msg="left correctly";
     } else {
-      result.error=user.name+" was not registered";
+      error=user.name+" was not registered";
     }
   } else {
     var msg="pinged correctly";
     if (!doc.users || !doc.users[user.name]) {
       msg="registered correctly";
-    } else {
-      if (body.changename && body.changename != user.name && user.anonymous) {
-        var msg="changed name correctly";
-        var oldname=user.name;
-        if (Traduxio.userRename(user.name,body.changename,user.anonymous)) {
-          result.user=body.changename;
-          Traduxio.userQuit(oldname);
-          var ok=true;
-        } else {
-          var error="could not change name";
-        }
-      }
     }
     if (ok && !error || Traduxio.userActivity()) {
       result.ok=msg;

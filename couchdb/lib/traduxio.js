@@ -110,24 +110,6 @@ Traduxio= {
     toQuit.forEach(function(user){log(user+" leaves for inactivity");Traduxio.userQuit(user);});
   },
 
-  userRename:function(oldName,newName,anonymous) {
-    if (this.doc.users && this.doc.users[oldName] && newName && oldName!=newName && !this.doc.users[newName]) {
-      user=this.doc.users[oldName];
-      user.name=newName;
-      user.anonymous=anonymous;
-      this.doc.users[newName]=user;
-      delete this.doc.users[oldName];
-      this.doc.session=this.doc.session || [];
-      this.addActivity(this.doc.session,{rename:true,author:oldName,newname:newName,anonymous:anonymous},false);
-      delete user.active;
-      if (user.footprint && this.doc.browsers) {
-        this.doc.browsers[user.footprint]=user;
-      }
-      return true;
-    }
-    return false;
-  },
-
   userQuit:function(username) {
     if (this.doc.users && this.doc.users[username]) {
       this.doc.session=this.doc.session || [];
@@ -198,31 +180,6 @@ Traduxio= {
     }
   },
 
-
-  getNewName:function() {
-
-    //no uuid because not in a update function, non need for a name
-    if (!this.req.uuid) return;
-
-    var generateName=function(i) {
-      return "anonym-"+this.req.uuid.substr(-3-i,3);
-    }.bind(this);
-
-    var exists=function (name) {
-      if (!this.doc.browsers) return false;
-      for (var f in this.doc.browsers) {
-        if (this.doc.browsers[f].name==name) return true;
-      }
-      return false;
-    }.bind(this);
-
-    var i=0,name;
-    do {
-      name=generateName(i++);
-    } while (exists(name) && i<this.req.uuid.length);
-    return exists(name) ? false : name;
-  },
-
   isAdmin:function () {
     return this.getUser().isAdmin;
   },
@@ -246,58 +203,36 @@ Traduxio= {
   },
 
   getUser:function() {
-    var user;
+    var user={};
 
-    var users=this.doc.users||{};
-
-    //conversion from old data
-    if (this.doc.anonymous) {
-      this.doc.browsers={};
-      for (var f in this.doc.anonymous) {
-        this.doc.browsers[f]={name:this.doc.anonymous[f],anonymous:true};
-      }
-      delete this.doc.anonymous;
-    }
-    //TODO remove when all data is converted
-
-    if (this.req.peer && this.req.headers) {
-      var footprint=this.req.peer+"|"+this.req.headers["User-Agent"]+"|"+this.req.headers.Host;
-    }
-    var browsers=this.doc.browsers || {};
     if (this.req.userCtx.name) {
-      user={
-        name:this.req.userCtx.name,
-        roles:this.req.userCtx.roles
-      };
+      user.name=this.req.userCtx.name;
+      user.roles=this.req.userCtx.roles;
 
       user.isAdmin=this._isAdmin(this.req.userCtx,this.req.secObj);
 
-      if (footprint) {
-        if (browsers[footprint] && browsers[footprint].name!=user.name) {
-          this.userRename(this.doc.browsers[footprint].name,user.name);
-        }
-        if (users[user.name] && users[user.name].anonymous && users[user.name].footprint && users[user.name].footprint!=footprint) {
-          this.userRename(user.name,this.getNewName());
-        }
-      }
     } else {
-      if (footprint && browsers[footprint]) {
-        user=browsers[footprint];
-        if (!user.anonymous) {
-          this.userQuit(user.name);
-          user.anonymous=true;
-          user.name=this.getNewName();
+
+      hashCode = function(string) {
+        var hash = 0, i, chr;
+        if (string.length === 0) return hash;
+        for (i = 0; i < string.length; i++) {
+          chr   = string.charCodeAt(i);
+          hash  = ((hash << 5) - hash) + chr;
+          hash |= 0; // Convert to 32bit integer
         }
-        if (!user.name || users[user.name] && users[user.name].footprint && users[user.name].footprint!=footprint) {
-          user.name=this.getNewName();
-        }
-      } else {
-        user={name:this.getNewName(),anonymous:true};
+        return hash.toString(16);
+      };
+
+      user.anonymous=true;
+      user.name=null;
+
+      if (this.req.peer && this.req.headers) {
+        var footprint=this.req.peer+"|"+this.req.headers["User-Agent"]+"|"+this.req.headers.Host;
+        user.anonymous=hashCode(footprint);
       }
+
     }
-    if (user.anonymous) user.footprint=footprint;
-    else delete user.footprint;
-    browsers[footprint]=user;
     return user;
   },
 
@@ -309,7 +244,7 @@ Traduxio= {
     if (!activity.author) {
       var user=this.getUser();
       activity.author=user.name;
-      if (user.anonymous) activity.anonymous=true;
+      if (user.anonymous) activity.anonymous=user.anonymous;
     }
     activityList.push(activity);
     if (active) this.userActivity();
@@ -325,11 +260,6 @@ Traduxio= {
       if (!activity.seq || activity.seq > this.req.info.update_seq) {
         activity.seq=this.req.info.update_seq-1;
       }
-      //for old data
-      if (!activity.anonymous && (!activity.author || (activity.author.indexOf("anonym-")==0)) ) {
-        activity.anonymous=true;
-      }
-      //TODO remove when all data is converted
     }
   },
 
