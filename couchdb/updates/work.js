@@ -101,9 +101,9 @@ function(work, req) {
 
   work.privileges=work.privileges || {public:true};
 
-  if (!Traduxio.canEdit(work)) {
-    return [null,{code:403,body:"Forbidden"}];
-  }
+  // if (!Traduxio.canEdit(work)) {
+  //   return [null,{code:403,body:"Forbidden"}];
+  // }
 
   if (req.method=="DELETE") {
     if (!version_name && original) {

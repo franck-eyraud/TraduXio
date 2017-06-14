@@ -73,26 +73,24 @@ Traduxio= {
   },
 
   canEdit:function(work) {
-    log("canEdit ?"+work);
-    if (work==null) {log ("can edit absent work");return true;}
-    work=work || this.doc;
-    //var savDoc=this.doc; this.doc=work;
-    var user=this.getUser();
-    //this.doc=savDoc;
-    var privileges=work.privileges || {public:true};
-    if (!this.canAccess(work)) return false;
-    if (user.isAdmin) return true;
-    if (!user.anonymous) {
-      if (!privileges.owner) return true;
-      if (privileges.owner && privileges.owner==user.name) return true;
-      try {
+    try {
+      log("canEdit ?"+work);
+      if (work==null) {log ("can edit absent work");return true;}
+      work=work || this.doc;
+      var user=this.getUser();
+      var privileges=work.privileges || {public:true};
+      if (!this.canAccess(work)) return false;
+      if (user.isAdmin) return true;
+      if (!user.anonymous) {
+        if (!privileges.owner && privileges.public) return true;
+        if (privileges.owner && privileges.owner==user.name) return true;
         if (privileges.editors && privileges.editors.indexOf(user.name)!=-1) return true;
-      } catch (e) {
-        log("caught exception e in canEdit");
+      } else {
+        //when can anonymous edit ?
       }
-    } else {
-      if (!privileges.owner && privileges.public)
-        return true;
+    } catch (e) {
+      log("caught exception e in canEdit");
+      log(e);
     }
     log("no edit");
     return false;

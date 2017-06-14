@@ -142,7 +142,7 @@ function (newDoc, oldDoc, userCtx, secObj) {
   }
 
   if (!Traduxio.canEdit(oldDoc)) {
-    ensureUnchangedFields(["title","language","creator","date"]);
+    ensureUnchangedFields(["title","language","creator","date","privileges","text"]);
   }
 
   if (newDoc.hasOwnProperty("title")) {
@@ -154,22 +154,28 @@ function (newDoc, oldDoc, userCtx, secObj) {
     ensureStrings(["creator","date","language","title"]);
     ensureObjects(["translations","glossary"]);
     for (var t in newDoc.translations) {
-      var translation=newDoc.translations[t];
+      var newTrans=newDoc.translations[t];
       log("plop");
-      if (!Traduxio.canEdit(oldDoc) && oldDoc.translations) {
-        if (!(t in oldDoc.translations)) {
+      if (!Traduxio.canEdit(oldDoc)) {
+        if (!oldDoc || !oldDoc.translations || !(t in oldDoc.translations)) {
           throw({forbidden:"Can't add translation"});
         }
       }
-      mandatory(translation,"text");
-      mandatory(translation,"language");
-      shouldBeArray(translation,"text");
+      mandatory(newTrans,"text");
+      mandatory(newTrans,"language");
+      shouldBeArray(newTrans,"text");
       log("check translation "+t);
       if (!Traduxio.canEdit(oldDoc)) {
-        if (oldDoc && !Traduxio.canEdit(oldDoc.translations[t]) &&
-          !compare(oldDoc.translations[t],newDoc.translations[t])) {
+        log("can't edit");
+        var oldTrans=oldDoc && oldDoc.translations[t] || {};
+        //check that edit forbidden translations are not modified
+        if (!Traduxio.canEdit(oldTrans) &&
+            !compare(oldTrans,newTrans)) {
           throw({forbidden:"Can't modify translation "+t});
         }
+      } else {
+        //If you can edit the doc, you can edit translations
+        log("can edit");
       }
     }
   }
