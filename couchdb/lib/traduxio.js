@@ -86,7 +86,9 @@ Traduxio= {
         if (privileges.owner && privileges.owner==user.name) return true;
         if (privileges.editors && privileges.editors.indexOf(user.name)!=-1) return true;
       } else {
-        //when can anonymous edit ?
+        if (Traduxio.config.anonymous_edit && privileges.public && !privileges.owner) {
+          return true;
+        }
       }
     } catch (e) {
       log("caught exception e in canEdit");
@@ -185,10 +187,9 @@ Traduxio= {
   },
 
   _isAdmin:function (userCtx,secObj) {
-    if (!userCtx.name) return false;
     if (userCtx.roles.indexOf('_admin') != -1) return true;
     if (secObj.admins) {
-      if (isArray(secObj.admins.names) && secObj.admins.names.indexOf(userCtx.name) != -1) return true;
+      if (userCtx.name && isArray(secObj.admins.names) && secObj.admins.names.indexOf(userCtx.name) != -1) return true;
       var ok=false;
       if (isArray(secObj.admins.roles) && isArray(userCtx.roles)) {
         userCtx.roles.forEach(function(role) {
@@ -197,7 +198,7 @@ Traduxio= {
           };
         });
       }
-      return ok;
+      if (ok) return true;
     }
     return false;
   },
@@ -207,10 +208,6 @@ Traduxio= {
 
     if (this.req.userCtx.name) {
       user.name=this.req.userCtx.name;
-      user.roles=this.req.userCtx.roles;
-
-      user.isAdmin=this._isAdmin(this.req.userCtx,this.req.secObj);
-
     } else {
 
       hashCode = function(string) {
@@ -233,6 +230,8 @@ Traduxio= {
       }
 
     }
+    user.roles=this.req.userCtx.roles;
+    user.isAdmin=this._isAdmin(this.req.userCtx,this.req.secObj);
     return user;
   },
 
