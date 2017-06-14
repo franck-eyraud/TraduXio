@@ -89,11 +89,10 @@ function (newDoc, oldDoc, userCtx, secObj) {
   }
 
   function ensureUnchangedFields(fields,obj1,obj2) {
-    log ("testing ["+fields.join(",")+"] with "+(typeof obj1)+","+(typeof obj2));
+    Traduxio.config.debug && log ("testing ["+fields.join(",")+"] with "+(typeof obj1)+","+(typeof obj2));
     obj1=obj1 || oldDoc;
     obj2=obj2 || newDoc;
     if (obj1 && obj2 && obj1!=obj2) {
-      log ("really testing");
       fields.forEach(function(attribute) {
         shouldBeEqual(obj1,obj2,attribute);
       });
@@ -119,6 +118,9 @@ function (newDoc, oldDoc, userCtx, secObj) {
   }
 
   function compare(obj1,obj2) {
+    if (Traduxio.config.debug && isString(obj1) && isString(obj2)) {
+      log("comparing 2 strings '"+obj1+"' '"+obj2+"'");
+    }
     if (typeof obj1 != typeof obj2) return false;
     if (typeof obj1 == 'object') {
       for (var k in obj1) {
@@ -134,14 +136,17 @@ function (newDoc, oldDoc, userCtx, secObj) {
   }
 
   if (!Traduxio.canAccess(oldDoc)) {
+    Traduxio.config.debug && log("can't access old");
     throw({forbidden:"Access denied"});
   }
 
   if (!Traduxio.canAccess(newDoc)) {
+    Traduxio.config.debug && log("can't access new");
     throw({forbidden:"Access denied to modified doc"});
   }
 
   if (!Traduxio.canEdit(oldDoc)) {
+    Traduxio.config.debug && log("can't edit old");
     ensureUnchangedFields(["title","language","creator","date","privileges","text"]);
   }
 
@@ -155,7 +160,6 @@ function (newDoc, oldDoc, userCtx, secObj) {
     ensureObjects(["translations","glossary"]);
     for (var t in newDoc.translations) {
       var newTrans=newDoc.translations[t];
-      log("plop");
       if (!Traduxio.canEdit(oldDoc)) {
         if (!oldDoc || !oldDoc.translations || !(t in oldDoc.translations)) {
           throw({forbidden:"Can't add translation"});
@@ -164,9 +168,9 @@ function (newDoc, oldDoc, userCtx, secObj) {
       mandatory(newTrans,"text");
       mandatory(newTrans,"language");
       shouldBeArray(newTrans,"text");
-      log("check translation "+t);
+      Traduxio.config.debug && log("check translation "+t);
       if (!Traduxio.canEdit(oldDoc)) {
-        log("can't edit");
+        Traduxio.config.debug && log("can't edit old");
         var oldTrans=oldDoc && oldDoc.translations[t] || {};
         //check that edit forbidden translations are not modified
         if (!Traduxio.canEdit(oldTrans) &&
@@ -175,7 +179,7 @@ function (newDoc, oldDoc, userCtx, secObj) {
         }
       } else {
         //If you can edit the doc, you can edit translations
-        log("can edit");
+        Traduxio.config.debug && log("can edit");
       }
     }
   }

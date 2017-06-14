@@ -17,6 +17,8 @@ js_i18n_elements.push("i_search");
 
 Traduxio= {
 
+  config:this.couchapp.traduxio,
+
   sessionLength:30 * 60 * 1000, //1/2 hour
 
   req:{},
@@ -48,34 +50,32 @@ Traduxio= {
   },
 
   canAccess:function(work) {
-    log("canAccess ?"+work);
-    if (work==null) {log ("can access absent work");return true;}
+    if (work==null) {
+      this.config.debug && log ("can access absent work");
+      return true;
+    }
     work=work || this.doc;
     //var savDoc=this.doc; this.doc=work;
     var user=this.getUser();
     //this.doc=savDoc;
     var privileges=work.privileges || {public:true};
-    log(privileges);
     if (user.isAdmin) return true;
     if (privileges.public) return true;
 
-    log("not public");
     if (!user.anonymous) {
       if (privileges.owner==user.name) return true;
       try {
         if (privileges.readers && privileges.readers.indexOf(user.name)!=-1) return true;
       } catch (e) {
         log("caught exception in canAccess");
+        log(e);
       }
     }
-    log("no access");
     return false;
   },
 
   canEdit:function(work) {
     try {
-      log("canEdit ?"+work);
-      if (work==null) {log ("can edit absent work");return true;}
       work=work || this.doc;
       var user=this.getUser();
       var privileges=work.privileges || {public:true};
@@ -92,7 +92,6 @@ Traduxio= {
       log("caught exception e in canEdit");
       log(e);
     }
-    log("no edit");
     return false;
   },
 
@@ -105,7 +104,10 @@ Traduxio= {
         toQuit.push(user);
       }
     }
-    toQuit.forEach(function(user){log(user+" leaves for inactivity");Traduxio.userQuit(user);});
+    toQuit.forEach(function(user){
+      Traduxio.config.debug && log(user+" leaves for inactivity");
+      Traduxio.userQuit(user);
+    });
   },
 
   userQuit:function(username) {
@@ -113,7 +115,7 @@ Traduxio= {
       this.doc.session=this.doc.session || [];
       this.addActivity(this.doc.session,{left:true,author:username},false);
       delete this.doc.users[username];
-      log("removing "+username+" from active users of "+this.doc._id);
+      this.config.debug && log("removing "+username+" from active users of "+this.doc._id);
       return true;
     }
     return false;
@@ -137,7 +139,7 @@ Traduxio= {
       } else {
         delete user.active;
       }
-      log(user);
+      this.config.debug && log(user);
     }
     if (!user) return false;
     var alreadyActive=false;
@@ -145,7 +147,7 @@ Traduxio= {
       alreadyActive=true;
     }
     this.doc.users[username]=user;
-    log(this.doc.users);
+    this.config.debug && log(this.doc.users);
     var update=false;
     if (this.doc.users[username].active) {
       var activeDate=new Date(this.doc.users[username].active);
@@ -173,7 +175,7 @@ Traduxio= {
       this.doc.activity.sort(this.compareActivities);
       var now=new Date();
       for (var i=0;i<activityList.length && this.age(activityList[i],now)>delay;i++);
-      log("splicing activity for "+i);
+      this.config.debug && log("splicing activity for "+i);
       activityList.splice(0,i);
     }
   },
