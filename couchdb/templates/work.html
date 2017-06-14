@@ -1,8 +1,16 @@
 {{> header}}
 {{#i18n}}
+{{^canAccess}}
+<div class="top">
+<b>NO ACCESS</b>
+</div>
+{{/canAccess}}
+{{#canAccess}}
+{{#glossary}}
 <script type="text/javascript">
   var glossary={{{glossary}}};
 </script>
+{{/glossary}}
 <div class="top">
   <h1><span class="title">{{display_work_title}}</span> – <span class="creator">{{display_work_creator}}</span> (<span class="language expand" data-id="{{language}}">{{language}}</span>)</h1>
   {{^original}}<a href="#" class="workButton" id="editDoc">{{i_edit}}</a>{{/original}}
@@ -41,7 +49,7 @@
 <table id="hexapla" data-lines="{{lines}}" data-id="{{id}}" class="full">
   <thead><tr>
     {{#headers}}
-      <th class="pleat open{{#edited}} edited{{/edited}}{{#opened}} opened{{/opened}}" data-version="{{version}}"><div class="relative-wrapper">
+      <th class="pleat open{{#edited}} edited{{/edited}}{{#opened}} opened{{/opened}}{{#canAccess}} canAccess{{/canAccess}}{{#canEdit}} canEdit{{/canEdit}}" data-version="{{version}}"><div class="relative-wrapper">
       {{^justOneText}}<span class="button delete"></span>{{/justOneText}}
       {{#is_original}}
         <div class="metadata title"  title="{{i_title}}">{{work_title}}</div>
@@ -79,7 +87,7 @@
             value="{{language}}" data-language="{{language}}"></select>
         </div>
       {{/is_original}}
-        <input type="button" class="edit" value="{{i_edit}}" />
+        {{#canEdit}}<input type="button" class="edit" value="{{i_edit}}" />{{/canEdit}}
         <span class="button hide">{{i_hide}}</span>
       </div></th>
     {{/headers}}
@@ -136,6 +144,6 @@
   {{/headers}}
   </tr></tfoot>
 </table>
-
+{{/canAccess}}
 {{/i18n}}
 {{> footer}}
