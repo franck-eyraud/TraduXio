@@ -1152,6 +1152,8 @@ $(document).ready(function() {
     }
   });
 
+  $(".unit textarea.autosize").each(autoSize);
+
   browseGlossary(displayGlossaryAllText);
 
   $("#hexapla").on("click",".glossary",function(e) {
