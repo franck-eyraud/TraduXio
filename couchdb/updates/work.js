@@ -56,9 +56,7 @@ function(work, req) {
       version_name="original";
       Traduxio.doc=doc=work={};
       doc.privileges={};
-      log("getting user");
       if (!Traduxio.getUser().anonymous) {
-        log("getting name");
         doc.privileges.owner=Traduxio.getUser().name;
         doc.privileges.public=false;
       } else {
@@ -86,8 +84,13 @@ function(work, req) {
       delete args.original;
     } else if (version_name) {
       if (!work.translations[version_name]) {
-        work.translations[version_name] = { title: "", language: "", creator:"", text: emptyText(work) };
+        work.translations[version_name] = {
+          title: "", language: "", creator:"", text: emptyText(work)
+        };
         doc=work.translations[version_name];
+        if (Traduxio.getUser().name) {
+          doc.privileges ={ owner: Traduxio.getUser().name};
+        }
         actions.push("created "+version_name+" version");
         Traduxio.addActivity(work.edits,{action:"created",version:version_name});
         created=true;

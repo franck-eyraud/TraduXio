@@ -49,52 +49,96 @@ Traduxio= {
     return new Date(activity.when).getTime();
   },
 
-  canAccess:function(work) {
-    if (work==null) {
-      this.config.debug && log ("can access absent work");
+  isFreeWork:function (work) {
+    if (work.creativeCommons) {
       return true;
     }
-    work=work || this.doc;
-    //var savDoc=this.doc; this.doc=work;
-    var user=this.getUser();
-    //this.doc=savDoc;
-    var privileges=work.privileges || {public:true};
-    if (user.isAdmin) return true;
-    if (privileges.public) return true;
+    return false;
+  },
 
-    if (!user.anonymous) {
-      if (privileges.owner==user.name) return true;
-      try {
-        if (privileges.readers && privileges.readers.indexOf(user.name)!=-1) return true;
-      } catch (e) {
-        log("caught exception in canAccess");
-        log(e);
+  isPublic:function (work) {
+    work=work || this.doc;
+    if (work && work.privileges && work.privileges.public && isFreeWork(work)) {
+      return true
+    }
+    return false;
+  },
+
+  isOriginalWork:function (work) {
+    work=work || this.doc;
+    if (work) {
+      if (work.hasOwnProperty("translations")) {
+        return true;
       }
     }
     return false;
   },
 
-  canEdit:function(work) {
-    try {
-      work=work || this.doc;
+  isOwner:function (work) {
+    work=work || this.doc;
+    if (work) {
+      var privileges=work.privileges || {};
       var user=this.getUser();
-      var privileges=work.privileges || {public:true};
-      if (!this.canAccess(work)) return false;
-      if (user.isAdmin) return true;
-      if (!user.anonymous) {
-        if (!privileges.owner && privileges.public) return true;
-        if (privileges.owner && privileges.owner==user.name) return true;
-        if (privileges.editors && privileges.editors.indexOf(user.name)!=-1) return true;
-      } else {
-        if (Traduxio.config.anonymous_edit && privileges.public && !privileges.owner) {
-          return true;
-        }
-      }
-    } catch (e) {
-      log("caught exception e in canEdit");
-      log(e);
+      if (!user.anonymous && privileges.owner==user.name) return true;
     }
     return false;
+  },
+
+  hasSharedAccess:function (work) {
+    var user=this.getUser();
+    work=work || this.doc;
+    if (work) {
+      this.config.debug && log(user.name+" hasSharedAccess to "+work.title);
+      var privileges=work.privileges || {};
+      this.config.debug && log(privileges);
+      if (privileges.sharedTo && privileges.sharedTo.indexOf(user.name)!=-1) return true;
+    }
+    return false;
+  },
+
+  canAccess:function(work) {
+    if (work==null) {
+      this.config.debug && log ("can access absent work");
+      return true;
+    }
+    this.config.debug && log (this.getUser().name + "can access ?");
+    if (this.isAdmin()) return true;
+    if (this.isOwner(work)) return true;
+    if (this.hasSharedAccess(work)) return true;
+    if (work) {
+      var privileges=work.privileges || {};
+      if (privileges.public) return true;
+    }
+    return false;
+  },
+
+  canEdit:function(work) {
+    if (this.isAdmin()) return true;
+    if (this.isOwner(work)) return true;
+    if (this.hasSharedAccess(work) && !this.isOriginalWork(work)) return true;
+    if (work) {
+      var privileges=work.privileges || {public:false};
+      if (Traduxio.config.anonymous_edit && privileges.public && !privileges.owner) {
+        return true;
+      }
+    }
+    return false;
+  },
+
+  canTranslate:function(work) {
+    log("can translate");
+    if (this.isAdmin()) return true;
+    work=work||this.doc;
+    if (this.isOriginalWork(work) &&
+      (this.isPublic(work) || this.hasSharedAccess(work))
+    ) {
+      return true;
+    }
+    return false;
+  },
+
+  canDelete:function (work) {
+    return isAdmin() || isOwner(work);
   },
 
   checkActiveUsers:function() {

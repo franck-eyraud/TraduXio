@@ -21,10 +21,18 @@ function(o, req) {
   }
 
   var newWork = false;
+
   if (o===null) {
     o={translations:{},language:getMyLanguage()};
     newWork=true;
+    o.privileges={};
+    if (Traduxio.getUser().name) {
+      o.privileges.owner=Traduxio.getUser().name;
+    } else {
+      o.privileges.public=true;
+    }
   }
+  o.privileges=o.privileges||{};
   var data = {
     id: o._id,
     headers: [],
@@ -43,7 +51,7 @@ function(o, req) {
     data.original=o.text ? true : false;
     data.date=o.date;
     data.lines=getTextLength();
-    data.canEdit=Traduxio.canEdit();
+    data.canEdit=Traduxio.canEdit(o);
     data.canAccess=true;
 
     if (!newWork) {
@@ -64,7 +72,8 @@ function(o, req) {
           raw:o.text,
           creativeCommons: o.creativeCommons,
           edited: (edited_versions.indexOf("original")!=-1),
-          opened: (opened_versions.indexOf("original")!=-1)
+          opened: (opened_versions.indexOf("original")!=-1),
+          owner:o.privileges.owner
         });
       }
 
@@ -86,8 +95,8 @@ function(o, req) {
           canAccess: Traduxio.canAccess(translation),
           opened: Traduxio.canAccess(translation) && (opened_versions.indexOf(t)!== -1),
           canEdit: Traduxio.canEdit(translation),
-          edited: Traduxio.canEdit(translation) && (edited_versions.indexOf(t)!== -1)
-
+          edited: Traduxio.canEdit(translation) && (edited_versions.indexOf(t)!== -1),
+          owner:translation.privileges.owner
         });
       }
       data.rows=hexapla.getRows();

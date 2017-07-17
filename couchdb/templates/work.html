@@ -88,6 +88,7 @@
         </div>
       {{/is_original}}
         {{#canEdit}}<input type="button" class="edit" value="{{i_edit}}" />{{/canEdit}}
+        <span class="owner">{{owner}}</span>
         <span class="button hide">{{i_hide}}</span>
       </div></th>
     {{/headers}}
@@ -125,7 +126,7 @@
   {{#headers}}
     <th class="pleat open" data-version="{{version}}">
       <div class="relative-wrapper">
-        <input type="button" class="edit" value="{{i_edit}}" />
+        {{#canEdit}}<input type="button" class="edit" value="{{i_edit}}" />{{/canEdit}}
         <div class="button edit-license" title="{{i_edit_license}}"></div>
         <div class="license">
         {{#creativeCommons}}

@@ -160,7 +160,7 @@ function (newDoc, oldDoc, userCtx, secObj) {
     ensureObjects(["translations","glossary"]);
     for (var t in newDoc.translations) {
       var newTrans=newDoc.translations[t];
-      if (!Traduxio.canEdit(oldDoc)) {
+      if (!Traduxio.canTranslate(oldDoc)) {
         if (!oldDoc || !oldDoc.translations || !(t in oldDoc.translations)) {
           throw({forbidden:"Can't add translation"});
         }
