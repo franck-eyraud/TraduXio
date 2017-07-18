@@ -29,6 +29,29 @@ Traduxio= {
     return new Date(a1.when).getTime()-new Date(a2.when).getTime();
   },
 
+  canAccessActivity:function(activity,index) {
+    if (activity.version) {
+      Traduxio.config.debug && log("check if "+Traduxio.getUser().name+" can access "+activity.version);
+      if (Traduxio.doc && Traduxio.doc.translations) {
+        if (Traduxio.doc.translations[activity.version]) {
+          Traduxio.config.debug && log("FOUND VERSION IN TRANSLATIONS");
+          var ok=Traduxio.canAccess(Traduxio.doc.translations[activity.version]);
+          if (ok) {
+            Traduxio.config.debug && log("access granted");
+          } else {
+            Traduxio.config.debug && log("access denied");
+          }
+          return ok;
+        }
+      } else {
+        Traduxio.config.debug && log("NO DOC TO CHECK");
+      }
+      return false;
+    } else {
+      return true;
+    }
+  },
+
   unique_version_name:function(version) {
     var i=2;
     version=version.trim();

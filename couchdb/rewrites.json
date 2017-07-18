@@ -73,5 +73,5 @@
 },{
   "from":"works/:id/changes/:seq",
   "to":"../../_changes",
-  "query":{"filter":"traduxio/docid","feed":"longpoll","since":":seq"}
+  "query":{"filter":"traduxio/docid","feed":"longpoll","since":":seq","include_docs":"false"}
 }]
