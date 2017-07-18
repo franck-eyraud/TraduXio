@@ -40,10 +40,7 @@ function logout() {
     dataType:"json",
     type:"DELETE"
   }).done(function(result){
-    updateUserInfo(result);
-    if (Traduxio && Traduxio.activity && Traduxio.activity.presence) {
-      Traduxio.activity.presence();
-    }
+    window.location.href=window.location.href;
   });
 }
 
@@ -56,10 +53,7 @@ function login(name,password) {
   }).done(function(result){
     if (result.ok) {
       result.name=result.name || name;
-      updateUserInfo(result);
-      if (Traduxio && Traduxio.activity && Traduxio.activity.presence) {
-        Traduxio.activity.presence();
-      }
+      window.location.href=window.location.href;
     }
   });
 }
