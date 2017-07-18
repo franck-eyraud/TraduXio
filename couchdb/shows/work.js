@@ -79,25 +79,27 @@ function(o, req) {
 
       for (var t in o.translations) {
         var translation = o.translations[t];
-        hexapla.addVersion({
-          id: t,
-          text: Traduxio.canAccess(translation) ? translation.text : [""],
-        });
-        data.headers.push({
-          version:t,
-          title: translation.title,
-          work_creator: translation.creator || "",
-          creator: t,
-          language: translation.language || "",
-          date: translation.date,
-          raw:Traduxio.canAccess(translation) ? translation.text : [],
-          creativeCommons: translation.creativeCommons,
-          canAccess: Traduxio.canAccess(translation),
-          opened: Traduxio.canAccess(translation) && (opened_versions.indexOf(t)!== -1),
-          canEdit: Traduxio.canEdit(translation),
-          edited: Traduxio.canEdit(translation) && (edited_versions.indexOf(t)!== -1),
-          owner:translation.privileges.owner
-        });
+        if (Traduxio.canAccess(translation)) {
+          hexapla.addVersion({
+            id: t,
+            text: Traduxio.canAccess(translation) ? translation.text : [""],
+          });
+          data.headers.push({
+            version:t,
+            title: translation.title,
+            work_creator: translation.creator || "",
+            creator: t,
+            language: translation.language || "",
+            date: translation.date,
+            raw:Traduxio.canAccess(translation) ? translation.text : [],
+            creativeCommons: translation.creativeCommons,
+            canAccess: Traduxio.canAccess(translation),
+            opened: Traduxio.canAccess(translation) && (opened_versions.indexOf(t)!== -1),
+            canEdit: Traduxio.canEdit(translation),
+            edited: Traduxio.canEdit(translation) && (edited_versions.indexOf(t)!== -1),
+            owner:translation.privileges.owner
+          });
+        }
       }
       data.rows=hexapla.getRows();
     }

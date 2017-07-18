@@ -27,7 +27,6 @@ body {
   border-radius:15px 15px 0px 0px;
   border-bottom:0px;
   padding:5px 5px 2em 5px;
-  color: #C11C1C;
   border-color: darkgrey;
 }
 
@@ -60,6 +59,7 @@ body {
 
 div.metadata {
   padding:0.5em 2em;
+  color: #C11C1C;
 }
 
 div.metadata::after {
@@ -328,6 +328,11 @@ tr.fulltext .unit .text {
 
 #hexapla .unit.highlight.included {
   background-color:#efefef;
+}
+
+div.owner {
+  font-style: italic;
+  color:normal;
 }
 
 .button.show {
