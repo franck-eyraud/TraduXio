@@ -104,10 +104,6 @@ function(work, req) {
 
   work.privileges=work.privileges || {public:true};
 
-  // if (!Traduxio.canEdit(work)) {
-  //   return [null,{code:403,body:"Forbidden"}];
-  // }
-
   if (req.method=="DELETE") {
     if (!version_name && original) {
       work._deleted = true;
@@ -173,7 +169,7 @@ function(work, req) {
         delete args["work-creator"];
       }
     }
-    var keysOK=["date","language","title","text","creativeCommons"];
+    var keysOK=["date","language","title","text","creativeCommons","shareTo"];
     for (var key in args) {
       if (keysOK.indexOf(key)!=-1) {
         if (key=="text") {
@@ -183,6 +179,25 @@ function(work, req) {
             actions.push("set text for "+version_name);
             doc[key]=args[key];
           }
+        } else if (key == "shareTo") {
+          var shared=args[key];
+          if (typeof shared=="string") {
+            shared=[shared];
+          }
+          if (typeof shared.indexOf !="function") {
+            return [null,{code:400,body:key+" must be a string or array"}];
+          }
+          doc.privileges=doc.privileges || {public:false};
+          doc.privileges.sharedTo=doc.privileges.sharedTo || [];
+          shared.forEach(function(user) {
+            if (doc.privileges.sharedTo.indexOf(user)==-1) {
+              doc.privileges.sharedTo.push(user);
+              actions.push("shared "+version_name+" to "+user);
+            } else {
+              actions.push(version_name+" already shared to "+user);
+            }
+          });
+          continue;
         } else if (!typeof args[key] == "string") {
           return [null,{code:400,body:key+" must be a string"}];
         }
@@ -204,7 +219,12 @@ function(work, req) {
   }
   result.actions=actions;
   adjustLength(work);
-  var code=req.query=="POST"?201:200;
+  var code;
+  if (actions.length) {
+    code=req.query=="POST"?201:200;
+  } else {
+    code=204;
+  }
   return [work, {code:code,body:JSON.stringify(result)}];
 
 }
