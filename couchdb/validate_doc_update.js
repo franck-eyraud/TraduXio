@@ -100,7 +100,6 @@ function (newDoc, oldDoc, userCtx, secObj) {
     return true;
   }
 
-
   function testArray(array,callback,nullok) {
     var ok=false;
     if (isArray(array)) {
@@ -127,7 +126,7 @@ function (newDoc, oldDoc, userCtx, secObj) {
         if (!compare(obj1[k],obj2[k])) return false;
       }
       for (var k in obj2) {
-        if (! k in obj1) return false;
+        if (! (k in obj1)) return false;
       }
       return true;
     } else {
@@ -150,37 +149,39 @@ function (newDoc, oldDoc, userCtx, secObj) {
     ensureUnchangedFields(["title","language","creator","date","privileges","text"]);
   }
 
-  if (newDoc.hasOwnProperty("title")) {
-    ensureArrays(["text"]);
-    if (newDoc.text && !testArray(newDoc.text,isString)) {
-      throw({forbidden:"text lines must be strings "+JSON.stringify(newDoc.text)});
+  Traduxio.config.debug && log("start checking trans");
+
+  ensureArrays(["text"]);
+  if (newDoc.text && !testArray(newDoc.text,isString)) {
+    throw({forbidden:"text lines must be strings "+JSON.stringify(newDoc.text)});
+  }
+  mandatoryFields(["translations"]);
+  ensureStrings(["creator","date","language","title"]);
+  ensureObjects(["translations","glossary"]);
+  for (var t in newDoc.translations) {
+    var newTrans=newDoc.translations[t];
+    if (!Traduxio.canTranslate(oldDoc)) {
+      if (!oldDoc || !oldDoc.translations || !(t in oldDoc.translations)) {
+        throw({forbidden:"Can't add translation"});
+      }
     }
-    mandatoryFields(["translations"]);
-    ensureStrings(["creator","date","language","title"]);
-    ensureObjects(["translations","glossary"]);
-    for (var t in newDoc.translations) {
-      var newTrans=newDoc.translations[t];
-      if (!Traduxio.canTranslate(oldDoc)) {
-        if (!oldDoc || !oldDoc.translations || !(t in oldDoc.translations)) {
-          throw({forbidden:"Can't add translation"});
-        }
-      }
-      mandatory(newTrans,"text");
-      mandatory(newTrans,"language");
-      shouldBeArray(newTrans,"text");
-      Traduxio.config.debug && log("check translation "+t);
-      if (!Traduxio.canEdit(oldDoc)) {
-        Traduxio.config.debug && log("can't edit old");
-        var oldTrans=oldDoc && oldDoc.translations[t] || {};
-        //check that edit forbidden translations are not modified
-        if (!Traduxio.canEdit(oldTrans) &&
-            !compare(oldTrans,newTrans)) {
-          throw({forbidden:"Can't modify translation "+t});
-        }
-      } else {
-        //If you can edit the doc, you can edit translations
-        Traduxio.config.debug && log("can edit");
-      }
+    mandatory(newTrans,"text");
+    mandatory(newTrans,"language");
+    shouldBeArray(newTrans,"text");
+    Traduxio.config.debug && log("check translation "+t);
+    var oldTrans=oldDoc && oldDoc.translations[t] || {};
+    //check that edit forbidden translations are not modified
+    log(oldTrans);
+    log(newTrans);
+    if (!Traduxio.canEdit(oldTrans) &&
+        !compare(oldTrans,newTrans)) {
+      throw({forbidden:"Can't modify translation "+t});
+    }
+  }
+  for (var t in oldDoc.translations) {
+    var oldTrans=oldDoc.translations[t];
+    if (!newDoc.translations[t] && !Traduxio.isOwner(oldTrans)) {
+      throw({forbidden:"Can't delete translation "+t});
     }
   }
 }

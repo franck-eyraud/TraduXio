@@ -111,7 +111,7 @@ Traduxio= {
     var user=this.getUser();
     work=work || this.doc;
     if (work) {
-      this.config.debug && log(user.name+" hasSharedAccess to "+work.title);
+      this.config.debug && log(user.name+" hasSharedAccess to "+work.title+" "+work.creator);
       var privileges=work.privileges || {};
       this.config.debug && log(privileges);
       if (privileges.sharedTo && privileges.sharedTo.indexOf(user.name)!=-1) return true;
@@ -124,7 +124,7 @@ Traduxio= {
       this.config.debug && log ("can access absent work");
       return true;
     }
-    this.config.debug && log (this.getUser().name + "can access ?");
+    this.config.debug && log (this.getUser().name + " can access ?");
     if (this.isAdmin()) return true;
     if (this.isOwner(work)) return true;
     if (this.hasSharedAccess(work)) return true;
@@ -145,6 +145,7 @@ Traduxio= {
         return true;
       }
     }
+    Traduxio.config.debug && log("no edit access to "+work.title+" "+work.creator);
     return false;
   },
 
