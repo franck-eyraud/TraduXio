@@ -79,7 +79,7 @@ function(o, req) {
 
       for (var t in o.translations) {
         var translation = o.translations[t];
-        translation.privileges=translation.privileges || {};
+        translation.privileges=translation.privileges || {public:true};
         if (Traduxio.canAccess(translation)) {
           hexapla.addVersion({
             id: t,

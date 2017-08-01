@@ -30,6 +30,8 @@ function (newDoc, oldDoc, userCtx, secObj) {
   function shouldBeEqual(obj1,obj2,attribute) {
     if ((typeof obj1==typeof obj2) && (typeof obj1=="object")) {
       log("obj1 and obj2 are both objects");
+      obj1=obj1 || {};
+      obj2=obj2 || {};
       if (!obj1.hasOwnProperty(attribute) && !obj2.hasOwnProperty(attribute))
         return;
       if (obj1.hasOwnProperty(attribute) && obj2.hasOwnProperty(attribute) &&
@@ -37,6 +39,9 @@ function (newDoc, oldDoc, userCtx, secObj) {
         || !obj1.hasOwnProperty(attribute) || !obj2.hasOwnProperty(attribute)) {
         throw({forbidden:attribute+" can't be changed"});
       }
+    } else {
+      log("obj1 and obj2 have different types");
+      throw({forbidden:attribute+" can't be added or removed"});
     }
   }
 
@@ -89,15 +94,16 @@ function (newDoc, oldDoc, userCtx, secObj) {
   }
 
   function ensureUnchangedFields(fields,obj1,obj2) {
-    Traduxio.config.debug && log ("testing ["+fields.join(",")+"] with "+(typeof obj1)+","+(typeof obj2));
     obj1=obj1 || oldDoc;
     obj2=obj2 || newDoc;
-    if (obj1 && obj2 && obj1!=obj2) {
+    Traduxio.config.debug && log ("testing ["+fields.join(",")+"] with "+(typeof obj1)+","+(typeof obj2));
+    if (typeof obj1=="object" && typeof obj2=="object" && obj1!=obj2) {
       fields.forEach(function(attribute) {
         shouldBeEqual(obj1,obj2,attribute);
       });
+    } else {
+      throw({forbidden:"can't check attribute of non object"});
     }
-    return true;
   }
 
   function testArray(array,callback,nullok) {
@@ -158,24 +164,26 @@ function (newDoc, oldDoc, userCtx, secObj) {
   mandatoryFields(["translations"]);
   ensureStrings(["creator","date","language","title"]);
   ensureObjects(["translations","glossary"]);
+  var canTranslate=Traduxio.canTranslate(oldDoc);
   for (var t in newDoc.translations) {
     var newTrans=newDoc.translations[t];
-    if (!Traduxio.canTranslate(oldDoc)) {
-      if (!oldDoc || !oldDoc.translations || !(t in oldDoc.translations)) {
-        throw({forbidden:"Can't add translation"});
-      }
-    }
     mandatory(newTrans,"text");
     mandatory(newTrans,"language");
     shouldBeArray(newTrans,"text");
     Traduxio.config.debug && log("check translation "+t);
-    var oldTrans=oldDoc && oldDoc.translations[t] || {};
-    //check that edit forbidden translations are not modified
-    log(oldTrans);
-    log(newTrans);
-    if (!Traduxio.canEdit(oldTrans) &&
-        !compare(oldTrans,newTrans)) {
-      throw({forbidden:"Can't modify translation "+t});
+    if (oldDoc && oldDoc.translations && oldDoc.translations[t]) {
+      var oldTrans=oldDoc.translations[t];
+      //check that edit forbidden translations are not modified
+      log(oldTrans);
+      log(newTrans);
+      if (!Traduxio.canEdit(oldTrans) &&
+          !compare(oldTrans,newTrans)) {
+        throw({forbidden:"Can't modify translation "+t});
+      }
+    } else {
+      if (!canTranslate) {
+        throw({forbidden:"Can't add translation"});
+      }
     }
   }
   if (oldDoc && oldDoc.translations) {

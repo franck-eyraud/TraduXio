@@ -81,9 +81,10 @@ Traduxio= {
 
   isPublic:function (work) {
     work=work || this.doc;
-    if (work && work.privileges && work.privileges.public && isFreeWork(work)) {
+    if (work && work.privileges && work.privileges.public) {
       return true
     }
+    log("work is not public");
     return false;
   },
 
@@ -93,6 +94,8 @@ Traduxio= {
       if (work.hasOwnProperty("translations")) {
         return true;
       }
+      log("no translations, is not original");
+      return false;
     }
     return false;
   },
@@ -100,7 +103,7 @@ Traduxio= {
   isOwner:function (work) {
     work=work || this.doc;
     if (work) {
-      var privileges=work.privileges || {};
+      var privileges=work.privileges || {public:true};
       var user=this.getUser();
       if (!user.anonymous && privileges.owner==user.name) return true;
     }
@@ -112,7 +115,7 @@ Traduxio= {
     work=work || this.doc;
     if (work) {
       this.config.debug && log(user.name+" hasSharedAccess to "+work.title+" "+work.creator);
-      var privileges=work.privileges || {};
+      var privileges=work.privileges || {public:true};
       this.config.debug && log(privileges);
       if (privileges.sharedTo && privileges.sharedTo.indexOf(user.name)!=-1) return true;
     }
@@ -129,9 +132,10 @@ Traduxio= {
       if (this.isOwner(work)) return true;
       if (this.hasSharedAccess(work)) return true;
       if (work) {
-        var privileges=work.privileges || {};
+        var privileges=work.privileges || {public:true};
         if (privileges.public) return true;
       }
+      this.config.debug && log("no access");
       return false;
     }
   },
@@ -141,18 +145,27 @@ Traduxio= {
     if (this.isOwner(work)) return true;
     if (this.hasSharedAccess(work) && !this.isOriginalWork(work)) return true;
     if (work) {
-      var privileges=work.privileges || {public:false};
-      if (Traduxio.config.anonymous_edit && privileges.public && !privileges.owner) {
+      var privileges=work.privileges || {};
+      if (Traduxio.config.anonymous_edit && !privileges.owner) {
+        log("can anonymously edit work");
         return true;
       }
       Traduxio.config.debug && log("no edit access to "+work.title+" "+work.creator);
     } else {
-      return false;
+      var user=this.getUser();
+      if (user.anonymous && !Traduxio.config.anonymous_edit) {
+        log(user);log(Traduxio.config);
+        Traduxio.config.debug && log("Can't add work");
+        return false;
+      } else {
+        Traduxio.config.debug && log("Can add work");
+        return true;
+      }
     }
   },
 
   canTranslate:function(work) {
-    log("can translate");
+    log("can translate ?");
     if (this.isAdmin()) return true;
     work=work||this.doc;
     if (this.isOriginalWork(work) &&
@@ -160,6 +173,7 @@ Traduxio= {
     ) {
       return true;
     }
+    log("no, cannot translate");
     return false;
   },
 
