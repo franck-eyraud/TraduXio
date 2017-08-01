@@ -140,6 +140,15 @@
         </div>
         <div class="link"><a href="{{prefix}}/works/{{id}}/print/{{version}}">{{i_print}}</a></div>
         <div class="button hide">{{i_hide}}</div>
+        {{^privileges.public}}
+        <div class="share">
+          <select>
+            <option value="public">Public</option>
+            <option value="private" selected="selected">Private</option>
+            <option value="shared">Shared</option>
+          </select>
+        </div>
+        {{/privileges.public}}
       </div>
     </th>
   {{/headers}}

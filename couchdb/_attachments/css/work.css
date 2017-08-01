@@ -352,38 +352,46 @@ div.owner {
 }
 
 .button.edit-license,
-.button.delete {
-  width:32px;
-  left: 10px;
+.button.delete,
+th.pleat div.share {
   display:none;
 }
 
 .edit .button.edit-license,
-.edit .button.delete {
+.edit .button.delete,
+th.pleat.edit div.share {
   display:inline-block;
 }
 
 .button.delete {
+  width:32px;
+  left: 10px;
   background-image: url(../img/delete.png);
+  top: 10px;
 }
+
 .button.edit-license {
+  width:32px;
+  left: 10px;
   background-image: url(../img/lock.png);
+  bottom:10px;
+}
+
+div.share {
+  position: absolute;
+  z-index:99;
+  right:10px;
+  bottom:10px;
 }
 
 #hexapla .pleat .button {
   background-repeat:no-repeat;
   height:32px;
   position: absolute;
-  top: 10px;
   cursor:pointer;
   text-indent: 100%;
   overflow:hidden;
   z-index:99;
-}
-
-#hexapla tfoot .pleat .button {
-  top:auto;
-  bottom:10px;
 }
 
 .top {
