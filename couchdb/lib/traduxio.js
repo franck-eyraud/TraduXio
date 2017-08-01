@@ -73,7 +73,7 @@ Traduxio= {
   },
 
   isFreeWork:function (work) {
-    if (work.creativeCommons) {
+    if (work && work.creativeCommons) {
       return true;
     }
     return false;
@@ -123,16 +123,17 @@ Traduxio= {
     if (work==null) {
       this.config.debug && log ("can access absent work");
       return true;
+    } else {
+      this.config.debug && log (this.getUser().name + " can access ?");
+      if (this.isAdmin()) return true;
+      if (this.isOwner(work)) return true;
+      if (this.hasSharedAccess(work)) return true;
+      if (work) {
+        var privileges=work.privileges || {};
+        if (privileges.public) return true;
+      }
+      return false;
     }
-    this.config.debug && log (this.getUser().name + " can access ?");
-    if (this.isAdmin()) return true;
-    if (this.isOwner(work)) return true;
-    if (this.hasSharedAccess(work)) return true;
-    if (work) {
-      var privileges=work.privileges || {};
-      if (privileges.public) return true;
-    }
-    return false;
   },
 
   canEdit:function(work) {
@@ -144,9 +145,10 @@ Traduxio= {
       if (Traduxio.config.anonymous_edit && privileges.public && !privileges.owner) {
         return true;
       }
+      Traduxio.config.debug && log("no edit access to "+work.title+" "+work.creator);
+    } else {
+      return false;
     }
-    Traduxio.config.debug && log("no edit access to "+work.title+" "+work.creator);
-    return false;
   },
 
   canTranslate:function(work) {

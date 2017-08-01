@@ -178,10 +178,12 @@ function (newDoc, oldDoc, userCtx, secObj) {
       throw({forbidden:"Can't modify translation "+t});
     }
   }
-  for (var t in oldDoc.translations) {
-    var oldTrans=oldDoc.translations[t];
-    if (!newDoc.translations[t] && !Traduxio.isOwner(oldTrans)) {
-      throw({forbidden:"Can't delete translation "+t});
+  if (oldDoc && oldDoc.translations) {
+    for (var t in oldDoc.translations) {
+      var oldTrans=oldDoc.translations[t];
+      if (!newDoc.translations[t] && !Traduxio.isOwner(oldTrans)) {
+        throw({forbidden:"Can't delete translation "+t});
+      }
     }
   }
 }
