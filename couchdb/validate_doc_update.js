@@ -153,9 +153,12 @@ function (newDoc, oldDoc, userCtx, secObj) {
   if (!Traduxio.canEdit(oldDoc)) {
     Traduxio.config.debug && log("can't edit old");
     ensureUnchangedFields(["title","language","creator","date","privileges","text"]);
+  } else if (!Traduxio.isAdmin()){
+    if (!oldDoc && !Traduxio.isOwner(newDoc) ) {
+      throw({forbidden:"Must set owner to yourself"});
+    }
   }
 
-  Traduxio.config.debug && log("start checking trans");
 
   ensureArrays(["text"]);
   if (newDoc.text && !testArray(newDoc.text,isString)) {
@@ -164,6 +167,7 @@ function (newDoc, oldDoc, userCtx, secObj) {
   mandatoryFields(["translations"]);
   ensureStrings(["creator","date","language","title"]);
   ensureObjects(["translations","glossary"]);
+  Traduxio.config.debug && log("start checking trans");
   var canTranslate=Traduxio.canTranslate(oldDoc);
   for (var t in newDoc.translations) {
     var newTrans=newDoc.translations[t];
@@ -184,12 +188,15 @@ function (newDoc, oldDoc, userCtx, secObj) {
       if (!canTranslate) {
         throw({forbidden:"Can't add translation"});
       }
+      if (!Traduxio.isAdmin() && !Traduxio.isOwner(newTrans)) {
+        throw({forbidden:"Must set owner to yourself"});
+      }
     }
   }
   if (oldDoc && oldDoc.translations) {
     for (var t in oldDoc.translations) {
       var oldTrans=oldDoc.translations[t];
-      if (!newDoc.translations[t] && !Traduxio.isOwner(oldTrans)) {
+      if (!newDoc.translations[t] && !Traduxio.canDelete(oldTrans)) {
         throw({forbidden:"Can't delete translation "+t});
       }
     }

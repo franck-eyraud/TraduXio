@@ -716,7 +716,7 @@ function saveMetadata() {
     }).done(function(result) {
       if (ref=="original") updateDocInfo(result);
       var target=elem.siblings("div.metadata."+name);
-      newValue=result[name] || newValue;
+      newValue=result && result[name] || newValue;
       elem.val(newValue);
       if(name == "creator") {
         changeVersion(ref, newValue);

@@ -95,6 +95,7 @@ function(work, req) {
         Traduxio.addActivity(work.edits,{action:"created",version:version_name});
         created=true;
       } else {
+        log("Version "+version_name+" already exists");
         return [null,{code:403,body:"Version "+version_name+" already exists"}];
       }
     }

@@ -106,6 +106,11 @@ Traduxio= {
       var privileges=work.privileges || {public:true};
       var user=this.getUser();
       if (!user.anonymous && privileges.owner==user.name) return true;
+      if (!privileges.owner && Traduxio.config.anonymous_edit) return true;
+      if (Traduxio.config.anonymous_edit) {log("anonymous edit")}
+      else {log("sorry, no anonymous edit");}
+    } else {
+      if (Traduxio.config.anonymous_edit) return true;
     }
     return false;
   },
@@ -154,7 +159,6 @@ Traduxio= {
     } else {
       var user=this.getUser();
       if (user.anonymous && !Traduxio.config.anonymous_edit) {
-        log(user);log(Traduxio.config);
         Traduxio.config.debug && log("Can't add work");
         return false;
       } else {
@@ -178,7 +182,7 @@ Traduxio= {
   },
 
   canDelete:function (work) {
-    return isAdmin() || isOwner(work);
+    return this.isAdmin() || this.isOwner(work);
   },
 
   checkActiveUsers:function() {
