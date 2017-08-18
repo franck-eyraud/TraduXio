@@ -73,7 +73,10 @@ function(o, req) {
           creativeCommons: o.creativeCommons,
           edited: (edited_versions.indexOf("original")!=-1),
           opened: (opened_versions.indexOf("original")!=-1),
-          owner:o.privileges.owner
+          owner:o.privileges.owner,
+          public:o.privileges.public,
+          private:!o.privileges.public && (!o.privileges.sharedTo || !o.privileges.sharedTo.length),
+          shared:!o.privileges.public && o.privileges.sharedTo && o.privileges.sharedTo.length
         });
       }
 
@@ -85,6 +88,9 @@ function(o, req) {
             id: t,
             text: Traduxio.canAccess(translation) ? translation.text : [""],
           });
+          var public=translation.privileges.public;
+          var shared=translation.privileges.sharedTo && translation.privileges.sharedTo.length;
+          var shareValue=public ? "public" : (shared ? "shared" : "private");
           data.headers.push({
             version:t,
             title: translation.title,
@@ -98,7 +104,9 @@ function(o, req) {
             opened: Traduxio.canAccess(translation) && (opened_versions.indexOf(t)!== -1),
             canEdit: Traduxio.canEdit(translation),
             edited: Traduxio.canEdit(translation) && (edited_versions.indexOf(t)!== -1),
-            owner:translation.privileges.owner
+            owner:translation.privileges.owner,
+            shareValue:shareValue,
+            sharedTo:translation.privileges.sharedTo
           });
         }
       }

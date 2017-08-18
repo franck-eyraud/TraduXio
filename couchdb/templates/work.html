@@ -142,11 +142,12 @@
         <div class="button hide">{{i_hide}}</div>
         {{^privileges.public}}
         <div class="share">
-          <select>
+          <select data-value="{{shareValue}}">
             <option value="public">Public</option>
-            <option value="private" selected="selected">Private</option>
+            <option value="private">Private</option>
             <option value="shared">Shared</option>
           </select>
+          {{#sharedTo}}{{.}}, {{/sharedTo}}
         </div>
         {{/privileges.public}}
       </div>

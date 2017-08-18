@@ -351,6 +351,14 @@ div.owner {
   right: 10px;
 }
 
+thead .button {
+  top: 10px;
+}
+
+tfoot .button {
+  bottom: 10px;
+}
+
 .button.edit-license,
 .button.delete,
 th.pleat div.share {
@@ -380,7 +388,7 @@ th.pleat.edit div.share {
 div.share {
   position: absolute;
   z-index:99;
-  right:10px;
+  left:50px;
   bottom:10px;
 }
 
