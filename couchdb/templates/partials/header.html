@@ -9,6 +9,9 @@
   {{#css}}
   <link rel="stylesheet" href="{{prefix}}/shared/css/{{name}}.css" type="text/css" />
   {{/css}}
+  {{#extraCss}}
+  <link rel="stylesheet" href="{{prefix}}/shared/css/{{.}}.css" type="text/css" />
+  {{/extraCss}}
   <script src="{{prefix}}/shared/js/jquery.js"></script>
   <script src="{{prefix}}/shared/js/traduxio.js"></script>
   <script src="{{prefix}}/shared/js/login.js"></script>

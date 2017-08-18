@@ -134,7 +134,8 @@ function(o, req) {
   data.name="work";
   data.css=true;
   data.script=true;
-  data.scripts=["jquery.selection","jquery.ajax-retry","activity","jquery.highlight"];
+  data.scripts=["jquery.selection","jquery.ajax-retry","activity","jquery.highlight","jquery-ui"];
+  data.extraCss=["jquery-ui"];
   if (this.couchapp.traduxio.chat) data.scripts.push("chat");
   if (this.couchapp.traduxio.sessions) data.scripts.push("sessions");
 

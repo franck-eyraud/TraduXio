@@ -983,20 +983,20 @@ var shareText = function(version) {
     }
   });
   var req;
-  input.on("change input paste",function() {
-    var val=$(this).val();
-    if (val) {
-      if (req && req.state()=="pending") {
-        req.abort();
-      }
-      req=$.ajax({
-        url: getPrefix()+"/users/search/"+val,
-        dataType:"json"
-      }).done(function(result) {
-        if (result.join) {
-          console.log(result.join(","));
+  input.autocomplete({
+    source: function( request, response ) {
+      val=request.term;
+      if (val) {
+        if (req && req.state()=="pending") {
+          req.abort();
         }
-      });
+        req=$.ajax({
+          url: getPrefix()+"/users/search/"+val,
+          dataType:"json"
+        }).done(function(result) {
+          response(result || []);
+        });
+      }
     }
   });
   addModal(shareDiv);
