@@ -15,8 +15,8 @@ function(work, req) {
   }
   var actions=[];
   var result={};
+  var version_name = req.query.version;
   if (["PUT","DELETE"].indexOf(req.method)!=-1) {
-    var version_name = req.query.version;
 
     if (work===null) {
       return [null,{code:404,body:"Not found"}];
@@ -26,7 +26,7 @@ function(work, req) {
 
     if(!version_name || version_name == "original") {
       original=true;
-
+      version_name="original";
     } else {
       if(!work.translations[version_name]) {
         return [null,{code:404,body:version_name+" not found"}];
@@ -34,9 +34,6 @@ function(work, req) {
       doc = work.translations[version_name];
     }
   } else { //req.method==POST
-    if (version_name) {
-      return [null,{code:400,body:"Can't specify version"}];
-    }
     if (work!==null) {
       if (args.creator) {
         version_name=args.creator.trim();
@@ -46,6 +43,7 @@ function(work, req) {
         delete args.creator;
       } else {
         original=true;
+        version_name="original";
       }
 
       work.edits=work.edits||[];
@@ -58,7 +56,6 @@ function(work, req) {
       doc.privileges={};
       if (!Traduxio.getUser().anonymous) {
         doc.privileges.owner=Traduxio.getUser().name;
-        doc.privileges.public=false;
       } else {
         doc.privileges.public=true;
       }
@@ -170,7 +167,7 @@ function(work, req) {
         delete args["work-creator"];
       }
     }
-    var keysOK=["date","language","title","text","creativeCommons","shareTo"];
+    var keysOK=["date","language","title","text","creativeCommons","shareTo","public"];
     for (var key in args) {
       if (keysOK.indexOf(key)!=-1) {
         if (key=="text") {
@@ -180,6 +177,14 @@ function(work, req) {
             actions.push("set text for "+version_name);
             doc[key]=args[key];
           }
+        } else if (key == "public") {
+          doc.privileges=doc.privileges || {};
+          if (args[key]=="true" || args[key]==true) {
+            doc.privileges.public=true;
+            actions.push(version_name+" becomes public");
+          } else {
+            return [null,{code:400,body:"Can't set value "+args[key]+" to public"}];
+          }
         } else if (key == "shareTo") {
           var shared=args[key];
           if (typeof shared=="string") {
@@ -188,7 +193,7 @@ function(work, req) {
           if (typeof shared.indexOf !="function") {
             return [null,{code:400,body:key+" must be a string or array"}];
           }
-          doc.privileges=doc.privileges || {public:false};
+          doc.privileges=doc.privileges || {public:true};
           doc.privileges.sharedTo=doc.privileges.sharedTo || [];
           shared.forEach(function(user) {
             if (doc.privileges.sharedTo.indexOf(user)==-1) {
