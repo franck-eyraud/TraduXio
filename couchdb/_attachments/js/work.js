@@ -944,6 +944,85 @@ var editOnServer = function(content, reference) {
   });
 };
 
+var changeVersion = function(version,modify) {
+  return request({
+    type: "PUT",
+    url: "work/"+Traduxio.getId()+"/"+encodeURIComponent(version),
+    contentType: 'text/plain',
+    data: JSON.stringify(modify),
+    dataType: "json"
+  });
+}
+
+var addModal=function (content) {
+  var modal=$("<div>").addClass("modal").appendTo("body");
+  var dialog=$("<div>").addClass("dialog").appendTo(modal);
+  var close=$("<button>").addClass("close").appendTo(dialog).append("Close");
+  dialog.append(content);
+  $(close).on("click",function() {
+    modal.remove();
+  });
+}
+
+var shareText = function(version) {
+  var shareDiv=$("<div>").append("Share "+version);
+  var input=$("<input>").appendTo(shareDiv);
+  var add=$("<input>").attr("type","button").attr("value","Share").appendTo(shareDiv);
+  add.on("click submit",function() {
+    var val=input.val();
+    if (val) {
+      var req=request({
+        url: "work/"+Traduxio.getId()+"/"+encodeURIComponent(version),
+        type:"PUT",
+        data:JSON.stringify({shareTo:val}),
+        dataType:"json"
+      }).done(function(result) {
+        console.log(result.actions.join(","));
+        input.val();
+      });
+    }
+  });
+  var req;
+  input.on("change input paste",function() {
+    var val=$(this).val();
+    if (val) {
+      if (req && req.state()=="pending") {
+        req.abort();
+      }
+      req=$.ajax({
+        url: getPrefix()+"/users/search/"+val,
+        dataType:"json"
+      }).done(function(result) {
+        if (result.join) {
+          console.log(result.join(","));
+        }
+      });
+    }
+  });
+  addModal(shareDiv);
+
+}
+
+var changePrivacy = function () {
+  var val=$(this).val();
+  alert(val);
+  var ref = $(this).closest("th").data("version");
+  var modify;
+  if (val=="public") {
+    modify={public:true};
+  } else if (val=="shared") {
+    shareText(ref);
+  }
+  if (modify) {
+    changeVersion(ref,modify)
+    .done(function(result) {
+      if (result.actions) {
+        alert(result.actions.join("\n"));
+      }
+    });
+  }
+}
+
 $(document).ready(function() {
 
   $("#hexapla").on("click", ".button.hide", toggleShow);
@@ -1018,6 +1097,8 @@ $(document).ready(function() {
   $("thead").on("focusout","input.editedMeta", saveMetadata);
   $("thead").on("change","select.editedMeta", saveMetadata);
   $("#hexapla").on("click","span.delete", clickDeleteVersion);
+
+  $("tfoot").on("change","div.share select", changePrivacy);
 
   $("input[type=text],select").each(function() {
     if (!$(this).prop("placeholder")) {
