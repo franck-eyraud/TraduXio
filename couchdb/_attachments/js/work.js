@@ -969,6 +969,10 @@ var shareText = function(version) {
   var input=$("<input>").appendTo(shareDiv);
   var add=$("<input>").attr("type","button").attr("value","Share").appendTo(shareDiv);
   var alreadyShares=find(version).find(".list-shares .shared").map(function() {return $(this).text()}).toArray();
+  var shareList=$("<div>").prependTo(shareDiv);
+  alreadyShares.forEach(function(u) {
+    shareList.append($("<div>").addClass("shared").text(u));
+  });
   add.on("click submit",function() {
     var val=input.val();
     if (val) {
@@ -983,10 +987,11 @@ var shareText = function(version) {
         data:JSON.stringify({shareTo:val}),
         dataType:"json"
       }).done(function(result) {
-        alert(result.actions.join(","));
+        console.log(result.actions.join(","));
         input.val("");
         alreadyShares.push(val);
         find(version).find(".list-shares").append($("<span>").addClass("shared").text(val));
+        shareList.append($("<div>").addClass("shared").text(val));
       });
     }
   });
@@ -1002,7 +1007,12 @@ var shareText = function(version) {
           url: getPrefix()+"/users/search/"+val,
           dataType:"json"
         }).done(function(result) {
-          response(result || []);
+          result=result || [];
+          response(result.filter(
+            function(t) {
+              return alreadyShares.indexOf(t)==-1
+            }
+          ));
         });
       }
     }
