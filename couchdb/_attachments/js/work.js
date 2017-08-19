@@ -944,7 +944,7 @@ var editOnServer = function(content, reference) {
   });
 };
 
-var changeVersion = function(version,modify) {
+var modifyVersion = function(version,modify) {
   return request({
     type: "PUT",
     url: "work/"+Traduxio.getId()+"/"+encodeURIComponent(version),
@@ -968,17 +968,25 @@ var shareText = function(version) {
   var shareDiv=$("<div>").append("Share "+version);
   var input=$("<input>").appendTo(shareDiv);
   var add=$("<input>").attr("type","button").attr("value","Share").appendTo(shareDiv);
+  var alreadyShares=find(version).find(".list-shares .shared").map(function() {return $(this).text()}).toArray();
   add.on("click submit",function() {
     var val=input.val();
     if (val) {
+      if (alreadyShares.indexOf(val)!=-1) {
+        alert("already shared");
+        input.val("");
+        return;
+      }
       var req=request({
         url: "work/"+Traduxio.getId()+"/"+encodeURIComponent(version),
         type:"PUT",
         data:JSON.stringify({shareTo:val}),
         dataType:"json"
       }).done(function(result) {
-        console.log(result.actions.join(","));
-        input.val();
+        alert(result.actions.join(","));
+        input.val("");
+        alreadyShares.push(val);
+        find(version).find(".list-shares").append($("<span>").addClass("shared").text(val));
       });
     }
   });
@@ -1005,21 +1013,22 @@ var shareText = function(version) {
 
 var changePrivacy = function () {
   var val=$(this).val();
-  alert(val);
   var ref = $(this).closest("th").data("version");
   var modify;
   if (val=="public") {
-    modify={public:true};
+    if (confirm("Are you sure you want to switch this work to public ? ")) {
+      modify={public:true};
+      modifyVersion(ref,modify)
+      .done(function(result) {
+        if (result.actions) {
+          alert(result.actions.join("\n"));
+          $("option",this).attr("disabled",true);
+          $(this).siblings("list-shares").hide();
+        }
+      });
+    }
   } else if (val=="shared") {
     shareText(ref);
-  }
-  if (modify) {
-    changeVersion(ref,modify)
-    .done(function(result) {
-      if (result.actions) {
-        alert(result.actions.join("\n"));
-      }
-    });
   }
 }
 

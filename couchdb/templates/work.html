@@ -147,7 +147,10 @@
             <option value="private">Private</option>
             <option value="shared">Shared</option>
           </select>
-          {{#sharedTo}}{{.}}, {{/sharedTo}}
+          <div class="list-shares">{{#sharedTo}}
+            <span class="shared">{{.}}</span>
+            {{/sharedTo}}
+          </div>
         </div>
         {{/privileges.public}}
       </div>
