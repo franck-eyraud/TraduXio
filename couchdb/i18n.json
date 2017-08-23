@@ -17,7 +17,7 @@
     "i_username": "Username",
     "i_password": "Password",
     "i_login": "Log in",
-    "i_login": "Log out",
+    "i_logout": "Log out",
 
     "i_glossary_add_entry": "Add a glossary entry",
     "i_glossary_add_translation": "Add a translation of {0} into the glossary",
