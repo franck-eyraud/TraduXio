@@ -20,7 +20,8 @@ function updateUserInfo(ctx) {
     var username=$("<input>").addClass("username").attr("placeholder",Traduxio.getTranslated("i_username"));
     var password=$("<input>").addClass("password").attr("type","password").attr("placeholder",Traduxio.getTranslated("i_password"));
     var go=$("<input>").addClass("go").attr("type","submit").val(Traduxio.getTranslated("i_login"));
-    form.append(username).append(password).append(go).on("submit",function(e) {
+    var signup=$("<input>").addClass("signup").attr("type","button").val(Traduxio.getTranslated("i_signup"));
+    form.append(username).append(password).append(go).append(signup).on("submit",function(e) {
       e.preventDefault();
       var name=username.val();
       var passwd=password.val();
@@ -31,6 +32,11 @@ function updateUserInfo(ctx) {
       else username.add(password).addClass("bad");
     });
     sessionInfo.empty().append(form);
+    signup.on("click",function() {
+      var modal=addModal(signUpForm(function() {
+        modal.remove()
+      }));
+    });
   }
 }
 
@@ -56,6 +62,51 @@ function login(name,password) {
       window.location.href=window.location.href;
     }
   });
+}
+
+function register(name, email, password, callback) {
+  $.couch.signup(
+    {name:name,email:email},password,{
+      success:function() {
+        login(name,password);
+      },
+      error: callback
+    }
+  );
+}
+
+function signUpForm(callback) {
+  var form=$("<form>").addClass("login");
+  var username=$("<input>").addClass("username").attr("placeholder",Traduxio.getTranslated("i_username"));
+  var email=$("<input>").addClass("email").attr("placeholder",Traduxio.getTranslated("i_email"));
+  var password=$("<input>").addClass("password").attr("type","password").attr("placeholder",Traduxio.getTranslated("i_password"));
+  var confirm_password=$("<input>").addClass("password").attr("type","password").attr("placeholder",Traduxio.getTranslated("i_confirm_password"));
+  var go=$("<input>").addClass("go").attr("type","submit").val(Traduxio.getTranslated("i_signup"));
+  form.append(username).append(email).append(password).append(confirm_password).append(go).on("submit",function(e) {
+    e.preventDefault();
+    var bad=false;
+    [username,email,password,confirm_password].forEach(function(control) {
+      control.removeClass("bad");
+      if (control.val().length<1) {
+        control.addClass("bad");
+        bad=true;
+      }
+    });
+    if (confirm_password.val()!=password.val()) {
+      confirm_password.addClass("bad");
+      bad=true;
+    }
+    var emailRegExp=/^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
+    if (!emailRegExp.test(email.val())) {
+      email.addClass("bad");
+      bad=true;
+    }
+    if (bad) return;
+    register(username.val(),email.val(),password.val(),function() {
+      username.addClass("bad");
+    });
+  });
+  return form;
 }
 
 $(document).ready(function() {

@@ -117,6 +117,17 @@ function getTranslated(name) {
   return translation;
 }
 
+function addModal (content) {
+  var modal=$("<div>").addClass("modal").appendTo("body");
+  var dialog=$("<div>").addClass("dialog").appendTo(modal);
+  var close=$("<button>").addClass("close").appendTo(dialog).append("Close");
+  dialog.append(content);
+  $(close).on("click",function() {
+    modal.remove();
+  });
+  return modal;
+}
+
 $(document).ready(function() {
   fixLanguages();
   $("form.concordance").concordancify();
