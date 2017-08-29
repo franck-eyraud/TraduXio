@@ -140,6 +140,25 @@ function (newDoc, oldDoc, userCtx, secObj) {
     }
   }
 
+  if (newDoc._id=="confirmed_users") {
+    if (!Traduxio.isAdmin()) {
+      throw({forbidden:"Access denied"});
+    }
+    return;
+  }
+
+  if (newDoc.type=="confirm") {
+    if (oldDoc) {
+      ensureUnchangedFields(["name","email","type"]);
+
+    } else {
+      if (!Traduxio.isAdmin()) {
+        throw({forbidden:"Access denied"});
+      }
+    }
+    return;
+  }
+
   if (!Traduxio.canAccess(oldDoc)) {
     Traduxio.config.debug && log("can't access old");
     throw({forbidden:"Access denied"});
