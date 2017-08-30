@@ -40,7 +40,7 @@ function updateUserInfo(ctx) {
     sessionInfo.empty().append(form);
     signup.on("click",function() {
       var modal=addModal(signUpForm(function() {
-        modal.remove()
+        modal.remove();
       }));
     });
   }

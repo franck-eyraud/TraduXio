@@ -120,11 +120,13 @@ function getTranslated(name) {
 function addModal (content) {
   var modal=$("<div>").addClass("modal").appendTo("body");
   var dialog=$("<div>").addClass("dialog").appendTo(modal);
-  var close=$("<button>").addClass("close").appendTo(dialog).append("Close");
+  var close=$("<span>").addClass("button close").appendTo(dialog).append("X");
   dialog.append(content);
-  $(close).on("click",function() {
+  close.on("click",function() {
     modal.remove();
   });
+  dialog.on("click",function(e) {e.stopPropagation();});
+  modal.on("click",function(e) {modal.remove()});
   return modal;
 }
 
