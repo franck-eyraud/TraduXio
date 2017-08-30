@@ -228,7 +228,21 @@ http://kizu.ru/en/fun/rotated-text/
      border: 1px solid #888;
      width: 80%; /* Could be more or less, depending on screen size */
      height: 80%; /* Full height */
- }
+}
+
+form.user-info input {
+  display:block;
+  margin:1em;
+  padding:0.2em;
+  font-size:1.5em;
+  width:75%;
+}
+
+form.user-info input[type=button],
+form.user-info input[type=submit], {
+  width:auto;
+}
+
 
 /* ==== */
 

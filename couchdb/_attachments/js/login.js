@@ -1,9 +1,7 @@
 function session() {
-  $.ajax({
+  return $.ajax({
     url:"/_session",
     dataType:"json"
-  }).done(function(result){
-    updateUserInfo(result.userCtx);
   });
 };
 
@@ -14,7 +12,15 @@ function updateUserInfo(ctx) {
     var logoutSpan=$("<span>").addClass("logout").text(Traduxio.getTranslated("i_logout")).on("click",function(){
       logout();
     });
-    sessionInfo.empty().append(userSpan).append(" - ").append(logoutSpan);
+    var edit=$("<input>").addClass("signup").attr("type","button").val(Traduxio.getTranslated("i_edit_user"));
+    edit.on("click",function() {
+      getUserInfo(ctx.name,function(userInfo) {
+        var modal=addModal(editUserForm(userInfo,function() {
+          modal.remove();
+        }));
+      })
+    });
+    sessionInfo.empty().append(userSpan).append(" - ").append(logoutSpan).append(edit);
   } else {
     var form=$("<form>").addClass("login");
     var username=$("<input>").addClass("username").attr("placeholder",Traduxio.getTranslated("i_username"));
@@ -50,6 +56,14 @@ function logout() {
   });
 }
 
+function getUserInfo(username,callback) {
+  // session().done(function(result){
+  //   if (result.userCtx.name) {
+      $.couch.db("_users").openDoc("org.couchdb.user:"+username,{success:callback});
+  //   }
+  // });
+}
+
 function login(name,password) {
  return $.ajax({
     url:"/_session",
@@ -75,14 +89,44 @@ function register(name, email, password, callback) {
   );
 }
 
+function editUserForm(userInfo,callback) {
+  var form=$("<form>").addClass("user-info");
+  var username=$("<input>").addClass("username").attr("disabled","disabled").attr("placeholder",Traduxio.getTranslated("i_username")).val(userInfo.name);
+  var fullname=$("<input>").addClass("fullname").attr("placeholder",Traduxio.getTranslated("i_fullname")).val(userInfo.fullname);
+  var email=$("<input>").addClass("email").attr("placeholder",Traduxio.getTranslated("i_email")).val(userInfo.email);
+  var password=$("<input>").addClass("password").attr("type","password").attr("placeholder",Traduxio.getTranslated("i_password"));
+  var confirm_password=$("<input>").addClass("password").attr("type","password").attr("placeholder",Traduxio.getTranslated("i_confirm_password"));
+  var go=$("<input>").addClass("go").attr("type","submit").val(Traduxio.getTranslated("i_save"));
+  form.append(username).append(fullname).append(email).append(password).append(confirm_password).append(go).on("submit",function(e) {
+    e.preventDefault();
+    var bad=false;
+    var emailRegExp=/^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
+    if (!emailRegExp.test(email.val())) {
+      email.addClass("bad");
+      bad=true;
+    }
+    if (password.val() && confirm_password.val()!=password.val()) {
+      confirm_password.addClass("bad");
+      bad=true;
+    }
+    if (bad) return;
+    if (password.val()) userInfo.password=password.val();
+    userInfo.email=email.val();
+    userInfo.fullname=fullname.val();
+    $.couch.db("_users").saveDoc(userInfo,{success:callback});
+  });
+  return form;
+}
+
 function signUpForm(callback) {
-  var form=$("<form>").addClass("login");
+  var form=$("<form>").addClass("user-info");
   var username=$("<input>").addClass("username").attr("placeholder",Traduxio.getTranslated("i_username"));
+  var fullname=$("<input>").addClass("fullname").attr("placeholder",Traduxio.getTranslated("i_fullname"));
   var email=$("<input>").addClass("email").attr("placeholder",Traduxio.getTranslated("i_email"));
   var password=$("<input>").addClass("password").attr("type","password").attr("placeholder",Traduxio.getTranslated("i_password"));
   var confirm_password=$("<input>").addClass("password").attr("type","password").attr("placeholder",Traduxio.getTranslated("i_confirm_password"));
   var go=$("<input>").addClass("go").attr("type","submit").val(Traduxio.getTranslated("i_signup"));
-  form.append(username).append(email).append(password).append(confirm_password).append(go).on("submit",function(e) {
+  form.append(username).append(fullname).append(email).append(password).append(confirm_password).append(go).on("submit",function(e) {
     e.preventDefault();
     var bad=false;
     [username,email,password,confirm_password].forEach(function(control) {
@@ -110,5 +154,7 @@ function signUpForm(callback) {
 }
 
 $(document).ready(function() {
-  session();
+  session().done(function(result){
+    updateUserInfo(result.userCtx);
+  });
 });

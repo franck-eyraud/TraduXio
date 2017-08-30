@@ -11,6 +11,12 @@ js_i18n_elements.push("i_password");
 js_i18n_elements.push("i_login");
 js_i18n_elements.push("i_logout");
 js_i18n_elements.push("i_search");
+js_i18n_elements.push("i_signup");
+js_i18n_elements.push("i_confirm_password");
+js_i18n_elements.push("i_fullname");
+js_i18n_elements.push("i_email");
+js_i18n_elements.push("i_save");
+js_i18n_elements.push("i_edit_user");
 
 // !code lib/path.js
 // !code lib/localization.js
