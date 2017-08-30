@@ -7,9 +7,11 @@
 var email = require('emailjs/email');
 var Url  = require('url');
 var nano=require('nano');
+var crypto=require('crypto');
 console.log(Url);
 
 var config = JSON.parse(require("fs").readFileSync("node_config.json", "UTF-8"));
+var MAX_CONFIRM_HOURS=config.max_hours || 24;
 
 var email_server = email.server.connect({
    user: config.email_user,
@@ -27,59 +29,8 @@ function sendConfirm(emailAddress,url,callback) {
   console.log("Sent confirmation email to " + emailAddress);
 }
 
-function getDoc(id,database,callback) {
-  database=new Url.URL(database || config.database);
-  var url=new Url.URL(encodeURIComponent(id),database);
-  var options=Url.format(url);
-  options.method="GET";
-  var data="";
-  console.log(options);
-  return http.request(options,function(response) {
-    if (response.statusCode<200 || response.statusCode>=300) {
-      err="error "+response.statusCode;
-      callback(err,response.statusCode);
-      return;
-    }
-    response.on('data',function(chunk) {
-      data+=chunk;
-    }).on('end',function () {
-      console.log("got doc");
-      console.log(data);
-      try {
-        var result=JSON.parse(data);
-        callback(false,result);
-      } catch(e) {
-        callback(e.message,e);
-      }
-    });
-  }).end();
-}
-
-function addDoc(doc,database,callback) {
-  database=database || config.database;
-  console.log("posting doc in "+database);
-  var stringDoc = JSON.stringify(doc);
-  var headers = {
-  	'Content-Type': 'application/json',
-  	'Content-Length': stringDoc.length
-  };
-  var options = Url.parse(database);
-  options.method= 'POST';
-  options.headers= headers;
-  console.log(options);
-  console.log(stringDoc);
-  http.request(options,function(response) {
-    console.log("response!");
-    console.log(response.statusCode);
-    response.on("end",function() {
-      console.log("response end!");
-      callback(response.statusCode);
-    });
-    response.on("error",function() {
-      console.log("add doc error");
-      console.log(arguments);
-    })
-  }).end(stringDoc);
+function getConfirmKey(email,timestamp) {
+  return crypto.createHash('sha1').update(config.salt).update(email).update(timestamp).digest("hex");
 }
 
 function isValidEmail(email) {
@@ -88,49 +39,97 @@ function isValidEmail(email) {
 }
 
 function confirm(user) {
-  function unconfirm(callback) {
-    user.roles.splice(confirmed_role,1);
-    users_db.insert(user,callback);
+  function unconfirm() {
+    var confirmed_role=user.roles.indexOf("confirmed");
+    if (confirmed_role != -1) {
+      user.roles.splice(confirmed_role,1);
+      console.log("remove confirmed role");
+      user._modified=true;
+    }
+    if (user.confirm_key) {
+      delete user.confirm_key;
+      console.log("remove confirm key");
+      user._modified=true;
+    }
   }
 
   if (!user.name) {console.log("user doesn't have name");return;}
-  var confirmed_role = user.roles.indexOf("confirmed") != -1;
-  if (!user.email || !isValidEmail(user.email)) {
-    if (confirmed_role) {
+  if (user._deleted) {
+    console.log("user is deleted");
+    delete known_users[user.name]
+    admin_db.insert(known_users);
+    return;
+  }
+  if (user.email && isValidEmail(user.email)) {
+    var expired=false,
+      confirmed=false;
+    //update user db in database (to allow user search)
+    if (known_users[user.name] && known_users[user.name].email!=user.email) {
+      expired=true;
+    } else {
+      var existing_timestamp=user.confirm_sent_timestamp;
+      console.log("found existing_timestamp "+existing_timestamp);
+      if (existing_timestamp) {
+        var key=getConfirmKey(user.email,existing_timestamp);
+        if (user.confirm_key && user.confirm_key==key) {
+          confirmed=true;
+          console.log("confirmed");
+          if (user.roles.indexOf("confirmed") == -1) {
+            console.log("add role confirmed");
+            user.roles.push("confirmed");
+            user._modified=true;
+          } else {
+            console.log("already role confirmed");
+            console.log(user.roles);
+          }
+        } else {
+          console.log("not confirmed");
+          var spent_time=new Date().getTime()-new Date(existing_timestamp).getTime();
+          expired=(spent_time > MAX_CONFIRM_HOURS * 3600 * 1000);
+          if (expired) {console.log("expired "+spent_time)};
+        }
+      } else {
+        expired=true;
+      }
+    }
+
+    var key=null;
+    if (!confirmed) {
       unconfirm();
+      if (expired) {
+        var timestamp=new Date().toISOString();
+        user.confirm_sent_timestamp=timestamp;
+        user._modified=true;
+        console.log("getting key for "+user.email+" "+timestamp);
+        key=getConfirmKey(user.email,timestamp);
+      }
     }
-    if (confirmed_users[user.name]) {
-      delete confirmed_users[user.name]
-      admin_db.insert(confirmed_users);
+    if (user._modified) {
+      delete user._modified;
+      known_users[user.name]=user;
+      console.log("insert modified user");
+      users_db.insert(user,function(err,body) {
+        if (!err) {
+          known_users[user.name]._rev=body.rev;
+        } else {
+          console.log("error saving user "+user.name+" "+user._rev);
+        }
+        console.log("insert known users");
+        admin_db.insert(known_users);
+      });
+    } else {
+      if (known_users[user.name] && (!known_users[user.name]._rev || known_users[user.name]._rev!=user._rev)) {
+        console.log("insert known users");
+        known_users[user.name]=user;
+        admin_db.insert(known_users);
+      }
     }
+    if (key) {
+      console.log("would send email to "+user.email+" with "+key);
+    }
+  } else {
     console.log("user "+user.name+" doesn't have email");
     return; // can't confirm
-  }
-  if (!confirmed_users[user.name] || confirmed_users[user.name]!=user.email) {
-    //not confirmed
-    if (confirmed_role) {
-      unconfirm();
-    }
-    confirmDoc={
-      type:"confirm",
-      confirm_name:user.name,
-      confirm_email:user.email
-    }
-    console.log("inserting confirm doc for "+user.name+" "+user.email);
-    admin_db.insert(confirmDoc,function(err,body) {
-      if (!err) {
-        var link=config.database+"/"+body.id;
-        console.log(body);
-        console.log("will send sent confirmation to "+user.email+" to "+link);
-        sendConfirm(user.email,function(err) {
-
-        });
-      } else {
-        console.log(err);
-      }
-    });
-  } else {
-    console.log("user "+user.name+" already confirmed with email "+user.email);
   }
 }
 
@@ -176,18 +175,22 @@ try {
 }
 
 var users_db=admin_db.server.use("/_users/");
-db.get("confirmed_users",function(error,doc) {
+db.get("known_users",function(error,doc) {
   console.log(error);
   if (error && error.statusCode==404) {
-    confirmed_users={_id:"confirmed_users"};
-    admin_db.insert(confirmed_users,function(err,body) {
+    known_users={_id:"known_users"};
+    admin_db.insert(known_users,function(err,body) {
       if (!err) {
-        confirmed_users._rev=body._rev;
+        console.log("inserted known_users "+body.rev);
+        known_users._rev=body.rev;
+        followUsers();
+      } else {
+        console.log(error);
+        console.log("error not started");
       }
-      followUsers();
     });
   } else if (!error) {
-    confirmed_users=doc;
+    known_users=doc;
     followUsers();
   } else {
     console.log(error);

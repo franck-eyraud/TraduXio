@@ -140,7 +140,7 @@ function (newDoc, oldDoc, userCtx, secObj) {
     }
   }
 
-  if (newDoc._id=="confirmed_users") {
+  if (newDoc._id=="known_users") {
     if (!Traduxio.isAdmin()) {
       throw({forbidden:"Access denied"});
     }
