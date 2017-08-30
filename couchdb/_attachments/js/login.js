@@ -78,11 +78,11 @@ function login(name,password) {
   });
 }
 
-function register(name, email, password, callback) {
+function register(data, password, callback) {
   $.couch.signup(
-    {name:name,email:email},password,{
+    data,password,{
       success:function() {
-        login(name,password);
+        login(data.name,password);
       },
       error: callback
     }
@@ -146,7 +146,13 @@ function signUpForm(callback) {
       bad=true;
     }
     if (bad) return;
-    register(username.val(),email.val(),password.val(),function() {
+    var data={
+      name:username.val(),
+      email:email.val(),
+      fullname:fullname.val()
+    }
+    register(data,password.val(),function(err) {
+      console.log(err);
       username.addClass("bad");
     });
   });
