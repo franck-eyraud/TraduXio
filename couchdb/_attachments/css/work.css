@@ -281,7 +281,7 @@ tr.fulltext .unit .text {
   height:32px;
   cursor:pointer;
   border:1px solid black;
-  z-index:99;
+  z-index:9;
   right:0px;
   visibility: hidden;
 }
@@ -387,7 +387,7 @@ th.pleat.edit div.share {
 
 div.share {
   position: absolute;
-  z-index:99;
+  z-index:9;
   left:50px;
   bottom:10px;
 }
@@ -399,7 +399,7 @@ div.share {
   cursor:pointer;
   text-indent: 100%;
   overflow:hidden;
-  z-index:99;
+  z-index:9;
 }
 
 .top {
@@ -457,6 +457,17 @@ div.context-menu .action:hover {
 
 .temp {
     font-style: italic;
+}
+
+div.share-list {
+  padding:1em 3em;
+  text-align: left;
+  height:85%;
+  overflow-y: scroll;
+}
+
+div.share-list .shared-user {
+  padding:1em;
 }
 
 div.unit *::selection {

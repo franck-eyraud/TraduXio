@@ -70,10 +70,9 @@
 },{
   "from":"works/:id/activity",
   "to":"_show/doc_activity/:id"
-  },{
-    "from":"users/search/:search",
-    "to":"_list/autocomplete/users",
-    "query": {"group":"true"}
+},{
+  "from":"users/search/:search",
+  "to":"_list/autocomplete/users"
 },{
   "from":"works/:id/changes/:seq",
   "to":"../../_changes",

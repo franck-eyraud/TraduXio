@@ -56,7 +56,7 @@ body,html,input,textarea {
 }
 
 #header {
-  z-index:100;
+  z-index:10;
   top: 0;
   width: 100%;
   font-size:0.85em;
@@ -69,7 +69,7 @@ body,html,input,textarea {
   background-color: #333;
   width:100%;
   position:fixed;
-  z-index:99;
+  z-index:9;
   bottom:0px;
   font-size: 0.8em;
   height:2.1em;
@@ -210,7 +210,7 @@ http://kizu.ru/en/fun/rotated-text/
 
 .modal {
     position: fixed; /* Stay in place */
-    z-index: 100; /* Sit on top */
+    z-index: 11; /* Sit on top */
     left: 0;
     top: 0;
     width: 100%; /* Full width */

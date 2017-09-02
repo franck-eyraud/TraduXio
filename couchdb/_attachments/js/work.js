@@ -954,16 +954,47 @@ var modifyVersion = function(version,modify) {
   });
 }
 
+var searchUser = function(userid,callback) {
+  $.ajax({
+    url: getPrefix()+"/users/search/"+userid,
+    dataType:"json"
+  }).done(function(result) {
+    if (result) {
+      result.forEach(function(user) {
+        if (user.value && user.value==userid) {
+          callback(user);
+          return false;
+        }
+      });
+    }
+  });
+}
+
 var shareText = function(version) {
-  var shareDiv=$("<div>").append("Share "+version);
+
+  function sharedItem(userid) {
+    var item=$("<div>").addClass("shared-user").text(userid);
+    searchUser(userid,function(userDetails) {
+      if (userDetails.label) {
+        item.text(userDetails.label+" ("+userDetails.value+")");
+      }
+    });
+    return item;
+  }
+
+  var shareDiv=$("<div>").append($("<h1>").append("Share "+version)).addClass("share-text");
+  var alreadyShares=find(version).find(".list-shares .shared").map(function() {return $(this).text()}).toArray();
+  var shareList=$("<div>").addClass("share-list").appendTo(shareDiv);
+
+  alreadyShares.forEach(function(userid) {
+    sharedItem(userid).appendTo(shareList);
+  });
   var input=$("<input>").appendTo(shareDiv);
   var add=$("<input>").attr("type","button").attr("value","Share").appendTo(shareDiv);
-  var alreadyShares=find(version).find(".list-shares .shared").map(function() {return $(this).text()}).toArray();
   add.on("click submit",function() {
     var val=input.val();
     if (val) {
       if (alreadyShares.indexOf(val)!=-1) {
-        alert("already shared");
         input.val("");
         return;
       }
@@ -973,10 +1004,11 @@ var shareText = function(version) {
         data:JSON.stringify({shareTo:val}),
         dataType:"json"
       }).done(function(result) {
-        alert(result.actions.join(","));
         input.val("");
         alreadyShares.push(val);
         find(version).find(".list-shares").append($("<span>").addClass("shared").text(val));
+        sharedItem(val).appendTo(shareList);
+        shareList.scrollTop(sharedItem.position().top);
       });
     }
   });
@@ -992,7 +1024,13 @@ var shareText = function(version) {
           url: getPrefix()+"/users/search/"+val,
           dataType:"json"
         }).done(function(result) {
-          response(result || []);
+          var send=result || [];
+          send=send.filter(function(o) {return alreadyShares.indexOf(o.value)==-1});
+          console.log(send);
+          response(send);
+        }).error(function() {
+          console.log(arguments);
+          response([]);
         });
       }
     }
