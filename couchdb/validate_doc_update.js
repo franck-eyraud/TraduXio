@@ -149,8 +149,17 @@ function (newDoc, oldDoc, userCtx, secObj) {
 
   if (newDoc.type=="confirm") {
     if (oldDoc) {
-      ensureUnchangedFields(["name","email","type"]);
-
+      ensureUnchangedFields(["confirm_name","confirm_email","type"]);
+      if (newDoc.confirm_key) {
+        if (!oldDoc.confirm_key) {
+          //TODO check key with some hash
+          if (newDoc.confirm_key!=oldDoc.confirm_email) {
+            throw({forbidden:"Access denied"});
+          }
+        } else {
+          throw({forbidden:"Access denied"});
+        }
+      }
     } else {
       if (!Traduxio.isAdmin()) {
         throw({forbidden:"Access denied"});

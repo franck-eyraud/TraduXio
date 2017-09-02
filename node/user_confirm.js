@@ -118,7 +118,7 @@ function confirm(user) {
         admin_db.insert(known_users);
       });
     } else {
-      if (known_users[user.name] && (!known_users[user.name]._rev || known_users[user.name]._rev!=user._rev)) {
+      if (!known_users[user.name] || !known_users[user.name]._rev || known_users[user.name]._rev!=user._rev) {
         console.log("insert known users");
         known_users[user.name]=user;
         admin_db.insert(known_users);
@@ -147,7 +147,7 @@ function followUsers() {
       include_docs:true
     });
   user_follow.on('change', function(change) {
-    console.log("received change");
+    console.log("received change "+change.id);
     confirm(change.doc);
   }).on("start",function() {
     console.log("Started");
