@@ -19,14 +19,22 @@ var email_server = email.server.connect({
    host: config.email_host
 });
 
+config.base_url=config.base_url || config.database+ "/_design/traduxio/_rewrite/works/"
+
 function sendConfirm(emailAddress,url,callback) {
   email_server.send({
     text: "Please confirm your email address by clicking on this link : "+url,
     from: config.email_sender,
     to: emailAddress,
     subject: "Traduxio confirmation d'adresse email"
+  },function(err,message) {
+    if (!err) {
+      console.log("Sent confirmation email to " + emailAddress+" "+message);
+    } else {
+      console.log("Error sending confirmation email to " + emailAddress+" "+err);
+    }
+    callback(err,message);
   });
-  console.log("Sent confirmation email to " + emailAddress);
 }
 
 function getConfirmKey(email,timestamp) {
@@ -150,6 +158,13 @@ function confirm(user) {
     }
     if (key) {
       console.log("would send email to "+user.email+" with "+key);
+      sendConfirm(user.email,config.base_url+"?email_confirm="+key,function(err,message) {
+        if (err) {
+          console.log("recording semail send error "+err);
+          user.email_send_error=err;
+          recordUser(user);
+        }
+      });
     }
   } else {
     console.log("user "+user.name+" doesn't have email");
