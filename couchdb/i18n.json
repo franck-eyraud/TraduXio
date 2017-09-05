@@ -37,6 +37,13 @@
     "i_about": "About",
     "i_copyright": "Compliance with copyright",
 
+    "i_share": "Share",
+    "i_share_": "Manage shares...",
+    "i_shares": "Partages",
+    "i_shared": "Shared",
+    "i_public": "Public",
+    "i_private": "Private",
+
     "i_report": "Report",
     "i_report_description": "Report abusive publication",
     "i_at_page_": "at page:",
@@ -139,6 +146,13 @@
 
     "i_about": "À propos de",
     "i_copyright": "Respect des droits d'auteur",
+
+    "i_share": "Partager",
+    "i_share_": "Gérer les partages...",
+    "i_shares": "Partages",
+    "i_shared": "Partagé",
+    "i_public": "Public",
+    "i_private": "Privé",
 
     "i_report": "Signaler",
     "i_report_description": "Signaler une mise en ligne abusive",

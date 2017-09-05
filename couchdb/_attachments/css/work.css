@@ -392,6 +392,14 @@ div.share {
   bottom:10px;
 }
 
+.list-shares .shared {
+  display:none;
+}
+
+input.share-button {
+  display: inline-block;
+}
+
 #hexapla .pleat .button {
   background-repeat:no-repeat;
   height:32px;

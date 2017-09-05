@@ -982,7 +982,7 @@ var shareText = function(version) {
     return item;
   }
 
-  var shareDiv=$("<div>").append($("<h1>").append("Share "+version)).addClass("share-text");
+  var shareDiv=$("<div>").append($("<h1>").append(getTranslated("i_share")+" "+version)).addClass("share-text");
   var alreadyShares=find(version).find(".list-shares .shared").map(function() {return $(this).text()}).toArray();
   var shareList=$("<div>").addClass("share-list").appendTo(shareDiv);
 
@@ -990,7 +990,7 @@ var shareText = function(version) {
     sharedItem(userid).appendTo(shareList);
   });
   var input=$("<input>").appendTo(shareDiv);
-  var add=$("<input>").attr("type","button").attr("value","Share").appendTo(shareDiv);
+  var add=$("<input>").attr("type","button").attr("value",getTranslated("i_share")).appendTo(shareDiv);
   add.on("click submit",function() {
     var val=input.val();
     if (val) {
@@ -1007,7 +1007,10 @@ var shareText = function(version) {
         input.val("");
         alreadyShares.push(val);
         find(version).find(".list-shares").append($("<span>").addClass("shared").text(val));
+        find(version).find(".list-shares .total").text(find(version).find(".list-shares .shared").length);
         sharedItem(val).appendTo(shareList);
+        find(version).find("div.share select").val("shared");
+        updatePrivacyInfo.apply(find(version).find("div.share select"));
         shareList.scrollTop(sharedItem.position().top);
       });
     }
@@ -1039,24 +1042,50 @@ var shareText = function(version) {
 
 }
 
+var updatePrivacyInfo=function() {
+  var ref = $(this).closest("th").data("version");
+  var val=$(this).val();
+  $(this).data("value",val);
+  if ($(this).data("value")=="public") {
+    $("option.private",this).attr("disabled",true);
+    $("option.shared",this).attr("disabled",true).attr("value","Shared");
+  } else if ($(this).data("value")=="shared") {
+    $("option.private",this).attr("disabled",true);
+    if (!$(this).parent().find("input.share-button").length) {
+      $("<input>").attr("type","button").addClass("share-button").val(getTranslated("i_share_")).on("click",function() {
+        shareText(ref);
+      }).appendTo($(this).siblings(".list-shares"));
+    }
+  }
+}
+
 var changePrivacy = function () {
   var val=$(this).val();
   var ref = $(this).closest("th").data("version");
-  var modify;
-  if (val=="public") {
-    if (confirm("Are you sure you want to switch this work to public ? ")) {
-      modify={public:true};
-      modifyVersion(ref,modify)
-      .done(function(result) {
-        if (result.actions) {
-          alert(result.actions.join("\n"));
-          $("option",this).attr("disabled",true);
-          $(this).siblings("list-shares").hide();
-        }
-      });
+  if (val!=$(this).data("value")) {
+    var modify;
+    if (val=="public") {
+      var select=$(this);
+      if (confirm("Are you sure you want to switch this work to public ? ")) {
+        modify={public:true};
+        modifyVersion(ref,modify)
+        .done(function(result) {
+          if (result.actions) {
+            $("option",select).attr("disabled",true);
+            select.siblings(".list-shares").hide();
+            select.data("value","public");
+            updatePrivacyInfo.apply(select);
+          }
+        });
+      } else {
+        //Cancel change
+        $(this).val($(this).data("value"));
+      }
+    } else if (val=="shared") {
+      shareText(ref);
+      //value will change if a share is effectively done
+      $(this).val($(this).data("value"));
     }
-  } else if (val=="shared") {
-    shareText(ref);
   }
 }
 
@@ -1136,6 +1165,10 @@ $(document).ready(function() {
   $("#hexapla").on("click","span.delete", clickDeleteVersion);
 
   $("tfoot").on("change","div.share select", changePrivacy);
+  $("div.share select").each(function() {
+    $(this).val($(this).data("value"));
+    updatePrivacyInfo.apply(this);
+  })
 
   $("input[type=text],select").each(function() {
     if (!$(this).prop("placeholder")) {

@@ -140,19 +140,19 @@
         </div>
         <div class="link"><a href="{{prefix}}/works/{{id}}/print/{{version}}">{{i_print}}</a></div>
         <div class="button hide">{{i_hide}}</div>
-        {{^privileges.public}}
         <div class="share">
-          <select data-value="{{shareValue}}">
-            <option value="public">Public</option>
-            <option value="private">Private</option>
-            <option value="shared">Shared</option>
-          </select>
-          <div class="list-shares">{{#sharedTo}}
-            <span class="shared">{{.}}</span>
-            {{/sharedTo}}
-          </div>
+        <select data-value="{{shareValue}}">
+          <option value="public" class="public">{{i_public}}</option>
+          <option value="shared" class="shared">{{i_shared}}</option>
+          <option value="private" class="private">{{i_private}}</option>
+        </select>
+        <div class="list-shares">
+          <!--<span class="total">{{sharedTo.length}}</span> {{i_shares}}-->
+          {{#sharedTo}}
+          <span class="shared">{{.}}</span>
+          {{/sharedTo}}
         </div>
-        {{/privileges.public}}
+      </div>
       </div>
     </th>
   {{/headers}}

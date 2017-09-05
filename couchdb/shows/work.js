@@ -3,7 +3,9 @@ function(o, req) {
   var js_i18n_elements=[
     "i_read","i_edit","i_show","i_search_concordance",
     "i_confirm_delete","i_delete_version","i_delete_original", "i_no_title", "i_no_author",
-    "i_glossary_add_translation"
+    "i_glossary_add_translation",
+    "i_share","i_share_","i_public","i_shared","i_public","i_private"
+
   ];
 
   var doc=o;
@@ -58,6 +60,9 @@ function(o, req) {
       var hexapla = new Hexapla();
       var edited_versions=req.query.edit ? req.query.edit.split("|") : [];
       var opened_versions=req.query.open ? req.query.open.split("|") : [];
+      var public=o.privileges.public;
+      var shared=o.privileges.sharedTo && o.privileges.sharedTo.length;
+      var shareValue=public ? "public" : (shared ? "shared" : "private");
       if (o.text) {
         hexapla.addVersion({
           id: "original",
@@ -74,6 +79,8 @@ function(o, req) {
           edited: (edited_versions.indexOf("original")!=-1),
           opened: (opened_versions.indexOf("original")!=-1),
           owner:o.privileges.owner,
+          shareValue:shareValue,
+          sharedTo:o.privileges.sharedTo,
           public:o.privileges.public,
           private:!o.privileges.public && (!o.privileges.sharedTo || !o.privileges.sharedTo.length),
           shared:!o.privileges.public && o.privileges.sharedTo && o.privileges.sharedTo.length
@@ -106,7 +113,10 @@ function(o, req) {
             edited: Traduxio.canEdit(translation) && (edited_versions.indexOf(t)!== -1),
             owner:translation.privileges.owner,
             shareValue:shareValue,
-            sharedTo:translation.privileges.sharedTo
+            sharedTo:translation.privileges.sharedTo,
+            public:translation.privileges.public,
+            private:!translation.privileges.public && (!translation.privileges.sharedTo || !translation.privileges.sharedTo.length),
+            shared:!translation.privileges.public && translation.privileges.sharedTo && translation.privileges.sharedTo.length
           });
         }
       }
