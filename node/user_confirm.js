@@ -38,6 +38,34 @@ function isValidEmail(email) {
   return emailRegExp.test(email);
 }
 
+var known_users;
+
+function recordUser(user) {
+  if (!known_users[user.name] || !known_users[user.name]._rev || known_users[user.name]._rev!=user._rev) {
+    known_users[user.name]=user;
+    saveKnownUsers();
+  }
+}
+
+var savingLock;
+function saveKnownUsers() {
+  if (!savingLock) {
+    savingLock=true;
+    console.log("insert known users");
+    admin_db.insert(known_users,function(err,body) {
+      if (!err) {
+        known_users._rev=body.rev;
+      } else {
+        console.log("error saving known users "+err);
+      }
+      savingLock=false;
+    });
+  } else {
+    console.log("already inserting known users");
+    setTimeout(saveKnownUsers,100);
+  }
+}
+
 function confirm(user) {
   function unconfirm() {
     var confirmed_role=user.roles.indexOf("confirmed");
@@ -57,7 +85,7 @@ function confirm(user) {
   if (user._deleted) {
     console.log("user is deleted");
     delete known_users[user.name]
-    admin_db.insert(known_users);
+    saveKnownUsers();
     return;
   }
   if (user.email && isValidEmail(user.email)) {
@@ -106,30 +134,25 @@ function confirm(user) {
     }
     if (user._modified) {
       delete user._modified;
-      known_users[user.name]=user;
       console.log("insert modified user");
       users_db.insert(user,function(err,body) {
         if (!err) {
-          known_users[user.name]._rev=body.rev;
+          user._rev=body.rev;
         } else {
-          console.log("error saving user "+user.name+" "+user._rev);
+          console.log("error saving user "+user.name+" "+user._rev+" "+err);
         }
         console.log("insert known users");
-        admin_db.insert(known_users);
+        recordUser(user);
       });
     } else {
-      if (!known_users[user.name] || !known_users[user.name]._rev || known_users[user.name]._rev!=user._rev) {
-        console.log("insert known users");
-        known_users[user.name]=user;
-        admin_db.insert(known_users);
-      }
+      recordUser(user);
     }
     if (key) {
       console.log("would send email to "+user.email+" with "+key);
     }
   } else {
     console.log("user "+user.name+" doesn't have email");
-    return; // can't confirm
+    recordUser(user);
   }
 }
 
