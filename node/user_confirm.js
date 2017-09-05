@@ -75,6 +75,7 @@ function confirm(user) {
       user._modified=true;
     }
     if (user.confirm_key) {
+      user.failed_confirm_key=user.confirm_key;
       delete user.confirm_key;
       console.log("remove confirm key");
       user._modified=true;

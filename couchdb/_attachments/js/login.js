@@ -56,12 +56,8 @@ function logout() {
   });
 }
 
-function getUserInfo(username,callback) {
-  // session().done(function(result){
-  //   if (result.userCtx.name) {
-      $.couch.db("_users").openDoc("org.couchdb.user:"+username,{success:callback});
-  //   }
-  // });
+function getUserInfo(username,callback,failcallback) {
+  $.couch.db("_users").openDoc("org.couchdb.user:"+username,{success:callback,error:failcallback});
 }
 
 function login(name,password) {
@@ -87,6 +83,37 @@ function register(data, password, callback) {
       error: callback
     }
   );
+}
+
+function emailConfirm(username,confirm_key,retrycount) {
+  getUserInfo(username,function(userInfo) {
+    if (userInfo.confirm_key) {
+      if(userInfo.roles.indexOf("confirmed")!=-1) {
+        if (retrycount) {
+          alert("email confirmed");
+        } else {
+          alert("email already confirmed");
+        }
+        window.location.search="";
+      } else if (retrycount>4) {
+        alert("confirmation failed");
+        window.location.search="";
+      }
+    } else if (userInfo.failed_confirm_key && userInfo.failed_confirm_key==confirm_key) {
+      alert("confirmation failed")
+      window.location.search="";
+    }
+    userInfo.confirm_key=confirm_key;
+    $.couch.db("_users").saveDoc(userInfo,{
+      success:function() {
+        retrycount=retrycount || 0;
+        retrycount++;
+        setTimeout(emailConfirm,2000,username,confirm_key,retrycount);
+      }
+    });
+  },function(error) {
+    alert("error confirming "+error);
+  });
 }
 
 function editUserForm(userInfo,callback) {
@@ -159,8 +186,20 @@ function signUpForm(callback) {
   return form;
 }
 
+function getParameterByName(name) {
+  var match = RegExp('[?&]' + name + '=([^&]*)').exec(window.location.search);
+  return match && decodeURIComponent(match[1].replace(/\+/g, ' '));
+}
+
 $(document).ready(function() {
-  session().done(function(result){
+  session().done(function(result) {
     updateUserInfo(result.userCtx);
+    if (getParameterByName("email_confirm")) {
+      if (!result.userCtx.name) {
+        alert("Please log in to confirm your email");
+      } else {
+        emailConfirm(result.userCtx.name,getParameterByName("email_confirm"));
+      }
+    }
   });
 });
