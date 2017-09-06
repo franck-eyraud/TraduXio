@@ -43,7 +43,7 @@ function(o, req) {
     lines:1,
     i18n:i18n
   }
-  if (Traduxio.canAccess(o)) {
+  if (Traduxio.canAccess(o) && (!newWork || Traduxio.canEdit(o))) {
     data.seq=req.info.update_seq;
     data.work_title=o.title;
     data.display_work_title=o.title?o.title:i18n["i_no_title"];

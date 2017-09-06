@@ -55,5 +55,6 @@ function(head, req) {
   data.prefix="..";
   data.i18n=localized();
   data.page_title=data.i18n["i_works_list"];
+  data.canAddWork=Traduxio.canEdit(null);
   return Mustache.to_html(this.templates.works, data,this.templates.partials);
 }
