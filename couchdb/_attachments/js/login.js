@@ -52,7 +52,7 @@ function logout() {
     dataType:"json",
     type:"DELETE"
   }).done(function(result){
-    window.location.href=window.location.href;
+    window.location.reload();
   });
 }
 
@@ -69,7 +69,7 @@ function login(name,password) {
   }).done(function(result){
     if (result.ok) {
       result.name=result.name || name;
-      window.location.href=window.location.href;
+      window.location.reload();
     }
   });
 }
