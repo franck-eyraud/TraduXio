@@ -26,7 +26,6 @@ function(work, req) {
 
     if(!version_name || version_name == "original") {
       original=true;
-      version_name="original";
     } else {
       if(!work.translations[version_name]) {
         return [null,{code:404,body:version_name+" not found"}];
@@ -43,7 +42,6 @@ function(work, req) {
         delete args.creator;
       } else {
         original=true;
-        version_name="original";
       }
 
       work.edits=work.edits||[];
@@ -181,7 +179,8 @@ function(work, req) {
           doc.privileges=doc.privileges || {};
           if (args[key]=="true" || args[key]==true) {
             doc.privileges.public=true;
-            actions.push(version_name+" becomes public");
+            var name=version_name || "original";
+            actions.push(name+" becomes public");
           } else {
             return [null,{code:400,body:"Can't set value "+args[key]+" to public"}];
           }
