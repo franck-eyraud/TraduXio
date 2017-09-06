@@ -87,10 +87,19 @@ Traduxio= {
 
   isPublic:function (work) {
     work=work || this.doc;
-    if (work && work.privileges && work.privileges.public) {
-      return true
+    if (work) {
+      work.privileges=work.privileges || {};
+      if (work.privileges.public) {
+        return true
+      }
+      if (!work.privileges.owner) {
+        log("public because no owner");
+        work.privileges.public=true;
+        return true;
+      }
+      log("work is not public");
+      return false;
     }
-    log("work is not public");
     return false;
   },
 
@@ -112,9 +121,13 @@ Traduxio= {
       var privileges=work.privileges || {public:true};
       var user=this.getUser();
       if (!user.anonymous && privileges.owner==user.name) return true;
-      if (!privileges.owner && Traduxio.config.anonymous_edit) return true;
-      if (Traduxio.config.anonymous_edit) {log("anonymous edit")}
-      else {log("sorry, no anonymous edit");}
+      if (!privileges.owner && Traduxio.config.anonymous_edit) {
+        log("anonymous edit");
+        privileges.public=true;
+        return true;
+      } else if (!privileges.owner) {
+        log("sorry, no anonymous edit");
+      }
     } else {
       if (Traduxio.config.anonymous_edit) return true;
     }
