@@ -55,6 +55,8 @@ function(o, req) {
     data.lines=getTextLength();
     data.canEdit=Traduxio.canEdit(o);
     data.canAccess=true;
+    data.canDelete=Traduxio.canDelete(o);
+    data.canTranslate=Traduxio.canTranslate(o);
 
     if (!newWork) {
       var hexapla = new Hexapla();
@@ -110,6 +112,7 @@ function(o, req) {
             canAccess: Traduxio.canAccess(translation),
             opened: Traduxio.canAccess(translation) && (opened_versions.indexOf(t)!== -1),
             canEdit: Traduxio.canEdit(translation),
+            canDelete: Traduxio.canDelete(translation),
             edited: Traduxio.canEdit(translation) && (edited_versions.indexOf(t)!== -1),
             owner:translation.privileges.owner,
             shareValue:shareValue,
