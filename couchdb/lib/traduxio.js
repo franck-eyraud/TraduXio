@@ -121,13 +121,6 @@ Traduxio= {
       var privileges=work.privileges || {public:true};
       var user=this.getUser();
       if (!user.anonymous && privileges.owner==user.name) return true;
-      if (!privileges.owner && Traduxio.config.anonymous_edit) {
-        log("anonymous edit");
-        privileges.public=true;
-        return true;
-      } else if (!privileges.owner) {
-        log("sorry, no anonymous edit");
-      }
     } else {
       if (Traduxio.config.anonymous_edit) return true;
     }

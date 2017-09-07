@@ -147,27 +147,6 @@ function (newDoc, oldDoc, userCtx, secObj) {
     return;
   }
 
-  if (newDoc.type=="confirm") {
-    if (oldDoc) {
-      ensureUnchangedFields(["confirm_name","confirm_email","type"]);
-      if (newDoc.confirm_key) {
-        if (!oldDoc.confirm_key) {
-          //TODO check key with some hash
-          if (newDoc.confirm_key!=oldDoc.confirm_email) {
-            throw({forbidden:"Access denied"});
-          }
-        } else {
-          throw({forbidden:"Access denied"});
-        }
-      }
-    } else {
-      if (!Traduxio.isAdmin()) {
-        throw({forbidden:"Access denied"});
-      }
-    }
-    return;
-  }
-
   if (!Traduxio.canAccess(oldDoc)) {
     Traduxio.config.debug && log("can't access old");
     throw({forbidden:"Access denied"});
@@ -186,6 +165,11 @@ function (newDoc, oldDoc, userCtx, secObj) {
       throw({forbidden:"Must set owner to yourself"});
     }
   }
+
+  if (newDoc._deleted && !Traduxio.canDelete(oldDoc)) {
+    throw({forbidden:"Can't delete!"});
+  }
+
 
 
   ensureArrays(["text"]);
