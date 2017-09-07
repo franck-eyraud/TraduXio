@@ -182,7 +182,7 @@ Traduxio= {
     if (this.isAdmin()) return true;
     work=work||this.doc;
     if (this.isOriginalWork(work) &&
-      (this.isPublic(work) || this.hasSharedAccess(work))
+      (this.isPublic(work) || this.isOwner(work) || this.hasSharedAccess(work))
     ) {
       return true;
     }
