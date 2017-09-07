@@ -148,10 +148,7 @@ Traduxio= {
       if (this.isAdmin()) return true;
       if (this.isOwner(work)) return true;
       if (this.hasSharedAccess(work)) return true;
-      if (work) {
-        var privileges=work.privileges || {public:true};
-        if (privileges.public) return true;
-      }
+      if (this.isPublic(work)) return true;
       this.config.debug && log("no access");
       return false;
     }
