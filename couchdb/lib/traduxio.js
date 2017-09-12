@@ -120,7 +120,7 @@ Traduxio= {
     if (work) {
       var privileges=work.privileges || {public:true};
       var user=this.getUser();
-      if (!user.anonymous && privileges.owner==user.name) return true;
+      if ((!user.anonymous || Traduxio.config.anonymous_edit) && privileges.owner==user.name) return true;
     } else {
       if (Traduxio.config.anonymous_edit) return true;
     }
@@ -182,7 +182,10 @@ Traduxio= {
     if (this.isAdmin()) return true;
     work=work||this.doc;
     if (this.isOriginalWork(work) &&
-      (this.isPublic(work) || this.isOwner(work) || this.hasSharedAccess(work))
+      (
+        this.isPublic(work) || this.isOwner(work) || this.hasSharedAccess(work)
+      )
+      && (!this.getUser().anonymous || Traduxio.config.anonymous_edit)
     ) {
       return true;
     }
