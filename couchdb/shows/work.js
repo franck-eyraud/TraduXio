@@ -4,7 +4,8 @@ function(o, req) {
     "i_read","i_edit","i_show","i_search_concordance",
     "i_confirm_delete","i_delete_version","i_delete_original", "i_no_title", "i_no_author",
     "i_glossary_add_translation",
-    "i_share","i_share_","i_share_with","i_public","i_shared","i_public","i_private"
+    "i_share","i_share_","i_share_invite","i_share_participants",
+    "i_public","i_shared","i_public","i_private"
 
   ];
 

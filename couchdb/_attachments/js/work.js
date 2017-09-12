@@ -982,16 +982,18 @@ var shareText = function(version) {
     return item;
   }
 
-  var shareDiv=$("<div>").append($("<h1>").append(getTranslated("i_share")+" "+version)).addClass("share-text");
+  var shareDiv=$("<div>").addClass("share-dialog")
+    .append($("<h2>").append(getTranslated("i_share_participants")));
   var alreadyShares=find(version).find(".list-shares .shared").map(function() {return $(this).text()}).toArray();
   var shareList=$("<div>").addClass("share-list").appendTo(shareDiv);
 
   alreadyShares.forEach(function(userid) {
     sharedItem(userid).appendTo(shareList);
   });
-  shareDiv.append(getTranslated("i_share_with"));
-  var input=$("<input>").appendTo(shareDiv);
-  var add=$("<input>").attr("type","button").attr("value",getTranslated("i_share")).appendTo(shareDiv);
+  var addPanel=$("<div>").addClass("add-panel").appendTo(shareDiv);
+  addPanel.append($("<label>").addClass("share").text(getTranslated("i_share_invite")));
+  var input=$("<input>").appendTo(addPanel);
+  var add=$("<input>").attr("type","button").attr("value",getTranslated("i_share")).appendTo(addPanel);
   add.on("click submit",function() {
     var val=input.val();
     if (val) {
@@ -1009,10 +1011,10 @@ var shareText = function(version) {
         alreadyShares.push(val);
         find(version).find(".list-shares").append($("<span>").addClass("shared").text(val));
         find(version).find(".list-shares .total").text(find(version).find(".list-shares .shared").length);
-        sharedItem(val).appendTo(shareList);
+        var newItem=sharedItem(val).appendTo(shareList);
         find(version).find("div.share select").val("shared");
         updatePrivacyInfo.apply(find(version).find("div.share select"));
-        shareList.scrollTop(sharedItem.position().top);
+        shareList.scrollTop(newItem.position().top);
       });
     }
   });
@@ -1039,7 +1041,7 @@ var shareText = function(version) {
       }
     }
   });
-  addModal(shareDiv);
+  addModal(shareDiv,getTranslated("i_share")+" "+version);
 
 }
 

@@ -117,16 +117,25 @@ function getTranslated(name) {
   return translation;
 }
 
-function addModal (content) {
-  var modal=$("<div>").addClass("modal").appendTo("body");
-  var dialog=$("<div>").addClass("dialog").appendTo(modal);
-  var close=$("<span>").addClass("button close").appendTo(dialog).append("X");
-  dialog.append(content);
-  close.on("click",function() {
+function addModal (content,title) {
+  function modalClean() {
     modal.remove();
-  });
+    $("body").css("overflow",body_overfolw);
+  }
+  var modal=$("<div>").addClass("modal").appendTo("body");
+  var body_overfolw=$("body").css("overflow");
+  $("body").css("overflow","hidden");
+
+  var dialog=$("<div>").addClass("dialog").appendTo(modal);
+  var titleDiv=$("<div>").addClass("title").appendTo(dialog);
+  if (title) titleDiv.text(title);
+  var close=$("<span>").addClass("button close").appendTo(titleDiv).append("X");
   dialog.on("click",function(e) {e.stopPropagation();});
-  modal.on("click",function(e) {modal.remove()});
+  modal.on("click",modalClean);
+  close.on("click",modalClean);
+
+  var contentPane=$("<div>").addClass("content").appendTo(dialog);
+  contentPane.append(content);
   return modal;
 }
 

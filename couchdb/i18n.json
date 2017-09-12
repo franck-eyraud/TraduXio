@@ -39,7 +39,8 @@
 
     "i_share": "Share",
     "i_share_": "Manage shares...",
-    "i_share_with": "Enter user name :",
+    "i_share_participants": "Participants",
+    "i_share_with": "Invite a new participant",
     "i_shares": "Partages",
     "i_shared": "Shared",
     "i_public": "Public",
@@ -150,7 +151,8 @@
 
     "i_share": "Partager",
     "i_share_": "Gérer les partages...",
-    "i_share_with": "Entrer le nom d'un utilisateur :",
+    "i_share_participants": "Participants",
+    "i_share_invite": "Inviter un nouveau participant",
     "i_shares": "Partages",
     "i_shared": "Partagé",
     "i_public": "Public",

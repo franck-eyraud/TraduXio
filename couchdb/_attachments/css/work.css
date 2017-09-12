@@ -467,15 +467,25 @@ div.context-menu .action:hover {
     font-style: italic;
 }
 
-div.share-list {
+div.share-dialog .share-list {
   padding:1em 3em;
   text-align: left;
-  height:85%;
+  height:50%;
   overflow-y: scroll;
+  border: 1px solid;
+  margin: 1em 0em;
 }
 
-div.share-list .shared-user {
+div.share-dialog .share-list .shared-user {
   padding:1em;
+}
+
+div.share-dialog .add-panel {
+  text-align: center;
+}
+
+div.share-dialog label {
+  display: block;
 }
 
 div.unit *::selection {
