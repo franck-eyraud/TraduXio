@@ -241,7 +241,7 @@ http://kizu.ru/en/fun/rotated-text/
   font-weight: bold;
 }
 
-.modal .title .button.close {
+.modal .button.close {
   top:0px; right:0px;
   border:2px solid;
   padding:3px;

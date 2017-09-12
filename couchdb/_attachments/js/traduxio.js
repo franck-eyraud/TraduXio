@@ -127,9 +127,10 @@ function addModal (content,title) {
   $("body").css("overflow","hidden");
 
   var dialog=$("<div>").addClass("dialog").appendTo(modal);
-  var titleDiv=$("<div>").addClass("title").appendTo(dialog);
-  if (title) titleDiv.text(title);
-  var close=$("<span>").addClass("button close").appendTo(titleDiv).append("X");
+  if (title) {
+    $("<div>").addClass("title").text(title).appendTo(dialog);
+  }
+  var close=$("<span>").addClass("button close").appendTo(dialog).append("X");
   dialog.on("click",function(e) {e.stopPropagation();});
   modal.on("click",modalClean);
   close.on("click",modalClean);
