@@ -989,6 +989,7 @@ var shareText = function(version) {
   alreadyShares.forEach(function(userid) {
     sharedItem(userid).appendTo(shareList);
   });
+  shareDiv.append(getTranslated("i_share_with"));
   var input=$("<input>").appendTo(shareDiv);
   var add=$("<input>").attr("type","button").attr("value",getTranslated("i_share")).appendTo(shareDiv);
   add.on("click submit",function() {
