@@ -98,42 +98,48 @@ function confirm(user) {
     return;
   }
   if (user.email && isValidEmail(user.email)) {
-    var expired=false,
+    var toBeConfirmed=false,
       confirmed=false;
     //update user db in database (to allow user search)
     if (known_users[user.name] && known_users[user.name].email!=user.email) {
-      expired=true;
+      toBeConfirmed=true;
     } else {
       var existing_timestamp=user.confirm_sent_timestamp;
       console.log("found existing_timestamp "+existing_timestamp);
       if (existing_timestamp) {
         var key=getConfirmKey(user.email,existing_timestamp);
         if (user.confirm_key && user.confirm_key==key) {
-          confirmed=true;
-          console.log("confirmed");
           if (user.roles.indexOf("confirmed") == -1) {
-            console.log("add role confirmed");
-            user.roles.push("confirmed");
-            user._modified=true;
+            var spent_time=new Date().getTime()-new Date(existing_timestamp).getTime();
+            var expired=(spent_time > MAX_CONFIRM_HOURS * 3600 * 1000);
+            if (expired) {
+              console.log("expired "+spent_time+" rejecting confirm_key");
+              delete user.confirm_key;
+              user._modified=true;
+            } else {
+              confirmed=true;
+              console.log("confirmed");
+              console.log("add role confirmed");
+              user.roles.push("confirmed");
+              user._modified=true;
+            }
           } else {
             console.log("already role confirmed");
             console.log(user.roles);
+            confirmed=true;
           }
         } else {
           console.log("not confirmed");
-          var spent_time=new Date().getTime()-new Date(existing_timestamp).getTime();
-          expired=(spent_time > MAX_CONFIRM_HOURS * 3600 * 1000);
-          if (expired) {console.log("expired "+spent_time)};
         }
       } else {
-        expired=true;
+        toBeConfirmed=true;
       }
     }
 
     var key=null;
     if (!confirmed) {
       unconfirm();
-      if (expired) {
+      if (toBeConfirmed) {
         var timestamp=new Date().toISOString();
         user.confirm_sent_timestamp=timestamp;
         user._modified=true;
