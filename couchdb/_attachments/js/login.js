@@ -95,13 +95,16 @@ function emailConfirm(username,confirm_key,retrycount) {
           alert("email already confirmed");
         }
         window.location.search="";
+        return;
       } else if (retrycount>4) {
         alert("confirmation failed");
         window.location.search="";
+        return;
       }
     } else if (userInfo.failed_confirm_key && userInfo.failed_confirm_key==confirm_key) {
       alert("confirmation failed")
       window.location.search="";
+      return;
     }
     userInfo.confirm_key=confirm_key;
     $.couch.db("_users").saveDoc(userInfo,{
