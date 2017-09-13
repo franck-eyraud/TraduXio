@@ -49,9 +49,27 @@ function isValidEmail(email) {
 var known_users;
 
 function recordUser(user) {
-  if (!known_users[user.name] || !known_users[user.name]._rev || known_users[user.name]._rev!=user._rev) {
-    known_users[user.name]=user;
-    saveKnownUsers();
+  if (user._modified) {
+    delete user._modified;
+    console.log("insert modified user");
+    users_db.insert(user,function(err,body) {
+      if (!err) {
+        user._rev=body.rev;
+      } else {
+        console.log("error saving user "+user.name+" "+user._rev+" "+err);
+      }
+    });
+  } else {
+    if (user._deleted) {
+      if (known_users[user.name]) {
+        console.log("user "+user.name+" is deleted");
+        delete known_users[user.name]
+        saveKnownUsers();
+      }
+    } else if (!known_users[user.name] || !known_users[user.name]._rev || known_users[user.name]._rev!=user._rev) {
+      known_users[user.name]=user;
+      saveKnownUsers();
+    }
   }
 }
 
@@ -85,19 +103,14 @@ function confirm(user) {
     if (user.confirm_key) {
       user.failed_confirm_key=user.confirm_key;
       delete user.confirm_key;
+      delete confirm_sent_timestamp;
       console.log("remove confirm key");
       user._modified=true;
     }
   }
 
   if (!user.name) {console.log("user doesn't have name");return;}
-  if (user._deleted) {
-    console.log("user is deleted");
-    delete known_users[user.name]
-    saveKnownUsers();
-    return;
-  }
-  if (user.email && isValidEmail(user.email)) {
+  if (!user._deleted && user.email && isValidEmail(user.email)) {
     var toBeConfirmed=false,
       confirmed=false;
     //update user db in database (to allow user search)
@@ -114,6 +127,7 @@ function confirm(user) {
             var expired=(spent_time > MAX_CONFIRM_HOURS * 3600 * 1000);
             if (expired) {
               console.log("expired "+spent_time+" rejecting confirm_key");
+              user.confirm_error="Confirmation token has expired";
               delete user.confirm_key;
               user._modified=true;
             } else {
@@ -147,35 +161,24 @@ function confirm(user) {
         key=getConfirmKey(user.email,timestamp);
       }
     }
-    if (user._modified) {
+    if (key) {
+      console.log("send email to "+user.email+" with "+key);
+      //defer user save to after email sending
+      let modified=user._modified;
       delete user._modified;
-      console.log("insert modified user");
-      users_db.insert(user,function(err,body) {
-        if (!err) {
-          user._rev=body.rev;
-        } else {
-          console.log("error saving user "+user.name+" "+user._rev+" "+err);
+      sendConfirm(user.email,config.base_url+"?email_confirm="+key,function(err,message) {
+        user._modified=modified;
+        if (err) {
+          console.log("recording email send error "+err);
+          user.confirm_error="Error sending email : "+err.message;
+          delete user.confirm_sent_timestamp;
+          user._modified=true;
         }
-        console.log("insert known users");
         recordUser(user);
       });
-    } else {
-      recordUser(user);
     }
-    if (key) {
-      console.log("would send email to "+user.email+" with "+key);
-      sendConfirm(user.email,config.base_url+"?email_confirm="+key,function(err,message) {
-        if (err) {
-          console.log("recording semail send error "+err);
-          user.email_send_error=err;
-          recordUser(user);
-        }
-      });
-    }
-  } else {
-    console.log("user "+user.name+" doesn't have email");
-    recordUser(user);
   }
+  recordUser(user);
 }
 
 function isEmail(doc, req) {
