@@ -1,0 +1,21 @@
+{{>header}}
+{{#i18n}}
+<div id="myworks">
+    {{#mine.length}}
+    My works
+    <table><tr><th>Creator</th><th>Version</th><th>Title</th><th>language</th><th>Last edit</th></tr>
+    {{/mine.length}}
+    {{#mine}}
+    <tr>
+      <td><a href="{{prefix}}/works/{{id}}?open={{version}}">{{work_creator}}</a></td>
+      <td>{{creator}}</td>
+      <td>{{title}}</td>
+      <td>{{language}}</td>
+      <td>{{when}}</td>
+    </tr>
+    {{/mine}}
+    {{#mine.length}}
+    </table>
+    {{/mine.length}}
+{{/i18n}}
+{{>footer}}

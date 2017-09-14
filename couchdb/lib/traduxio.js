@@ -32,7 +32,9 @@ Traduxio= {
   doc:{},
 
   compareActivities:function(a1,a2) {
-    return new Date(a1.when).getTime()-new Date(a2.when).getTime();
+    var time1=new Date(a1.when).getTime() || 0;
+    var time2=new Date(a2.when).getTime() || 0;
+    return time1-time2;
   },
 
   canAccessActivity:function(activity,index) {
