@@ -13,6 +13,7 @@ function(head, req) {
     if (Traduxio.canAccess(row.value)) {
       if (!currentWork || currentWork.id != row.key[1]) {
         if (currentWork && (Traduxio.isOwner(currentWork) || currentWork.translations.length)) {
+          currentWork.translations.reverse();
           data.works.push(currentWork);
         }
         currentWork=row.value;
@@ -25,8 +26,10 @@ function(head, req) {
     }
   }
   if (currentWork && (Traduxio.isOwner(currentWork) || currentWork.translations.length)) {
+    currentWork.translations.reverse();
     data.works.push(currentWork);
   }
+  data.works.reverse();
   data.name="myworks";
   data.scripts=["ul-close"];
   data.script=true;

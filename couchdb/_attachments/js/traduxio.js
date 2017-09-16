@@ -91,14 +91,17 @@ function fixLanguages(container) {
     }
     language.each(function() {
       var lang=$(this);
-      var langID=lang.data("id");
+      var langID=lang.data("id") || lang.text();
       if (langID) {
         var langName=langID?getLanguageName(langID):"";
-        if (lang.is(".expand")) {
-          lang.text(langName);
-          lang.prop('title',langID);
-        } else {
-          lang.prop('title',langName);
+        if (langName) {
+          lang.data("id",langID);
+          if (lang.is(".expand")) {
+            lang.text(langName);
+            lang.prop('title',langID);
+          } else {
+            lang.prop('title',langName);
+          }
         }
       }
     });

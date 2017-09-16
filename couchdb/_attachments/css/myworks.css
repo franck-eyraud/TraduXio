@@ -1,0 +1,40 @@
+div#myworks {
+  padding:10px;
+}
+
+div#myworks ul {
+    padding-left: 0px;
+    margin-left: 0px;
+}
+
+div#myworks li {
+  list-style: none;
+}
+
+div#myworks li.work {
+  border: 1px solid;
+  border-radius: 20px;
+  padding:5px;
+  margin: 10px;
+  background-color: darkgray;
+}
+
+li.translation {
+  border: 1px solid;
+  border-radius: 10px;
+  padding: 5px;
+  margin: 5px;
+  background-color: gray;
+}
+
+span.language {
+  font-style: oblique;
+}
+
+span.owner, span.title {
+  font-style: italic;
+}
+
+span.work_creator, span.title {
+  font-weight: bold;
+}

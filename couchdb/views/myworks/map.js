@@ -9,15 +9,16 @@ function (o) {
       trname="original";
       doc=o;
       info.creator=doc.creator;
+      info.workd_creator=doc.creator;
     }
     if (doc) {
-      info.title=doc.title || o.title;
+      info.title=doc.title;
       info.lines=doc.text.length;
       info.translations=o.translations.length;
       info.privileges=doc.privileges;
       info.last_edit=last_edit(trname);
       info.version=trname;
-      info.work_creator=doc.work_creator || o.creator;
+      info.work_creator=doc.creator;
       info.language=doc.language;
     }
     return info;
