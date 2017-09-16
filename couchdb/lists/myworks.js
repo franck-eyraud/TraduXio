@@ -7,21 +7,26 @@ function(head, req) {
   }
 
   start({headers: {"Content-Type": "text/html;charset=utf-8"}});
-  var data = {mine:[],shared:[],public:[]};
+  var data = {works:[]};
+  var currentWork=null;
   while (row = getRow()) {
     if (Traduxio.canAccess(row.value)) {
-      if (Traduxio.isOwner(row.value)) {
-        data.mine.push(row.value);
-      } else if (Traduxio.isPublic(row.value)) {
-        data.public.push(row.value);
-      } else if (Traduxio.hasSharedAccess(row.value)) {
-        data.shared.push(row.value);
+      if (!currentWork || currentWork.id != row.key[1]) {
+        if (currentWork && (Traduxio.isOwner(currentWork) || currentWork.translations.length)) {
+          data.works.push(currentWork);
+        }
+        currentWork=row.value;
+        currentWork.translations=[];
+      } else {
+        if (Traduxio.isOwner(row.value) || Traduxio.hasSharedAccess(row.value)) {
+          currentWork.translations.push(row.value);
+        }
       }
     }
   }
-  data.shared.sort(lastBefore);
-  data.mine.sort(lastBefore);
-  data.public=data.public.sort(lastBefore);
+  if (currentWork && (Traduxio.isOwner(currentWork) || currentWork.translations.length)) {
+    data.works.push(currentWork);
+  }
   data.name="myworks";
   data.scripts=["ul-close"];
   data.script=true;

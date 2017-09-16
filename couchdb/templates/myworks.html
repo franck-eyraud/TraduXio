@@ -1,21 +1,37 @@
 {{>header}}
 {{#i18n}}
 <div id="myworks">
-    {{#mine.length}}
-    My works
-    <table><tr><th>Creator</th><th>Version</th><th>Title</th><th>language</th><th>Last edit</th></tr>
-    {{/mine.length}}
-    {{#mine}}
-    <tr>
-      <td><a href="{{prefix}}/works/{{id}}?open={{version}}">{{work_creator}}</a></td>
-      <td>{{creator}}</td>
-      <td>{{title}}</td>
-      <td>{{language}}</td>
-      <td>{{when}}</td>
-    </tr>
-    {{/mine}}
-    {{#mine.length}}
-    </table>
-    {{/mine.length}}
+  {{i_my_translations}}
+  <ul class="works">
+  {{#works}}
+    <li class="work">
+      <div class="work-details">
+      {{#work_creator}}{{work_creator}}{{/work_creator}}
+      {{^work_creator}}{{i_no_author}}{{/work_creator}}
+      -
+      {{#title}}{{title}}{{/title}}
+      {{^title}}{{i_no_title}}{{/title}}
+      <br/>
+      {{privileges.owner}}
+      <br/>
+      <span class="language">{{language}}</span>
+      </div>
+      <ul class="translations">
+      {{#translations}}
+        <li class="translation">
+          {{version}}<br/>
+          {{work_creator}}
+          <br/>
+          {{title}}
+          <br/>
+          {{privileges.owner}} {{last_edit}}
+
+        </li>
+      {{/translations}}
+      </ul>
+    </li>
+  {{/works}}
+  </ul>
+</div>
 {{/i18n}}
 {{>footer}}
