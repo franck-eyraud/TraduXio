@@ -12,19 +12,34 @@ div#myworks li {
 }
 
 div#myworks li.work {
-  border: 1px solid;
   border-radius: 20px;
+  border-width: 2px;
+  border-style: solid;
+  border-color: #fff;
+  background-color: #fefefe;
   padding:5px;
   margin: 10px;
-  background-color: darkgray;
 }
 
+div#myworks li.work:hover {
+  border-color: #ddd;
+  background-color: #eee;
+}
+
+
 li.translation {
-  border: 1px solid;
   border-radius: 10px;
+  border-width: 2px;
+  border-style: solid;
+  border-color: transparent;
+  background-color: transparent;
   padding: 5px;
   margin: 5px;
-  background-color: gray;
+}
+
+li.translation:hover {
+  background-color: #eee;
+  border-color: #ddd;
 }
 
 span.language {

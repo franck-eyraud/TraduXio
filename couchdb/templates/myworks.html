@@ -24,13 +24,15 @@
       {{#translations}}
         <li class="translation">
           <a href="{{prefix}}/works/{{id}}?open={{version}}">
+            <div class="work-details">
             <span class="language expand">{{language}}</span>
             <span class="version">{{version}}</span>
             <span class="work_creator">{{work_creator}}</span>
             <span class="title">{{title}}</span>
             <br/>
             <span class="owner">{{privileges.owner}}</span>
-        </a>
+          </div>
+          </a>
         </li>
       {{/translations}}
       </ul>
