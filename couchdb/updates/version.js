@@ -4,14 +4,21 @@ function(old, req) {
 
   function Work() {
     this.data = old;
+    this.getVersion = function(version) {
+      return this.isOriginal(version)
+        ? this.data
+        : this.data.translations[version];
+    };
+    this.exists = function(version) {
+      return this.isOriginal(version) && this.data.text ||
+        this.data.translations.hasOwnProperty(version);
+    };
     this.isOriginal = function(version) {
       return version=="original";
     };
     this.getContent = function(version, line) {
-      return (this.isOriginal(version)
-        ? this.data
-        : this.data.translations[version]
-      ).text[line];
+      var text=this.getVersion(version).text;
+      return text[line];
     };
     this.setContent = function(version, line, content) {
       if (this.isOriginal(version)) {
@@ -29,13 +36,32 @@ function(old, req) {
 
   const VERSION_ID = req.query.version;
   const LINE = +req.query.line;
-  var new_content = req.body;
   var work = new Work();
-  var old_content = work.getContent(VERSION_ID, LINE);
+  if (!work.exists(VERSION_ID)) {
+    return [null, {code:400,body:"incorrect version "+VERSION_ID}];
+  }
+  if (LINE!==parseInt(LINE, 10) || LINE<0 || LINE>work.getVersion(VERSION_ID).text.length) {
+    return [null, {code:400,body:"incorrect line "+LINE}];
+  }
+  var old_content = work.getContent(VERSION_ID, LINE),
+      new_content,error=false;
+  try {
+    new_content = JSON.parse(req.body);
+  } catch (e) {
+    error="incorrect JSON";
+    new_content=-1;
+  }
+  if (!error && (typeof new_content != "string") && new_content != null) {
+    error=(typeof new_content)+" is not a valid type";
+  }
+  if (error) {return [null, {code:400,body:"incorrect input "+error}];}
   if (new_content!=old_content) {
-    if (new_content=="null") {
+    if (new_content==null && !work.isOriginal(VERSION_ID)) {
       var previous_line = LINE;
       var previous_line_content;
+      if (previous_line==0) {
+        return [null, {code:400,body:"can't merge before first line !"}];
+      }
       do {
         previous_line_content = work.getContent(VERSION_ID, --previous_line);
       } while (previous_line_content==null);
@@ -43,6 +69,8 @@ function(old, req) {
       work.setContent(VERSION_ID, previous_line, joined_content);
       new_content = null;
       //Traduxio.addActivity(this.data.edits,{action:"joined",version:VERSION_ID,line:LINE});
+    } else if (new_content==null && work.isOriginal) {
+      if (error) {return [null, {code:400,body:"can't merge original"}];}
     } else {
       if (old_content==null) {
         //Traduxio.addActivity(this.data.edits,{action:"split",version:VERSION_ID,line:LINE});

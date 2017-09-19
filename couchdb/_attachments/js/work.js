@@ -939,8 +939,8 @@ var editOnServer = function(content, reference) {
   return request({
     type: "PUT",
     url: "version/"+Traduxio.getId()+"?"+ $.param(reference),
-    contentType: "text/plain",
-    data: content
+    contentType: "application/json",
+    data: JSON.stringify(content)
   });
 };
 
@@ -1133,7 +1133,7 @@ $(document).ready(function() {
     var unit=$(this).closest(".unit");
     var version=unit.getVersion("td");
     if (findUnits(version).index(unit)>0) {
-      editOnServer("null", $(this).closest(".unit").getReference())
+      editOnServer(null, $(this).closest(".unit").getReference())
         .done(function() {
           updateOnScreen(version,unit.getLine(),null);
         });
