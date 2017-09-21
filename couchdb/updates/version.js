@@ -69,13 +69,18 @@ function(old, req) {
       work.setContent(VERSION_ID, previous_line, joined_content);
       new_content = null;
       //Traduxio.addActivity(this.data.edits,{action:"joined",version:VERSION_ID,line:LINE});
-    } else if (new_content==null && work.isOriginal) {
-      if (error) {return [null, {code:400,body:"can't merge original"}];}
-    } else {
-      if (old_content==null) {
-        //Traduxio.addActivity(this.data.edits,{action:"split",version:VERSION_ID,line:LINE});
-      } else {
+    } else if (new_content==null && work.isOriginal(VERSION_ID)) {
+      work.data.text.splice(LINE,0,"");
+      for (var tr in work.data.translations) {
+        if (work.getContent(tr,LINE)===null) {
+          work.data.translations[tr].text.splice(LINE,0,null);
+        } else {
+          work.data.translations[tr].text.splice(LINE,0,"");
+        }
       }
+      doc.edits=doc.edits || [];
+      Traduxio.addActivity(doc.edits,{action:"inserted",line:LINE});
+      return [work.data, "inserted a new block at line " + LINE];
     }
     doc.edits=doc.edits || [];
     Traduxio.addActivity(doc.edits,{action:"translated",version:VERSION_ID,line:LINE,old:old_content,content:new_content});
