@@ -107,7 +107,7 @@
   </tr>
   {{/justOneText}}
   {{#rows}}
-  <tr id="line-{{line}}" data-line="{{line}}">
+  <tr id="line-{{line}}" data-line="{{line}}" class="text-line">
     {{#units}}
       <td class="pleat open" data-version="{{version}}" rowspan="{{space}}">
         <div class="box-wrapper">
@@ -115,6 +115,7 @@
             <textarea style="width: 100%; height: 100%;" class="autosize">{{{rawText}}}</textarea>
             <div class="text">{{{htmlText}}}</div>
             {{^firstVersion}}{{#line}}<span class="join" title="merge with previous"></span>{{/line}}{{/firstVersion}}
+            {{#firstVersion}}<span class="insert" title="insert block"></span>{{/firstVersion}}
           </div>
         </div>
       </td>
