@@ -70,7 +70,7 @@ function(old, req) {
       new_content = null;
       //Traduxio.addActivity(this.data.edits,{action:"joined",version:VERSION_ID,line:LINE});
     } else if (new_content==null && work.isOriginal(VERSION_ID)) {
-      work.data.text.splice(LINE,0,"");
+      if (work.data.text) work.data.text.splice(LINE,0,"");
       for (var tr in work.data.translations) {
         if (work.getContent(tr,LINE)===null) {
           work.data.translations[tr].text.splice(LINE,0,null);

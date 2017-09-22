@@ -300,13 +300,13 @@ tr.fulltext .unit .text {
   top:-24px;
 }
 
-#hexapla .unit.edit .split,
-#hexapla .unit.edit .join {
+#hexapla td.pleat.open.edit:hover .unit.edit .split,
+#hexapla td.pleat.open.edit:hover .unit.edit .join {
   visibility: visible;
   right: -32px;
 }
 
-#hexapla .unit.edit:hover .insert {
+#hexapla td.pleat.open.edit:hover .unit.edit .insert {
   visibility: visible;
   left: -32px;
 }

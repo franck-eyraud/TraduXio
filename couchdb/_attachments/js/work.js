@@ -620,20 +620,14 @@ function deleteVersion(version) {
   });
 }
 
-function createJoin(unit1,unit2) {
-    var p=($(unit2).offset().top-$(unit1).offset().top-$(unit1).outerHeight()+32)/(-2);
-    var join=$("<span/>").addClass("join").prop("title","merge with previous").css("top",p+"px");
-    unit2.prepend(join);
-}
-
-function createJoins(unit) {
+function createJoin(unit) {
   unit.find(".join").remove();
   var version=unit.getVersion("td.open");
   var units=findUnits(version);
   var currIndex=units.index(unit);
   if (currIndex>0) {
-    var prevUnit=units.eq(currIndex-1);
-    createJoin(prevUnit,unit);
+    var join=$("<span/>").addClass("join").prop("title","merge with previous");
+    unit.prepend(join);
   }
 }
 
@@ -857,8 +851,12 @@ function findLine(line) {
 
 jQuery.fn.reverse = [].reverse;
 
-function insertBlock(line) {
+function insertBlock(line,local) {
   var tr=$("#hexapla tr#line-"+line);
+  if (tr.hasClass("added") && !force) {
+    tr.removeClass("added");
+    return;
+  }
   if (tr.length==0) { //end of text
     var last_tr=$("#hexapla tr#line-"+(line-1));
     if (last_tr.length==0) {
@@ -868,6 +866,7 @@ function insertBlock(line) {
   }
   var all_trs=$("#hexapla tr.text-line").reverse();
   var new_tr=$("<tr>").addClass("text-line").attr("data-line",line).attr("id","line-"+line);
+  if (local) (new_tr.addClass("added"));
   all_trs.each(function() {
     var old_line=$(this).data("line");
     if (old_line>=line) {
@@ -881,6 +880,7 @@ function insertBlock(line) {
   } else {
     new_tr.insertBefore(tr);
   }
+  $("td.pleat.close").prop("rowspan",$("tbody tr").length);
   getVersions().forEach(function(version,index) {
     var oldUnit=findUnits(version).filter(function() {
       return $(this).closest("tr").data("line") <= line;
@@ -893,6 +893,7 @@ function insertBlock(line) {
       var newTd=$("<td>").addClass("pleat open").attr("data-version",version)
         .append($("<div>").addClass("box-wrapper").append(newUnit));
       new_tr.append(newTd);
+      if (!oldUnit.is(":visible")) newTd.hide();
       if (index==0) {
         createInsert(newUnit);
       }
@@ -906,10 +907,10 @@ function insertBlock(line) {
       }
     }
   });
+  return new_tr;
 }
 
-function updateOnScreen(version,line,content,color) {
-  var highlight=true;
+function updateOnScreen(version,line,content) {
   var unit=findUnit(version,line);
   if (unit) {
     if (content !== null) {
@@ -1194,7 +1195,7 @@ $(document).ready(function() {
     reference.version="original";
     editOnServer(null, reference)
       .done(function() {
-        insertBlock(unit.getLine());
+        insertBlock(unit.getLine(),true);
       });
   });
 
@@ -1345,7 +1346,7 @@ $(document).ready(function() {
             if ("line" in edit && "content" in edit) {
               edit.message="Version <em>"+edit.version+"</em> modifiée à la ligne <a href='#"+edit.line+"'>"+edit.line+"</a>";
               if(!edit.isPast && version.length>0) {
-                var unit=updateOnScreen(edit.version,edit.line,edit.content,edit.me?edit.color:null);
+                var unit=updateOnScreen(edit.version,edit.line,edit.content);
                 if (unit && edit.color) {
                   highlightUnit(unit,edit.color);
                 }
@@ -1370,6 +1371,26 @@ $(document).ready(function() {
             if (!edit.isPast) edit.message+=", svp rafraîchir la page pour voir les changements";
             break;
         }
+    } else {
+      if (edit.action=="inserted") {
+        if ("line" in edit) {
+          edit.message="bloc inséré à la ligne "+edit.line;
+          if(!edit.isPast) {
+            var tr=insertBlock(edit.line);
+            if (tr && edit.color) {
+              tr.find(".unit").each(function(unit) {
+                highlightUnit($(unit),edit.color);
+              });
+            }
+          }
+        }
+        if (edit.key=="creator") {
+          if (!edit.isPast) edit.message+=", svp rafraîchir la page pour voir les changements";
+        } else {
+          edit.message="informations de la version "+edit.version+" modifiées";
+          if (!edit.isPast) edit.message+=", svp rafraîchir la page pour voir les changements";
+        }
+      }
     }
     if (edit.message && Traduxio.chat && Traduxio.chat.addMessage) {
       Traduxio.chat.addMessage(edit);
