@@ -9,6 +9,10 @@ function(old, req) {
         ? this.data
         : this.data.translations[version];
     };
+    this.get = function(version) {
+      return this.isOriginal(version) ? this.data :
+        this.data.translations[version];
+    };
     this.exists = function(version) {
       return this.isOriginal(version) && this.data.text ||
         this.data.translations.hasOwnProperty(version);
@@ -39,6 +43,9 @@ function(old, req) {
   var work = new Work();
   if (!work.exists(VERSION_ID)) {
     return [null, {code:400,body:"incorrect version "+VERSION_ID}];
+  }
+  if (!Traduxio.canEdit(work.get(VERSION_ID))) {
+    return [null, {code:403,body:"can't modify "+VERSION_ID}];
   }
   if (LINE!==parseInt(LINE, 10) || LINE<0 || LINE>work.getVersion(VERSION_ID).text.length) {
     return [null, {code:400,body:"incorrect line "+LINE}];
