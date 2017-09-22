@@ -656,15 +656,10 @@ function createSplits(unit) {
   }
 }
 
-function createInserts(unit) {
+function createInsert(unit) {
   unit.find(".insert").remove();
-  var version=unit.getVersion("td.open");
-  var units=findUnits(version);
-  var currIndex=units.index(unit);
-  if (currIndex>0) {
-    var prevUnit=units.eq(currIndex-1);
-    createInsert(prevUnit,unit);
-  }
+  var insert=$("<span/>").addClass("insert").prop("title","inset block");
+  unit.prepend(insert);
 }
 
 function saveUnit(callback) {
@@ -872,25 +867,7 @@ function insertBlock(line) {
     }
   }
   var all_trs=$("#hexapla tr.text-line").reverse();
-  var new_tr=$("<tr>").addClass("text-line").data("line",line).attr("id","line-"+line);
-  getVersions().forEach(function(version) {
-    var oldUnit=findUnits(version).filter(function() {
-      return $(this).closest("tr").data("line") <= line;
-    }).last();
-    if (oldUnit.closest("tr").data("line")==line) {
-    var newUnit=createUnit("").attr("data-version",version);
-    var newTd=$("<td>").addClass("pleat open").attr("data-version",version)
-      .append($("<div>").addClass("box-wrapper").append(newUnit));
-    new_tr.append(newTd);
-      //if (unit.isEdited()) newUnit.addClass("edit");
-      // var direction=unit.css("direction");
-      // if (direction) newUnit.css("direction",direction);
-    } else {
-      //no unit, so it is merge with before
-      var oldSize=getSize(oldUnit);
-      oldUnit.closest("td").prop("rowspan",oldSize+1);
-    }
-  });
+  var new_tr=$("<tr>").addClass("text-line").attr("data-line",line).attr("id","line-"+line);
   all_trs.each(function() {
     var old_line=$(this).data("line");
     if (old_line>=line) {
@@ -904,6 +881,31 @@ function insertBlock(line) {
   } else {
     new_tr.insertBefore(tr);
   }
+  getVersions().forEach(function(version,index) {
+    var oldUnit=findUnits(version).filter(function() {
+      return $(this).closest("tr").data("line") <= line;
+    }).last();
+    if (oldUnit.closest("tr").data("line")==line) {
+      var newUnit=createUnit("").attr("data-version",version);
+      if (oldUnit.isEdited()) newUnit.addClass("edit");
+      var direction=oldUnit.css("direction");
+      if (direction) newUnit.css("direction",direction);
+      var newTd=$("<td>").addClass("pleat open").attr("data-version",version)
+        .append($("<div>").addClass("box-wrapper").append(newUnit));
+      new_tr.append(newTd);
+      if (index==0) {
+        createInsert(newUnit);
+      }
+    } else {
+      //no unit, so it is merge with before
+      var oldSize=getSize(oldUnit);
+      oldUnit.closest("td").prop("rowspan",oldSize+1);
+      if (oldUnit.isEdited()) {
+        createSplits(oldUnit);
+        positionSplits(oldUnit);
+      }
+    }
+  });
 }
 
 function updateOnScreen(version,line,content,color) {
@@ -975,7 +977,7 @@ function updateOnScreen(version,line,content,color) {
           }
         }
         createSplits(unit);
-        createJoins(newUnit);
+        createJoin(newUnit);
         createSplits(newUnit);
         positionSplits();
         $(".tosplit").removeClass("tosplit");
