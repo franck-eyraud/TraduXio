@@ -7,6 +7,7 @@
   var sessionLength=600000;
   var initialWaitTime=500;
   var maxWaitTime=60000;
+  var showPresence=false;
 
   function resetTimeout(time) {
     time=time||sessionLength;
@@ -17,6 +18,7 @@
   var presenceWaitTime=initialWaitTime;
 
   function presence (callback) {
+    if (showPresence) {
     return $.ajax({
       url:Traduxio.getId()+"/presence",
       type:"POST",
@@ -66,6 +68,9 @@
       presenceWaitTime=Math.min(presenceWaitTime,maxWaitTime);
       resetTimeout(presenceWaitTime);
     });
+    } else {
+      if (typeof callback=="function") callback();
+    }
   };
 
   var leaving=false;
