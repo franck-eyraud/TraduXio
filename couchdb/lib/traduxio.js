@@ -36,7 +36,7 @@ Traduxio= {
   },
 
   canAccessActivity:function(activity,index) {
-    if (activity.version) {
+    if (activity.version && activity.version!="original") {
       Traduxio.config.debug && log("check if "+Traduxio.getUser().name+" can access "+activity.version);
       if (Traduxio.doc && Traduxio.doc.translations) {
         if (Traduxio.doc.translations[activity.version]) {
@@ -175,6 +175,7 @@ Traduxio= {
         return true;
       }
     }
+    return false;
   },
 
   canTranslate:function(work) {
