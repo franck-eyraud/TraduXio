@@ -229,6 +229,7 @@ function fixWidths() {
     $("#hexapla").addClass("full").css({height:"100%"}).css({height:null});
     $("thead tr:first-child th.pleat.open:visible").css("width",100/nbOpen+"%");
   }
+  positionSplits();
 }
 
 function toggleShow(e) {
@@ -237,7 +238,6 @@ function toggleShow(e) {
   findPleat(version).toggle();
   setTimeout(function(){
     fixWidths();
-    positionSplits();
   },0);
   if (e.cancelable) {
     updateUrl();
@@ -652,8 +652,8 @@ function createSplits(unit) {
 
 function createInsert(unit) {
   unit.find(".insert").remove();
-  var insert=$("<span/>").addClass("insert").prop("title","inset block");
-  unit.prepend(insert);
+  var insert=$("<span/>").addClass("insert").prop("title","insert block");
+  unit.append(insert);
 }
 
 function saveUnit(callback) {
@@ -853,7 +853,8 @@ jQuery.fn.reverse = [].reverse;
 
 function insertBlock(line,local) {
   var tr=$("#hexapla tr#line-"+line);
-  if (tr.hasClass("added") && !force) {
+  if (tr.hasClass("added") && !local) {
+    //replay of local change from change listener
     tr.removeClass("added");
     return;
   }
@@ -867,12 +868,45 @@ function insertBlock(line,local) {
   var all_trs=$("#hexapla tr.text-line").reverse();
   var new_tr=$("<tr>").addClass("text-line").attr("data-line",line).attr("id","line-"+line);
   if (local) (new_tr.addClass("added"));
+  getVersions().forEach(function(version,index) {
+    var oldUnit=findUnits(version).filter(function() {
+      return $(this).closest("tr").data("line") <= line;
+    }).last();
+    if (oldUnit.closest("tr").data("line")==line) {
+      var newUnit=createUnit("").attr("data-version",version);
+      var direction=oldUnit.css("direction");
+      if (direction) newUnit.css("direction",direction);
+      var newTd=$("<td>").addClass("pleat open").attr("data-version",version)
+        .append($("<div>").addClass("box-wrapper").append(newUnit));
+      if (oldUnit.isEdited()) {
+        newUnit.addClass("edit");
+        newTd.addClass("edit");
+      }
+      new_tr.append(newTd);
+      if (!oldUnit.is(":visible")) newTd.hide();
+      createInsert(newUnit);
+    } else {
+      //no unit, so it is merge with before
+      var oldSize=getSize(oldUnit);
+      oldUnit.closest("td").prop("rowspan",oldSize+1);
+      if (oldUnit.isEdited()) {
+        createSplits(oldUnit);
+      }
+    }
+  });
+  //increase line number of all rows
   all_trs.each(function() {
     var old_line=$(this).data("line");
     if (old_line>=line) {
-      var new_line=old_line+1
+      var new_line=old_line+1;
       $(this).attr("data-line",new_line);
+      $(this).data("line",new_line);
       $(this).attr("id","line-"+new_line);
+    }
+  });
+  $("unit.edit .split").each(function() {
+    if ($(this).data("line")>=line) {
+        $(this).data("line",line+1);
     }
   });
   if (last_tr) {
@@ -881,32 +915,8 @@ function insertBlock(line,local) {
     new_tr.insertBefore(tr);
   }
   $("td.pleat.close").prop("rowspan",$("tbody tr").length);
-  getVersions().forEach(function(version,index) {
-    var oldUnit=findUnits(version).filter(function() {
-      return $(this).closest("tr").data("line") <= line;
-    }).last();
-    if (oldUnit.closest("tr").data("line")==line) {
-      var newUnit=createUnit("").attr("data-version",version);
-      if (oldUnit.isEdited()) newUnit.addClass("edit");
-      var direction=oldUnit.css("direction");
-      if (direction) newUnit.css("direction",direction);
-      var newTd=$("<td>").addClass("pleat open").attr("data-version",version)
-        .append($("<div>").addClass("box-wrapper").append(newUnit));
-      new_tr.append(newTd);
-      if (!oldUnit.is(":visible")) newTd.hide();
-      if (index==0) {
-        createInsert(newUnit);
-      }
-    } else {
-      //no unit, so it is merge with before
-      var oldSize=getSize(oldUnit);
-      oldUnit.closest("td").prop("rowspan",oldSize+1);
-      if (oldUnit.isEdited()) {
-        createSplits(oldUnit);
-        positionSplits(oldUnit);
-      }
-    }
-  });
+
+  positionSplits($("td.pleat.edit"));
   return new_tr;
 }
 
@@ -1163,7 +1173,7 @@ $(document).ready(function() {
 
   $("input.edit").on("click",toggleEdit);
 
-  $("tr").on("mouseup select",".unit", function (e) {
+  $("#hexapla").on("mouseup select",".unit", function (e) {
     //requires jquery.selection plugin
     var txt=$.selection().trim(),language;
     var unit=$(this);
@@ -1188,7 +1198,7 @@ $(document).ready(function() {
     $("body .context-menu").remove();
   });
 
-  $("tr").on("click", ".insert", function(e) {
+  $("#hexapla").on("click", ".insert", function(e) {
     e.stopPropagation();
     var unit=$(this).closest(".unit");
     var reference=unit.getReference();
@@ -1199,7 +1209,7 @@ $(document).ready(function() {
       });
   });
 
-  $("tr").on("click", ".join", function(e) {
+  $("#hexapla").on("click", ".join", function(e) {
     e.stopPropagation();
     var unit=$(this).closest(".unit");
     var version=unit.getVersion("td");
@@ -1218,7 +1228,7 @@ $(document).ready(function() {
       .css("min-height",size*40+"px");
   };
 
-  $("tr").on("click", ".split", function(e) {
+  $("#hexapla").on("click", ".split", function(e) {
     e.stopPropagation();
     var unit=$(this).closest(".unit");
     var line=$(this).data("line");
@@ -1233,7 +1243,7 @@ $(document).ready(function() {
 
   $("#hexapla").on('change input cut paste','textarea,input.editedMeta',modified);
 
-  $("tr").on("focusout", ".unit.edit textarea", saveUnit);
+  $("#hexapla").on("focusout", ".unit.edit textarea", saveUnit);
   $("thead").on("focusout","input.editedMeta", saveMetadata);
   $("thead").on("change","select.editedMeta", saveMetadata);
   $("#hexapla").on("click","span.delete", clickDeleteVersion);
