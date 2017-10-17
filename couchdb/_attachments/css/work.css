@@ -361,12 +361,14 @@ tfoot .button {
 
 .button.edit-license,
 .button.delete,
+input[type=button].copy,
 th.pleat div.share {
   display:none;
 }
 
 .edit .button.edit-license,
 .edit .button.delete,
+.edit input[type=button].copy,
 th.pleat.edit div.share {
   display:inline-block;
 }

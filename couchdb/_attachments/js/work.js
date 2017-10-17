@@ -393,12 +393,26 @@ function toggleEdit (e) {
         finish();
       }
     } else {
+      doc.find("input.copy").remove();
       units.find("textarea").prop("disabled",false);
       units.addClass("edit");
       if (getVersions().indexOf(version)>0) {
         units.parents("td.pleat").not("[rowspan=1]").find(".unit").each(function () {
             createSplits($(this));
           });
+      }
+      if (getVersions().indexOf(version)>0) {
+        var empty=true;
+        units.each(function () {
+          if ($(this).find("textarea").val()) {
+            empty=false;
+            return;
+          }
+        });
+        if (empty) {
+          var inputCopy=$("<input>").attr("type","button").addClass("copy").val(getTranslated("i_copy_from"));
+          inputCopy.insertBefore(doc.find("input.edit"));
+        }
       }
       positionSplits(units);
       applyToggle();
@@ -680,6 +694,9 @@ function saveUnit(callback) {
         if (callback && typeof(callback) == "function") {
           callback();
         }
+        if (content) {
+          find(textarea.getVersion("td")).find("input.copy").remove();
+        }
       } else {
         alert(result+":"+message);
       }
@@ -855,6 +872,42 @@ function findUnit(version,line) {
   if (unit.length==0) return null;
   if (unit.length==1) return unit;
   return false;
+}
+
+function copyFrom(unit,version) {
+  var line=unit.getLine();
+  var source=findUnit(version,line);
+  if (source) {
+    var content=source.find("textarea").val();
+    var existingContent=unit.find("textarea").val();
+    if (!existingContent && existingContent!=content) {
+      if (fillUnit(unit,content)) {
+        unit.find("textarea").addClass("dirty");
+        editOnServer(content,unit.getReference()).done(function() {
+          unit.find("textarea").removeClass("dirty");
+          if (content) {
+            find(unit.getVersion("td")).find("input.copy").remove();
+          }
+        });
+      }
+    } else {
+      console.log("skipped line "+line+" already filled");
+    }
+  } else {
+    console.log("can't find version for line "+line);
+  }
+}
+
+function copyText(version,sourceVersion) {
+  var units=findUnits(version);
+  sourceVersion=sourceVersion || getVersions()[0];
+  if (sourceVersion!=version) {
+    units.each(function () {
+      copyFrom($(this),sourceVersion);
+    });
+  } else {
+    alert("trying to copy from same version!");
+  }
 }
 
 function findLine(line) {
@@ -1178,6 +1231,11 @@ $(document).ready(function() {
   $("thead").on("focusout","input.editedMeta", saveMetadata);
   $("thead").on("change","select.editedMeta", saveMetadata);
   $("#hexapla").on("click","span.delete", clickDeleteVersion);
+
+  $("thead").on("click","input.copy", function () {
+    var version=$(this).getVersion("th");
+    copyText(version);
+  });
 
   $("tfoot").on("change","div.share select", changePrivacy);
   $("div.share select").each(function() {
