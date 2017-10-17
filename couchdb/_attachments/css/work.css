@@ -210,7 +210,7 @@ div.creator {
 }
 
 #hexapla div.unit .text {
-  padding: 0.5em;   /* Same border+padding as text area. */
+  padding: 11px;   /* Same border+padding as text area. */
   padding-bottom: 1.5em; /* A bit more than one additional line of text. */
   width: 100%;
   height: 100%;
@@ -234,7 +234,7 @@ div.creator {
 .unit textarea {
   border:1px solid gray;
   border-radius:0.5em;
-  padding:0.5em;
+  padding:10px;
   width:100%;
   width: 100%;
   font-size:1em;
@@ -270,7 +270,7 @@ tr.fulltext .unit .text {
   overflow: auto;
 }
 
-.unit.edit div.text {
+#hexapla div.unit.edit div.text {
   visibility: hidden;
 }
 
