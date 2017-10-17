@@ -94,14 +94,21 @@ function editGlossaryEntry(glossaryEntry,language) {
   }
 }
 
+var runningEdit;
+
 function request(options) {
-  return $.ajax(options)
-    .retry({times:3,statusCodes:[0,409]})
-    .fail(function (jqXHR) {
-      if (jqXHR.responseText) {
-        alert("request failed "+jqXHR.responseText);
-      }
-    });
+  if (!runningEdit) {
+    runningEdit=$.Deferred().resolve();
+  }
+  var nextDfd=runningEdit.then(function() {
+    return $.ajax(options).retry({times:3,statusCodes:[0,409]});
+  }).fail(function (jqXHR) {
+    if (jqXHR.responseText) {
+      alert("request failed "+jqXHR.responseText);
+    }
+  });
+  runningEdit=nextDfd;
+  return nextDfd.promise();
 }
 
 function find(version) {
