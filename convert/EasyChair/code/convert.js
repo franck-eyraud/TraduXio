@@ -11,45 +11,95 @@
   'reviews sent',
   'abstract' ]
 */
+process.on('uncaughtException', function (error) {
+   console.log(error.stack);
+});
 
 var fs=require("fs");
-
 var papa=require("./papaparse.min.js");
-var stream=fs.createReadStream("data/submission.csv");
-papa.parse(stream,{
-  header:true,
-	complete:function(parsed,stream){
-			stream.close();
-			console.log("read "+parsed.data.length+" rows");
-      console.log(parsed);
-			//console.log(parsed.data.map(function(a){return a.join(",");}).join("\n"));
-      parsed.data.forEach(function(row,i) {
-        console.log(row);
-      	for (var i in row) {
-      		console.log(i+":"+row[i]);
-      	}
-      });
-      readStep();
-		}
-	}
-);
+
+
+function readFull() {
+  var stream=fs.createReadStream("/data/submission.csv");
+  papa.parse(stream,{
+    header:true,
+    complete:function(parsed,stream){
+        stream.close();
+        console.log("read "+parsed.data.length+" rows");
+        console.log(parsed);
+        //console.log(parsed.data.map(function(a){return a.join(",");}).join("\n"));
+        parsed.data.forEach(function(row,i) {
+          console.log(row);
+          for (var i in row) {
+            treatRow(row);
+          }
+        });
+      }
+    }
+  );
+}
+
+var reverse_languages={
+  "English":"en",
+  "Chinese":"zh"
+};
+
+function splitText(abstract) {
+  var sentence=/[^\s\n\.!\?]([^\.!\?](\W(cf|ie|i\.e|i\. e|p)\.)?|\.+\s*[0-9]+)*[\.!\?]+/g;
+  return abstract.match(sentence)
+}
+
+readStep();
+
+function treatRow(row) {
+  console.log("treat Row "+row["#"]);
+  var work={};
+  work.id="EasyChairImport-"+row["#"];
+  work.title=row.title;
+  work.creator=row.authors;
+  work.metadata={};
+  work.metadata.id=row["#"];
+  work.metadata.keywords=row.keywords.split("\n");
+  work.metadata.original_text=row.abstract;
+  work.text=splitText(row.abstract);
+  work.date=row.date;
+  work.language="en"; //default
+
+
+  var form_fields=row["form fields"].split("\n");
+  //EasyChair form fields are one per line with syntax :
+  //(form field label) form field value
+  var extract=/\(([^)]*)\) (.*)/;
+  form_fields.forEach(function (form_field_entry) {
+    var match=form_field_entry.match(extract);
+    if (match && match.length>=3) {
+      var form_field_label=match[1];
+      var form_field_value=match[2];
+      work.metadata[form_field_label]=form_field_value;
+    }
+  });
+  if (work.metadata["Language of Presentation"]) {
+    var language=work.metadata["Language of Presentation"];
+    if (reverse_languages[language]) {
+      work.language=reverse_languages[language];
+    }
+  }
+  console.log(work);
+}
 
 function readStep() {
-var rows=0;
-var stream=fs.createReadStream("data/submission.csv");
-console.log("step reading");
-papa.parse(stream,{
-  header:true,
-	step:function(parsed,stream) {
+  var rows=0;
+  var stream=fs.createReadStream("/data/submission.csv");
+  console.log("step reading");
+  papa.parse(stream,{
+    header:true,
+      step:function(parsed,stream) {
       rows++;
       console.log("read row #"+rows);
       var row=parsed.data[0];
       if (row) {
-      	for (var i in row) {
-      		console.log(i+":"+row[i]);
-      	}
+        treatRow(row);
       }
-		}
-	}
-);
+    }
+  });
 }
