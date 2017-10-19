@@ -1,15 +1,3 @@
-var baby=require("babyparse")
-var parsed=baby.parseFiles("data/submission.csv")
-var headers=parsed.data.shift();
-parsed.data.forEach(function(row,i) {
-  if (row.length==headers.length) {
-    console.log(row.join(","));
-  } else {
-     console.log("discarded row "+i+" which has not the same fields ("+row.length+") as headers ("+headers.length+")");
-  }
-});
-
-
 /* headers
 [ '#',
   'title',
