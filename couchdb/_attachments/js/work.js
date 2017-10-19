@@ -59,6 +59,9 @@ function displayGlossaryAllText(glossaryEntry,version) {
 function displayGlossary(glossaryEntry,element) {
   var l=element.getLanguage();
   if (l==glossaryEntry.src_language) {
+    //can't work on .unit level with google chrome : would also replace
+    //term in textarea, but without any content, so words are lost if edited
+    element=element.find("div.text");
     $("span.temp.glossary",
       element.highlight(glossaryEntry.src_sentence,"temp glossary"))
     .data("sentence",glossaryEntry.src_sentence)
@@ -373,7 +376,6 @@ function toggleEdit (e) {
         toSave.each(function() {
           var textarea=$(this);
           saveUnit.apply(textarea,[function () {
-            textarea.parents(".unit").find(".text").html(stringToHtml(textarea.val()));
             unitsOk++;
             if (unitsOk==length) {
               finish();
@@ -665,6 +667,9 @@ function saveUnit(callback) {
     .done(function(message,result) {
       if (result == "success") {
         textarea.removeClass("dirty");
+        var unit=textarea.parents(".unit");
+        $(".text",unit).html(stringToHtml(textarea.val()));
+        browseGlossary(displayGlossary,unit);
         if (callback && typeof(callback) == "function") {
           callback();
         }
@@ -804,7 +809,7 @@ function fillUnit(unit,content) {
   if (oldVal!=content) {
     var element=$("textarea",unit).val(content);
     autoSize.apply(element);
-    browseGlossary(displayGlossary,element);
+    browseGlossary(displayGlossary,unit);
     return true;
   }
   return false;
@@ -1406,6 +1411,8 @@ $(document).ready(function() {
       Traduxio.chat.addMessage(edit);
     }
   });
+
+  $(".unit textarea.autosize").each(autoSize);
 
   browseGlossary(displayGlossaryAllText);
 
