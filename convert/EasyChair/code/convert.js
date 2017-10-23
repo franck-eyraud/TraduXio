@@ -1,4 +1,5 @@
 
+
 /* headers
 [ '#',
   'title',
@@ -15,7 +16,36 @@
 
 var fs=require("fs");
 var papa=require("./papaparse.min.js");
+var nano=require('nano');
 
+
+var config = JSON.parse(require("fs").readFileSync("config.json", "UTF-8"));
+
+if (!config.server || !config.database || !config.user || !config.password) {
+  console.log("config requires server, database, user and password");
+}
+
+var db;
+
+
+var cookies={};
+
+nano(config.server).auth(config.user,config.password,function (err, body, headers) {
+  if (err) {
+    console.log("error logging in");
+    return;
+  }
+
+  if (headers && headers['set-cookie']) {
+    cookies = headers['set-cookie'];
+    console.log(cookies);
+  }
+
+  db=nano({url:config.server,
+    cookie:headers['set-cookie']
+  }).use(config.database);
+  readStep();
+});
 
 function readFull() {
   var stream=fs.createReadStream("/data/submission.csv");
@@ -29,13 +59,14 @@ function readFull() {
         parsed.data.forEach(function(row,i) {
           console.log(row);
           for (var i in row) {
-            treatRow(row);
+            treatRow(row,callback);
           }
         });
       }
     }
   );
 }
+
 
 var reverse_languages={
   "English":"en",
@@ -53,9 +84,7 @@ function splitText(abstract) {
   return abstract.match(sentence)
 }
 
-readStep();
-
-function treatRow(row) {
+function treatRow(row,callback) {
   console.log("treat Row "+row["#"]);
   var work={};
   work.id="EasyChairImport-"+row["#"];
@@ -68,6 +97,7 @@ function treatRow(row) {
   work.text=splitText(row.abstract);
   work.date=row.date;
   work.language="en"; //default
+  work.privileges={owner:config.user};
 
 
   var form_fields=row["form fields"].split("\n");
@@ -96,8 +126,17 @@ function treatRow(row) {
   }
   new_trans.language=possible_languages.length ? possible_languages[0] : translation_languages[0];
   new_trans.text=new Array(work.text.length).fill("");
+  new_trans.privileges={owner:config.user};
   work.translations["iatis"]=new_trans;
   console.log(work);
+  db.insert(work,function(err,body) {
+    if (err) console.log(err);
+    else {
+      console.log("stored "+work._id);
+      console.log(body);
+    }
+    callback();
+  });
 }
 
 function readStep() {
@@ -108,12 +147,14 @@ function readStep() {
     header:true,
     step:function(parsed,p) {
       try {
-        parser=p;
         rows++;
         console.log("read row #"+rows);
         var row=parsed.data[0];
         if (row) {
-          treatRow(row);
+          p.pause();
+          treatRow(row,function() {
+            p.resume();
+          });
         }
       } catch(e) {
         console.log(e);

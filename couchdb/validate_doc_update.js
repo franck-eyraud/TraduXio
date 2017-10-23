@@ -180,7 +180,7 @@ function (newDoc, oldDoc, userCtx, secObj) {
   ensureStrings(["creator","date","language","title"]);
   ensureObjects(["translations","glossary"]);
   Traduxio.config.debug && log("start checking trans");
-  var canTranslate=Traduxio.canTranslate(oldDoc);
+  var canTranslate=oldDoc ? Traduxio.canTranslate(oldDoc) : Traduxio.canTranslate(newDoc);
   for (var t in newDoc.translations) {
     var newTrans=newDoc.translations[t];
     mandatory(newTrans,"text");

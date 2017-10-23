@@ -11,4 +11,4 @@ if ! docker images | grep -q traduxio-convert || [ "x$1" == "x--rebuild" ]; then
 fi
 
 echo run
-docker run -ti -v "$(pwd)/data:/data" traduxio-convert node convert.js
+docker run -ti -v "$(pwd)/data:/data" --link couchdb traduxio-convert node convert.js
