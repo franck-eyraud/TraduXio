@@ -44,6 +44,8 @@ var reverse_languages={
   "Chinese":"zh"
 };
 
+var translation_languages=["en","zh"];
+
 function splitText(abstract) {
   var sentence=/[^\s\n\.!\?]([^\.!\?](\W(cf|ie|i\.e|i\. e|p)\.)?|\.+\s*[0-9]+)*[\.!\?]+/g;
   return abstract.match(sentence)
@@ -84,6 +86,15 @@ function treatRow(row) {
       work.language=reverse_languages[language];
     }
   }
+  work.translations={};
+  var new_trans={};
+  var possible_languages=translation_languages.slice();
+  if (possible_languages.indexOf(work.language)!=-1) {
+    possible_languages.splice(possible_languages.indexOf(work.language),1);
+  }
+  new_trans.language=possible_languages.length ? possible_languages[0] : translation_languages[0];
+  new_trans.text=new Array(work.text.length).fill("");
+  work.translations["iatis"]=new_trans;
   console.log(work);
 }
 
