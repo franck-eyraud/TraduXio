@@ -45,7 +45,11 @@ var reverse_languages={
 var translation_languages=["en","zh"];
 
 function splitText(abstract) {
-  var sentence=/[^\s\n\.!\?]([^\.!\?](\W(cf|ie|i\.e|i\. e|p)\.)?|\.+\s*[0-9]+)*[\.!\?]+/g;
+  //captures all non punctuation characters, except if they are not folowed by a space,
+  //or if they are preceded by a word of one letter or a list of abbrieviation words,
+  //plus the tailing punctuation characters and their following spaces.
+  //Test RegExp : https://regexr.com/3h12o
+  var sentence=/((?:\W(\w|cf|ie|eg|etc\.*|Mrs|Miss|Dr))\.(?=\s)|[^\.\?\!]+?|[\!\?\.][^\s\!\?\.])+([\?\.\!]+\s*|$)/g;
   return abstract.match(sentence)
 }
 
