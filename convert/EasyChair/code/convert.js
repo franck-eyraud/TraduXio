@@ -1,3 +1,4 @@
+
 /* headers
 [ '#',
   'title',
@@ -11,9 +12,6 @@
   'reviews sent',
   'abstract' ]
 */
-process.on('uncaughtException', function (error) {
-   console.log(error.stack);
-});
 
 var fs=require("fs");
 var papa=require("./papaparse.min.js");
@@ -102,15 +100,23 @@ function readStep() {
   var rows=0;
   var stream=fs.createReadStream("/data/submission.csv");
   console.log("step reading");
-  papa.parse(stream,{
+  var parser=papa.parse(stream,{
     header:true,
-      step:function(parsed,stream) {
-      rows++;
-      console.log("read row #"+rows);
-      var row=parsed.data[0];
-      if (row) {
-        treatRow(row);
+    step:function(parsed,p) {
+      try {
+        parser=p;
+        rows++;
+        console.log("read row #"+rows);
+        var row=parsed.data[0];
+        if (row) {
+          treatRow(row);
+        }
+      } catch(e) {
+        console.log(e);
       }
+    },
+    error:function(err) {
+      console.log(err);
     }
   });
 }

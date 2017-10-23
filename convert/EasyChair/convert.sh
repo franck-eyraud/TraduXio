@@ -3,6 +3,7 @@
 build() {
 	cd code
         docker build -t traduxio-convert .
+	cd ..
 }
 
 if ! docker images | grep -q traduxio-convert || [ "x$1" == "x--rebuild" ]; then
@@ -10,4 +11,4 @@ if ! docker images | grep -q traduxio-convert || [ "x$1" == "x--rebuild" ]; then
 fi
 
 echo run
-docker run -it -v "$(pwd)/data:/data" traduxio-convert node convert.js
+docker run -ti -v "$(pwd)/data:/data" traduxio-convert node convert.js
