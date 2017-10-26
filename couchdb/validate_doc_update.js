@@ -166,11 +166,14 @@ function (newDoc, oldDoc, userCtx, secObj) {
     }
   }
 
-  if (newDoc._deleted && !Traduxio.canDelete(oldDoc)) {
-    throw({forbidden:"Can't delete!"});
+  if (newDoc._deleted) {
+
+    if (!Traduxio.canDelete(oldDoc)) {
+      throw({forbidden:"Can't delete!"});
+    }
+
+    return;
   }
-
-
 
   ensureArrays(["text"]);
   if (newDoc.text && !testArray(newDoc.text,isString)) {
