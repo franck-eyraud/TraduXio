@@ -79,7 +79,7 @@ function(o, req) {
           date: o.date,
           raw:o.text,
           creativeCommons: o.creativeCommons,
-          edited: (edited_versions.indexOf("original")!=-1),
+          edited: (edited_versions.indexOf("original")!=-1) && Traduxio.canEdit(o),
           opened: (opened_versions.indexOf("original")!=-1),
           owner:o.privileges.owner,
           shareValue:shareValue,
