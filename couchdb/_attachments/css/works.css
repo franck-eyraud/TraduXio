@@ -3,7 +3,6 @@ div#main {
 }
 
 div#main > *{
-  margin-top: 25px;
   float:left;
 }
 
@@ -37,7 +36,6 @@ div#lead div#traduxio_heading {
   padding-left: 1%;
   padding-right: 1%;
   margin: 1%;
-  margin-top:25px;
 }
 
 div#lead div#supports {
@@ -66,11 +64,6 @@ div#traduxio-heading > * {
 #lead #traduxio_heading img {
   width:100%;
   max-width:269px;
-}
-
-#main > *{
-  margin-top: 25px;
-  float:left;
 }
 
 #works-list {

@@ -51,6 +51,7 @@ body,html,input,textarea {
 }
 
 #main {
+  padding-top:60px;
   padding-bottom:3em;
   position:relative;
 }
@@ -62,6 +63,7 @@ body,html,input,textarea {
   font-size:0.85em;
   color:#fff;
   background: linear-gradient(to bottom, grey 0%, #333 100%);
+  position: fixed;
 }
 
 #footer {
