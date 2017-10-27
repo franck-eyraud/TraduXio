@@ -5,8 +5,8 @@
 #main {
   font-family: "Trebuchet MS";
   font-size: 90%;
-  top:50%;
   background: linear-gradient(to bottom, rgba(235,235,235,1) 0%, white 5%);
+  top:50%;
           transform: translateY(-50%);
       -ms-transform: translateY(-50%);
   -webkit-transform: translateY(-50%);
@@ -90,4 +90,13 @@
 
 #logo {
   margin-top: 20px;
+}
+
+@media only screen and (max-height: 700px) {
+    #main {
+      top:initial;
+              transform: initial;
+          -ms-transform: initial;
+      -webkit-transform: initial;
+    }
 }
