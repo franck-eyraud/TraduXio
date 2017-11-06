@@ -129,10 +129,10 @@ function treatRow(row,callback) {
   // return;
 
 
-  var form_fields=row["form fields"] ? row["form fields"].split("\n") : [];
+  var form_fields=row["form fields"] ? row["form fields"].match(/\((.*?)\) (.*)/g) : [];
   //EasyChair form fields are one per line with syntax :
   //(form field label) form field value
-  var extract=/\((.*)\) (.*)/;
+  var extract=/\((.*?)\) (.*)/;
   form_fields.forEach(function (form_field_entry) {
     var match=form_field_entry.match(extract);
     if (match && match.length>=3) {
