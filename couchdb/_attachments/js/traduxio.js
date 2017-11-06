@@ -92,7 +92,7 @@ function fixLanguages(container) {
     if (container) {
       var language=$(container).find(".language").andSelf().filter(".language");
     } else {
-      language=$(".language").not("select");
+      language=$(".language").not("select").not("li");
     }
     language.each(function() {
       var lang=$(this);
