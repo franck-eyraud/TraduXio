@@ -9,7 +9,7 @@ function (o) {
         }
       }
     }
-    emit([o.language, o.creator], {
+    emit([o.language, o.creator, o.title], {
       title:o.title,
       original:o.text?true:false,
       languages: languages
