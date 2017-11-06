@@ -116,7 +116,6 @@ function treatRow(row,callback) {
   work.metadata.id=row["#"];
   work.metadata.keywords=row.keywords ? row.keywords.split("\n") : [];
   work.metadata.original_text=row.abstract;
-  work.text=row.abstract ? splitText(row.abstract) : [];
   work.date=row.date;
   work.language="en"; //default
   work.privileges={owner:config.user};
@@ -133,7 +132,7 @@ function treatRow(row,callback) {
   var form_fields=row["form fields"] ? row["form fields"].split("\n") : [];
   //EasyChair form fields are one per line with syntax :
   //(form field label) form field value
-  var extract=/\(([^)]*)\) (.*)/;
+  var extract=/\((.*)\) (.*)/;
   form_fields.forEach(function (form_field_entry) {
     var match=form_field_entry.match(extract);
     if (match && match.length>=3) {
@@ -148,17 +147,24 @@ function treatRow(row,callback) {
       work.language=reverse_languages[language];
     }
   }
+  work.text=[];
+  work.text.push("Keywords : "+work.metadata.keywords.join(", "));
+  work.text.push("Biographical notes");
+  work.text=work.text.concat(work.metadata["Biographical Note(s)"] ?
+      splitText(work.metadata["Biographical Note(s)"]) : []);
+  work.text.push("Abstract");
+  work.text=work.text.concat(row.abstract ? splitText(row.abstract) : []);
   // if (work.metadata["Language of Presentation"]!="English") {
   //   console.log("#"+row["#"]+" does not use English : "+work.metadata["Language of Presentation"]);
   // }
   // if (work.metadata["IATIS Policy"]!="Agree") {
   //   console.log("#"+row["#"]+" did not accept IATIS Policy "+work.metadata["IATIS Policy"]);
   // }
-  // if (row.decision!='accept' || work.metadata["IATIS Policy"]!="Agree") {
-  //   //console.log("not accepted, skip");
-  //   return callback();
-  // }
-  // console.log("#"+row['#']+" accepted, store");
+  if (row.decision!='accept' || work.metadata["IATIS Policy"]!="Agree") {
+    //console.log("not accepted, skip");
+    return callback();
+  }
+  console.log("#"+row['#']+" accepted, store");
   work.translations={};
   var new_trans={};
   var possible_languages=translation_languages.slice();
