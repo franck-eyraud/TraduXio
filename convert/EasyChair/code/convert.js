@@ -79,13 +79,35 @@ var reverse_languages={
 
 var translation_languages=["en","zh"];
 
-function splitText(abstract) {
+function splitText(text) {
   //captures all non punctuation characters, except if they are not folowed by a space,
   //or if they are preceded by a word of one letter or a list of abbrieviation words,
   //plus the tailing punctuation characters and their following spaces.
-  //Test RegExp : https://regexr.com/3h12o
-  var sentence=/((?:\W(\w|al|cf|eds|eg|ie|no|pp|qtd|vol|vs|etc\.*|Mrs|Miss|Dr))\.(?=\s)|[^\.\?\!]+?|[\!\?\.][^\s\!\?\.])+([\?\.\!]+\s*|$)/g;
-  return abstract.match(sentence);
+  //Also include new line as separation character
+  //exceptions are looked after sentecne match because of javascript limitation
+  //of look back feature
+  var sentence=/([^\n\.\?\!]+?|[\!\?\.][^\s\!\?\.])+([\?\.\!\n]+\s*|$)/;
+  var exceptions=/(\W|^)((\w|al|cf|eds|eg|ie|no|pp|qtd|vol|vs|et|etc\.*|Mrs|Miss|Dr|Ph|Ph\.?D|Prof|No|Dept|Univ|Bros))\.\s*$/
+
+  var sentences=[];
+  var workingText=text;
+  while (m=workingText.match(sentence)) {
+    var s=m[0];
+    console.log("extracted "+s);
+    workingText=workingText.substring(m.index+m[0].length);
+    console.log("new text "+workingText);
+    while (s.match(exceptions) && (m=workingText.match(sentence))) {
+      console.log("exception");
+      s+=m[0];
+      console.log("extracted "+s);
+      workingText=workingText.substring(m.index+m[0].length);
+      console.log("new text "+workingText);
+    }
+    sentences.push(s);
+  }
+  console.log(text);
+  console.log(sentences);
+  return sentences;
 }
 
 var lock=false;
