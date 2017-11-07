@@ -128,19 +128,35 @@ function treatRow(row,callback) {
   // })
   // return;
 
-
-  var form_fields=row["form fields"] ? row["form fields"].match(/\((.*?)\) (.*)/g) : [];
-  //EasyChair form fields are one per line with syntax :
-  //(form field label) form field value
-  var extract=/\((.*?)\) (.*)/;
-  form_fields.forEach(function (form_field_entry) {
-    var match=form_field_entry.match(extract);
-    if (match && match.length>=3) {
-      var form_field_label=match[1];
-      var form_field_value=match[2];
-      work.metadata[form_field_label]=form_field_value;
+  function formFieldsExtract(form_fields) {
+    //EasyChair form fields syntax :
+    //^(form field label) form field value (can be multiline)
+    var forms={};
+    var lines=form_fields.match(/^.*$/gm);
+    var curlabel,curvalue;
+    lines.forEach(function(line) {
+      var m=line.match(/^\((.*?)\) /);
+      if (m) {
+        if (curlabel) {
+          forms[curlabel]=curvalue;
+        }
+        curlabel=m[1];
+        curvalue=line.substring(m.index+m[0].length);
+      } else {
+        curvalue+="\n"+line;
+      }
+    });
+    if (curlabel) {
+      forms[curlabel]=curvalue;
     }
-  });
+    return forms;
+  }
+
+
+  var form_fields=row["form fields"] ? formFieldsExtract(row["form fields"]) : {};
+  for (var i in form_fields) {
+    work.metadata[i]=form_fields[i];
+  }
   if (work.metadata["Language of Presentation"]) {
     var language=work.metadata["Language of Presentation"];
     if (reverse_languages[language]) {
