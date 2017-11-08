@@ -105,8 +105,8 @@ function splitText(text) {
     }
     sentences.push(s);
   }
-  console.log(text);
-  console.log(sentences);
+  // console.log(text);
+  // console.log(sentences);
   return sentences;
 }
 
@@ -138,7 +138,7 @@ function treatRow(row,callback) {
   work.metadata.id=row["#"];
   work.metadata.keywords=row.keywords ? row.keywords.split("\n") : [];
   work.metadata.original_text=row.abstract;
-  work.date=row.date;
+  work.date=row["last updated"];
   work.language="en"; //default
   work.privileges={owner:config.user};
 
@@ -201,8 +201,9 @@ function treatRow(row,callback) {
   if (row.decision!='accept' || work.metadata["IATIS Policy"]!="Agree") {
     //console.log("not accepted, skip");
     return callback();
+  } else {
+    console.log("#"+row['#']+" accepted, store");
   }
-  console.log("#"+row['#']+" accepted, store");
   work.translations={};
   var new_trans={};
   var possible_languages=translation_languages.slice();
@@ -213,7 +214,7 @@ function treatRow(row,callback) {
   new_trans.text=new Array(work.text.length).fill("");
   new_trans.privileges={owner:config.user};
   work.translations["iatis"]=new_trans;
-  //console.log(work);
+  //console.log(work.text);
   //return callback();
   tostore++;
   db.insert(work,function(err,body) {
