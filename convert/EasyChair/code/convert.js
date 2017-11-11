@@ -140,7 +140,7 @@ function treatRow(row,callback) {
   work.metadata.original_text=row.abstract;
   work.date=row["last updated"];
   work.language="en"; //default
-  work.privileges={owner:config.user};
+  work.privileges={owner:config.user,"sharedTo":["*"]};
 
   // Check if sentences are correctly split
   // work.text.forEach(function(line,i) {
