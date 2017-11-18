@@ -12,6 +12,11 @@ $.fn.toggleText = function(text1, text2) {
   );
 };
 
+function updateConcordanceLanguage() {
+  var language=find(getVersions()[0],"th").find("div.language").data("id");
+  if (language) $("form.concordance select#language").val(language);
+}
+
 function browseGlossary(callback) {
   var args=Array.slice ? Array.slice(arguments) : Array.prototype.slice.call(arguments);
   if (glossary) {
@@ -739,6 +744,7 @@ function saveMetadata() {
         fixLanguages($(".pleat.close[data-version='" + ref + "']")
           .find(".metadata.language").data("id", lang_id).text(lang_id));
         fixScriptDirection(ref,lang_id);
+        updateConcordanceLanguage();
       }
     });
   }
@@ -1160,6 +1166,10 @@ $(document).ready(function() {
   $(".unit textarea.autosize").each(autoSize);
 
   browseGlossary(displayGlossaryAllText);
+
+  if (!$("form.concordance #language").val()) {
+    updateConcordanceLanguage();
+  }
 
   $("#hexapla").on("click",".glossary",function(e) {
     var l=$(this).getLanguage();

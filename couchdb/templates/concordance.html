@@ -3,13 +3,13 @@
 <div id="filters">
   {{i_language_}}
 </div>
-<table class="concordance">
+<table class="concordance" data-search-language="{{search_language}}">
   {{#glossary_entries}}
     <tr class="glossary">
       <td>{{{context}}}</td>
       <td>{{{mapping}}}</td>
       <td class="metadata">
-        {{#original}} 
+        {{#original}}
         <div class="original">
           <div class="creator">{{creator}}</div>
           <div class="title"><a href="{{work_id}}">{{title}}</a></div>
