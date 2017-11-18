@@ -189,10 +189,10 @@
   function sessionInfo(activity) {
     if (activity.author)
       if (activity.entered) {
-        activity.message="est entré dans la traduction";
+        activity.message=getTranslated("i_activity_entered");
       }
     if (activity.left) {
-      activity.message="est sorti de la traduction";
+      activity.message=getTranslated("i_activity_exited");
       if (!activity.isPast) {
         if (activity.isMe) {
           leaving ? null : presence();

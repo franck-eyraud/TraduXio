@@ -1124,7 +1124,7 @@ $(document).ready(function() {
         switch (edit.action) {
           case "translated":
             if ("line" in edit && "content" in edit) {
-              edit.message="Version <em>"+edit.version+"</em> modifiée à la ligne <a href='#"+edit.line+"'>"+edit.line+"</a>";
+              edit.message=getTranslated("i_activity_line_edited","<em>"+edit.version+"</em>","<a href='#line-"+edit.line+"'>"+edit.line+"</a>");
               if(!edit.isPast && version.length>0) {
                 var unit=updateOnScreen(edit.version,edit.line,edit.content,edit.me?edit.color:null);
                 if (unit && edit.color) {
@@ -1135,20 +1135,20 @@ $(document).ready(function() {
             break;
           case "edited":
             if (edit.key=="creator") {
-              edit.message="version "+edit.version+" renomée";
-              if (!edit.isPast) edit.message+=", svp rafraîchir la page pour voir les changements";
+              edit.message=getTranslated("i_activity_version_renamed",edit.version);
+              if (!edit.isPast) edit.message+=", "+getTranslated("i_activity_refresh");
             } else {
-              edit.message="informations de la version "+edit.version+" modifiées";
-              if (!edit.isPast) edit.message+=", svp rafraîchir la page pour voir les changements";
+              edit.message=getTranslated("i_activity_version_edited",edit.version);
+              if (!edit.isPast) edit.message+=", "+getTranslated("i_activity_refresh");
             }
             break;
           case "created":
-            edit.message="nouvelle version "+edit.version+" créée";
-            if (!edit.isPast) edit.message+=", svp rafraîchir la page pour voir les changements";
+            edit.message=getTranslated("i_activity_version_created",edit.version);
+            if (!edit.isPast) edit.message+=", "+getTranslated("i_activity_refresh");
             break;
           case "deleted":
-            edit.message="version "+edit.version+" supprimée";
-            if (!edit.isPast) edit.message+=", svp rafraîchir la page pour voir les changements";
+            edit.message=getTranslated("i_activity_version_deleted",edit.version);
+            if (!edit.isPast) edit.message+=", "+getTranslated("i_activity_refresh");
             break;
         }
     }
@@ -1170,32 +1170,26 @@ $(document).ready(function() {
 
   Traduxio.activity.register("glossary",function(edit) {
     if (edit.entry) {
+      var entryHtml="<em>"+edit.entry.src_language+":"+
+            edit.entry.src_sentence+"</em>"+" -> "+
+            "<em>"+edit.entry.target_language+":";
+      if (edit.entry.was) {
+        entryHtml+=edit.entry.was;
+      } else {
+        entryHtml+=edit.entry.target_sentence;
+      }
+      entryHtml+="</em>";
       switch (edit.action) {
         case "added":
-          edit.message="Entrée du glossaire <em>"+
-            edit.entry.src_language+":"+
-            edit.entry.src_sentence+"</em>"+" -> "+
-            edit.entry.target_language+":"+
-            edit.entry.target_sentence+"</em>"+
-            " ajoutée";
+          edit.message=getTranslated("i_activity_glossary_added",entryHtml);
           if (!edit.isPast) addGlossaryEntry(edit.entry);
           break;
         case "modified":
-          edit.message="Entrée du glossaire <em>"+
-            edit.entry.src_language+":"+
-            edit.entry.src_sentence+"</em>"+" -> "+
-            edit.entry.target_language+":"+
-            edit.entry.was+"</em>"+
-            " modifiée en <em>"+edit.entry.target_sentence+"</em>";
+          edit.message=getTranslated("i_activity_glossary_modified",entryHtml,"<em>"+edit.entry.target_sentence+"</em>");
           if (!edit.isPast) addGlossaryEntry(edit.entry);
           break;
         case "deleted":
-          edit.message="Entrée du glossaire <em>"+
-            edit.entry.src_language+":"+
-            edit.entry.src_sentence+"</em>"+" -> "+
-            edit.entry.target_language+":"+
-            edit.entry.was+"</em>"+
-            " supprimée";
+          edit.message=getTranslated("i_activity_glossary_removed",entryHtml,"<em>"+edit.entry.target_sentence+"</em>");
           if (!edit.isPast) removeGlossary(edit.entry);
           break;
       }
