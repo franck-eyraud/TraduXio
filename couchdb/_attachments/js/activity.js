@@ -125,13 +125,14 @@
     });
   };
 
-  function checkActivity(id,delay,callback) {
-    var url=id+"/activity";
+  function checkActivity(id,delay,max,callback) {
+    var url=window.location.pathname+"/activity";
     if (delay) url+="?delay="+delay;
     else if (current) url+="?since="+current;
     else {
       return {done:function(){}};
     }
+    if (max > 0) url+="&max="+max;
     var s=initialWaitTime;
     function go(){
       $.ajax({
@@ -266,7 +267,7 @@
     if (id) {
       var p=initialWaitTime;
       presence(function() {
-        checkActivity(id,86600,function(){
+        checkActivity(id,60*24*3600/*2 months*/,300,function() {
           listenChanges(id,Traduxio.getSeqNum());
         });
       });
