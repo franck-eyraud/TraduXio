@@ -160,7 +160,10 @@ Traduxio= {
   canEdit:function(work) {
     if (this.isAdmin()) return true;
     if (this.isOwner(work)) return true;
-    if (this.hasSharedAccess(work) && !this.isOriginalWork(work)) return true;
+    if (!this.isOriginalWork(work)) {
+      if (this.hasSharedAccess(work,true)) return true;
+      if (this.hasSharedAccess(work) && this.config.allEdit) return true;
+    }
     if (work) {
       var privileges=work.privileges || {};
       if (Traduxio.config.anonymous_edit && !privileges.owner) {

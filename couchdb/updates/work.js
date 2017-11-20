@@ -86,6 +86,17 @@ function(work, req) {
         if (Traduxio.getUser().name) {
           doc.privileges ={ owner: Traduxio.getUser().name};
         }
+        if (Traduxio.config.autoShareToOwner && work.privileges && work.privileges.owner) {
+          doc.privileges=doc.privileges || {};
+          doc.privileges.sharedTo=[work.privileges.owner];
+          Traduxio.addActivity(work.edits,{action:"shared",version:version_name,to:work.privileges.owner});
+        }
+        if (Traduxio.config.autoShareToAll) {
+          doc.privileges=doc.privileges || {};
+          doc.privileges.sharedTo=doc.privileges.sharedTo || [];
+          doc.privileges.sharedTo.push("*");
+          Traduxio.addActivity(work.edits,{action:"shared",version:version_name,to:work.privileges.owner});
+        }
         actions.push("created "+version_name+" version");
         Traduxio.addActivity(work.edits,{action:"created",version:version_name});
         created=true;
