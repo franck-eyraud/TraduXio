@@ -205,7 +205,7 @@
     }
     var user;
     user=getUser(activity);
-    if (Traduxio.chat && Traduxio.chat.addMessage) {
+    if (Traduxio.chat && Traduxio.chat.addMessage && showPresence) {
       Traduxio.chat.addMessage(activity);
     }
     return user;
