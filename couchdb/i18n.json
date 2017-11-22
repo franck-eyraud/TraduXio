@@ -14,10 +14,18 @@
     "i_contact": "Contact",
     "i_start": "Start",
     "i_works_list": "Works list",
+    "i_my_translations": "My translations",
+    "i_shared_translations": "Translations shared with me",
+    "i_public_translations": "Public translations",
+    "i_my_works": "My translations",
     "i_username": "Username",
     "i_password": "Password",
+    "i_confirm_password": "Confirm password",
     "i_login": "Log in",
-    "i_login": "Log out",
+    "i_logout": "Log out",
+    "i_signup": "Register",
+    "i_edit_user": "Details",
+    "i_fullname": "Full name",
 
     "i_glossary_add_entry": "Add a glossary entry",
     "i_glossary_add_translation": "Add a translation of {0} into the glossary",
@@ -32,6 +40,15 @@
 
     "i_about": "About",
     "i_copyright": "Compliance with copyright",
+
+    "i_share": "Share",
+    "i_share_": "Manage shares...",
+    "i_share_participants": "Participants",
+    "i_share_with": "Invite a new participant",
+    "i_shares": "Partages",
+    "i_shared": "Shared",
+    "i_public": "Public",
+    "i_private": "Private",
 
     "i_report": "Report",
     "i_report_description": "Report abusive publication",
@@ -62,6 +79,9 @@
     "i_selected_license": "Selected license",
     "i_not_free_license": "This is not a free cultural License",
 
+    "i_print": "Print",
+    "i_back": "Back",
+
     "i_language": "Language",
     "i_language_": "Language:",
     "i_trad": "Trans.",
@@ -73,6 +93,7 @@
     "i_hide": "Hide",
     "i_edit": "Edit",
     "i_show": "Show",
+    "i_copy_from": "Copy from",
     "i_edit_license": "Edit license",
     "i_search_concordance": "Search the concordance",
     "i_all_rights_reserved": "All rights reserved",
@@ -112,8 +133,12 @@
     "i_works_list": "Liste des œuvres",
     "i_username": "Nom de connexion",
     "i_password": "Mot de passe",
+    "i_confirm_password": "Confirmation",
     "i_login": "Connexion",
     "i_logout": "Se déconnecter",
+    "i_signup": "S'enregistrer",
+    "i_edit_user": "Détails",
+    "i_fullname": "Nom Complet",
 
     "i_glossary_add_translation": "Ajouter une traduction de {0} dans le glossaire",
     "i_glossary_add_entry": "Ajouter une entrée du glossaire",
@@ -128,6 +153,15 @@
 
     "i_about": "À propos de",
     "i_copyright": "Respect des droits d'auteur",
+
+    "i_share": "Partager",
+    "i_share_": "Gérer les partages...",
+    "i_share_participants": "Participants",
+    "i_share_invite": "Inviter un nouveau participant",
+    "i_shares": "Partages",
+    "i_shared": "Partagé",
+    "i_public": "Public",
+    "i_private": "Privé",
 
     "i_report": "Signaler",
     "i_report_description": "Signaler une mise en ligne abusive",
@@ -158,6 +192,9 @@
     "i_selected_license": "Licence sélectionnée",
     "i_not_free_license": "Ce n'est pas une licence culturelle gratuite",
 
+    "i_print": "Imprimer",
+    "i_back": "Retour",
+
     "i_language": "Langue",
     "i_language_": "Langue :",
     "i_trad": "Trad.",
@@ -169,6 +206,7 @@
     "i_hide": "Cacher",
     "i_edit": "Éditer",
     "i_show": "Montrer",
+    "i_copy_from": "Copier depuis",
     "i_edit_license": "Éditer la licence",
     "i_search_concordance": "Chercher dans la concordance",
     "i_all_rights_reserved": "Tous droits réservés",

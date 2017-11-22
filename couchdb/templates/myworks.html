@@ -1,0 +1,44 @@
+{{>header}}
+{{#i18n}}
+<div id="myworks">
+  <h1>{{i_my_translations}}</h1>
+  <ul class="works">
+  {{#works}}
+    <li class="work">
+      <a href="{{prefix}}/works/{{id}}">
+        <div class="work-details">
+          <span class="language expand">{{language}}</span>
+          <span class="author">
+          {{#work_creator}}{{work_creator}}{{/work_creator}}</span>
+          {{^work_creator}}{{i_no_author}}{{/work_creator}}
+          </span>
+          <span class="title">
+          {{#title}}{{title}}{{/title}}
+          {{^title}}{{i_no_title}}{{/title}}
+          </span>
+          <br/>
+          <span class="owner">{{privileges.owner}}</span>
+        </div>
+      </a>
+      <ul class="translations">
+      {{#translations}}
+        <li class="translation">
+          <a href="{{prefix}}/works/{{id}}?open=original,{{version}}">
+            <div class="work-details">
+            <span class="language expand">{{language}}</span>
+            <span class="version">{{version}}</span>
+            <span class="work_creator">{{work_creator}}</span>
+            <span class="title">{{title}}</span>
+            <br/>
+            <span class="owner">{{privileges.owner}}</span>
+          </div>
+          </a>
+        </li>
+      {{/translations}}
+      </ul>
+    </li>
+  {{/works}}
+  </ul>
+</div>
+{{/i18n}}
+{{>footer}}

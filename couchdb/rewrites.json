@@ -23,6 +23,10 @@
   "to": "_list/works/works",
   "query": {"stale":"update_after"}
 },{
+  "from": "myworks",
+  "to": "_list/myworks/myworks",
+  "query": {"stale":"update_after"}
+},{
   "from": "shared/*",
   "to": "*"
 },{
@@ -47,6 +51,10 @@
   "to": "_show/license/:id",
   "method": "GET"
 },{
+  "from": "works/:id/print/:version",
+  "to": "_show/text/:id",
+  "method": "GET"
+},{
   "from": "glossary/:id",
   "to": "_update/glossary/:id",
   "method": "POST"
@@ -67,7 +75,10 @@
   "from":"works/:id/activity",
   "to":"_show/doc_activity/:id"
 },{
+  "from":"users/search/:search",
+  "to":"_list/autocomplete/users"
+},{
   "from":"works/:id/changes/:seq",
   "to":"../../_changes",
-  "query":{"filter":"traduxio/docid","feed":"longpoll","since":":seq"}
+  "query":{"filter":"traduxio/docid","feed":"longpoll","since":":seq","include_docs":"false"}
 }]

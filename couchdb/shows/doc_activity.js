@@ -1,6 +1,10 @@
 function(doc,req) {
   //!code lib/traduxio.js
 
+  if (!Traduxio.canAccess(doc)) {
+    throw({forbidden:"no access to this doc"});
+  }
+
   var delay=req.query.delay || 60 * 10;
   var now=new Date();
   if (req.query.since) {
@@ -24,6 +28,7 @@ function(doc,req) {
     Traduxio.getActivity(doc.messages[forum],since,{type:"forum",forum:forum},activity);
   }
 
+  activity=activity.filter(Traduxio.canAccessActivity);
   activity.sort(Traduxio.compareActivities);
 
   return JSON.stringify({since:since,now:now,activity:activity});

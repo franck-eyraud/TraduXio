@@ -11,18 +11,53 @@ js_i18n_elements.push("i_password");
 js_i18n_elements.push("i_login");
 js_i18n_elements.push("i_logout");
 js_i18n_elements.push("i_search");
+js_i18n_elements.push("i_signup");
+js_i18n_elements.push("i_confirm_password");
+js_i18n_elements.push("i_fullname");
+js_i18n_elements.push("i_email");
+js_i18n_elements.push("i_save");
+js_i18n_elements.push("i_edit_user");
 
 // !code lib/path.js
 // !code lib/localization.js
 
 Traduxio= {
 
+  config:this.couchapp.traduxio,
+
   sessionLength:30 * 60 * 1000, //1/2 hour
 
-  req:req,
+  req:{},
+
+  doc:{},
 
   compareActivities:function(a1,a2) {
-    return new Date(a1.when).getTime()-new Date(a2.when).getTime();
+    var time1=new Date(a1.when).getTime() || 0;
+    var time2=new Date(a2.when).getTime() || 0;
+    return time1-time2;
+  },
+
+  canAccessActivity:function(activity,index) {
+    if (activity.version && activity.version!="original") {
+      Traduxio.config.debug && log("check if "+Traduxio.getUser().name+" can access "+activity.version);
+      if (Traduxio.doc && Traduxio.doc.translations) {
+        if (Traduxio.doc.translations[activity.version]) {
+          Traduxio.config.debug && log("FOUND VERSION IN TRANSLATIONS");
+          var ok=Traduxio.canAccess(Traduxio.doc.translations[activity.version]);
+          if (ok) {
+            Traduxio.config.debug && log("access granted");
+          } else {
+            Traduxio.config.debug && log("access denied");
+          }
+          return ok;
+        }
+      } else {
+        Traduxio.config.debug && log("NO DOC TO CHECK");
+      }
+      return false;
+    } else {
+      return true;
+    }
   },
 
   unique_version_name:function(version) {
@@ -45,6 +80,126 @@ Traduxio= {
     return new Date(activity.when).getTime();
   },
 
+  isFreeWork:function (work) {
+    if (work && work.creativeCommons) {
+      return true;
+    }
+    return false;
+  },
+
+  isPublic:function (work) {
+    work=work || this.doc;
+    if (work) {
+      work.privileges=work.privileges || {};
+      if (work.privileges.public) {
+        return true
+      }
+      if (!work.privileges.owner) {
+        log("public because no owner");
+        work.privileges.public=true;
+        return true;
+      }
+      log("work is not public");
+      return false;
+    }
+    return false;
+  },
+
+  isOriginalWork:function (work) {
+    work=work || this.doc;
+    if (work) {
+      if (work.hasOwnProperty("translations")) {
+        return true;
+      }
+      log("no translations, is not original");
+      return false;
+    }
+    return false;
+  },
+
+  isOwner:function (work) {
+    work=work || this.doc;
+    if (work) {
+      var privileges=work.privileges || {public:true};
+      var user=this.getUser();
+      if ((!user.anonymous || Traduxio.config.anonymous_edit) && privileges.owner==user.name) return true;
+    } else {
+      if (Traduxio.config.anonymous_edit) return true;
+    }
+    return false;
+  },
+
+  hasSharedAccess:function (work) {
+    var user=this.getUser();
+    work=work || this.doc;
+    if (work) {
+      this.config.debug && log(user.name+" hasSharedAccess to "+work.title+" "+work.creator);
+      var privileges=work.privileges || {public:true};
+      this.config.debug && log(privileges);
+      if (privileges.sharedTo && privileges.sharedTo.indexOf(user.name)!=-1) return true;
+    }
+    return false;
+  },
+
+  canAccess:function(work) {
+    if (work==null) {
+      this.config.debug && log ("can access absent work");
+      return true;
+    } else {
+      this.config.debug && log (this.getUser().name + " can access ?");
+      if (this.isAdmin()) return true;
+      if (this.isOwner(work)) return true;
+      if (this.hasSharedAccess(work)) return true;
+      if (this.isPublic(work)) return true;
+      this.config.debug && log("no access");
+      return false;
+    }
+  },
+
+  canEdit:function(work) {
+    if (this.isAdmin()) return true;
+    if (this.isOwner(work)) return true;
+    if (this.hasSharedAccess(work) && !this.isOriginalWork(work)) return true;
+    if (work) {
+      var privileges=work.privileges || {};
+      if (Traduxio.config.anonymous_edit && !privileges.owner) {
+        log("can anonymously edit work");
+        return true;
+      }
+      Traduxio.config.debug && log("no edit access to "+work.title+" "+work.creator);
+    } else {
+      var user=this.getUser();
+      if (user.anonymous && !Traduxio.config.anonymous_edit) {
+        Traduxio.config.debug && log("Can't add work");
+        return false;
+      } else {
+        Traduxio.config.debug && log("Can add work");
+        return true;
+      }
+    }
+    return false;
+  },
+
+  canTranslate:function(work) {
+    log("can translate ?");
+    if (this.isAdmin()) return true;
+    work=work||this.doc;
+    if (this.isOriginalWork(work) &&
+      (
+        this.isPublic(work) || this.isOwner(work) || this.hasSharedAccess(work)
+      )
+      && (!this.getUser().anonymous || Traduxio.config.anonymous_edit)
+    ) {
+      return true;
+    }
+    log("no, cannot translate");
+    return false;
+  },
+
+  canDelete:function (work) {
+    return this.isAdmin() || this.isOwner(work);
+  },
+
   checkActiveUsers:function() {
     var toQuit=[];
     for (var user in this.doc.users) {
@@ -54,25 +209,10 @@ Traduxio= {
         toQuit.push(user);
       }
     }
-    toQuit.forEach(function(user){log(user+" leaves for inactivity");Traduxio.userQuit(user);});
-  },
-
-  userRename:function(oldName,newName,anonymous) {
-    if (this.doc.users && this.doc.users[oldName] && newName && oldName!=newName && !this.doc.users[newName]) {
-      user=this.doc.users[oldName];
-      user.name=newName;
-      user.anonymous=anonymous;
-      this.doc.users[newName]=user;
-      delete this.doc.users[oldName];
-      this.doc.session=this.doc.session || [];
-      this.addActivity(this.doc.session,{rename:true,author:oldName,newname:newName,anonymous:anonymous},false);
-      delete user.active;
-      if (user.footprint && this.doc.browsers) {
-        this.doc.browsers[user.footprint]=user;
-      }
-      return true;
-    }
-    return false;
+    toQuit.forEach(function(user){
+      Traduxio.config.debug && log(user+" leaves for inactivity");
+      Traduxio.userQuit(user);
+    });
   },
 
   userQuit:function(username) {
@@ -80,7 +220,7 @@ Traduxio= {
       this.doc.session=this.doc.session || [];
       this.addActivity(this.doc.session,{left:true,author:username},false);
       delete this.doc.users[username];
-      log("removing "+username+" from active users of "+this.doc._id);
+      this.config.debug && log("removing "+username+" from active users of "+this.doc._id);
       return true;
     }
     return false;
@@ -104,7 +244,7 @@ Traduxio= {
       } else {
         delete user.active;
       }
-      log(user);
+      this.config.debug && log(user);
     }
     if (!user) return false;
     var alreadyActive=false;
@@ -112,7 +252,7 @@ Traduxio= {
       alreadyActive=true;
     }
     this.doc.users[username]=user;
-    log(this.doc.users);
+    this.config.debug && log(this.doc.users);
     var update=false;
     if (this.doc.users[username].active) {
       var activeDate=new Date(this.doc.users[username].active);
@@ -140,76 +280,61 @@ Traduxio= {
       this.doc.activity.sort(this.compareActivities);
       var now=new Date();
       for (var i=0;i<activityList.length && this.age(activityList[i],now)>delay;i++);
-      log("splicing activity for "+i);
+      this.config.debug && log("splicing activity for "+i);
       activityList.splice(0,i);
     }
   },
 
+  isAdmin:function () {
+    return this.getUser().isAdmin;
+  },
 
-  getNewName:function() {
-
-    var generateName=function(i) {
-      return "anonym-"+this.req.uuid.substr(-3-i,3);
-    }.bind(this);
-
-    var exists=function (name) {
-      if (!this.doc.browsers) return false;
-      for (var f in this.doc.browsers) {
-        if (this.doc.browsers[f].name==name) return true;
+  _isAdmin:function (userCtx,secObj) {
+    if (userCtx.roles.indexOf('_admin') != -1) return true;
+    if (secObj.admins) {
+      if (userCtx.name && isArray(secObj.admins.names) && secObj.admins.names.indexOf(userCtx.name) != -1) return true;
+      var ok=false;
+      if (isArray(secObj.admins.roles) && isArray(userCtx.roles)) {
+        userCtx.roles.forEach(function(role) {
+          if (secObj.admins.roles.indexOf(role) != -1) {
+            ok=true;
+          };
+        });
       }
-      return false;
-    }.bind(this);
-
-    var i=0,name;
-    do {
-      name=generateName(i++);
-    } while (exists(name) && i<this.req.uuid.length);
-    return exists(name) ? false : name;
+      if (ok) return true;
+    }
+    return false;
   },
 
   getUser:function() {
-    var user;
+    var user={};
 
-    this.doc.users=this.doc.users||{};
-
-    //conversion from old data
-    if (this.doc.anonymous) {
-      this.doc.browsers={};
-      for (var f in this.doc.anonymous) {
-        this.doc.browsers[f]={name:this.doc.anonymous[f],anonymous:true};
-      }
-      delete this.doc.anonymous;
-    }
-    //TODO remove when all data is converted
-
-    var footprint=this.req.peer+"|"+this.req.headers["User-Agent"]+"|"+this.req.headers.Host;
-    this.doc.browsers=this.doc.browsers || {};
     if (this.req.userCtx.name) {
-      user={name:this.req.userCtx.name};
-      if (this.doc.browsers[footprint] && this.doc.browsers[footprint].name!=user.name) {
-        this.userRename(this.doc.browsers[footprint].name,user.name);
-      }
-      if (this.doc.users[user.name] && this.doc.users[user.name].anonymous && this.doc.users[user.name].footprint && this.doc.users[user.name].footprint!=footprint) {
-        this.userRename(user.name,this.getNewName());
-      }
+      user.name=this.req.userCtx.name;
     } else {
-      if (this.doc.browsers[footprint]) {
-        user=this.doc.browsers[footprint];
-        if (!user.anonymous) {
-          this.userQuit(user.name);
-          user.anonymous=true;
-          user.name=this.getNewName();
+
+      hashCode = function(string) {
+        var hash = 0, i, chr;
+        if (string.length === 0) return hash;
+        for (i = 0; i < string.length; i++) {
+          chr   = string.charCodeAt(i);
+          hash  = ((hash << 5) - hash) + chr;
+          hash |= 0; // Convert to 32bit integer
         }
-        if (!user.name || this.doc.users[user.name] && this.doc.users[user.name].footprint && this.doc.users[user.name].footprint!=footprint) {
-          user.name=this.getNewName();
-        }
-      } else {
-        user={name:this.getNewName(),anonymous:true};
+        return hash.toString(16);
+      };
+
+      user.anonymous=true;
+      user.name=null;
+
+      if (this.req.peer && this.req.headers) {
+        var footprint=this.req.peer+"|"+this.req.headers["User-Agent"]+"|"+this.req.headers.Host;
+        user.anonymous=hashCode(footprint);
       }
+
     }
-    if (user.anonymous) user.footprint=footprint;
-    else delete user.footprint;
-    this.doc.browsers[footprint]=user;
+    user.roles=this.req.userCtx.roles;
+    user.isAdmin=this._isAdmin(this.req.userCtx,this.req.secObj);
     return user;
   },
 
@@ -221,7 +346,7 @@ Traduxio= {
     if (!activity.author) {
       var user=this.getUser();
       activity.author=user.name;
-      if (user.anonymous) activity.anonymous=true;
+      if (user.anonymous) activity.anonymous=user.anonymous;
     }
     activityList.push(activity);
     if (active) this.userActivity();
@@ -237,11 +362,6 @@ Traduxio= {
       if (!activity.seq || activity.seq > this.req.info.update_seq) {
         activity.seq=this.req.info.update_seq-1;
       }
-      //for old data
-      if (!activity.anonymous && (!activity.author || (activity.author.indexOf("anonym-")==0)) ) {
-        activity.anonymous=true;
-      }
-      //TODO remove when all data is converted
     }
   },
 
@@ -263,4 +383,5 @@ Traduxio= {
 
 };
 
-if (typeof doc != "undefined") Traduxio.doc=doc;
+if (typeof doc != "undefined" && doc!=null) Traduxio.doc=doc;
+if (typeof req != "undefined" && req!=null) Traduxio.req=req;

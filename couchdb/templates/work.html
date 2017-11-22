@@ -1,20 +1,28 @@
 {{> header}}
 {{#i18n}}
+{{^canAccess}}
+<div class="top">
+<b>NO ACCESS</b>
+</div>
+{{/canAccess}}
+{{#canAccess}}
+{{#glossary}}
 <script type="text/javascript">
   var glossary={{{glossary}}};
 </script>
+{{/glossary}}
 <div class="top">
   <h1><span class="title">{{display_work_title}}</span> – <span class="creator">{{display_work_creator}}</span> (<span class="language expand" data-id="{{language}}">{{language}}</span>)</h1>
-  {{^original}}<a href="#" class="workButton" id="editDoc">{{i_edit}}</a>{{/original}}
-  <a href="#" class="workButton" id="removeDoc">✕</a>
-  <a href="#" class="workButton" id="addVersion">+</a>
+  {{#canEdit}}{{^original}}<a href="#" class="workButton" id="editDoc">{{i_edit}}</a>{{/original}}{{/canEdit}}
+  {{#canDelete}}<a href="#" class="workButton" id="removeDoc">✕</a>{{/canDelete}}
+  {{#canTranslate}}<a href="#" class="workButton" id="addVersion">+</a>{{/canTranslate}}
   <form id="addPanel">
     {{^original}}
       <input type="radio" name="add-type" value="original" /> {{i_original}}
       <input type="radio" name="add-type" value="translation" checked="checked" /> {{i_translation_}}
     {{/original}}
     {{#original}}
-    <h3>{{i_translation_}} </h3>
+    <h3>{{i_translation_}}</h3>
     {{/original}}
     <input name="work-creator" placeholder="{{i_author}}"/>
     <select class="language" name="language" placeholder="{{i_version_language}}"></select>
@@ -41,8 +49,8 @@
 <table id="hexapla" data-lines="{{lines}}" data-id="{{id}}" class="full">
   <thead><tr>
     {{#headers}}
-      <th class="pleat open{{#edited}} edited{{/edited}}{{#opened}} opened{{/opened}}" data-version="{{id}}"><div class="relative-wrapper">
-      {{^justOneText}}<span class="button delete"></span>{{/justOneText}}
+      <th class="pleat open{{#edited}} edited{{/edited}}{{#opened}} opened{{/opened}}{{#canAccess}} canAccess{{/canAccess}}{{#canEdit}} canEdit{{/canEdit}}" data-version="{{version}}"><div class="relative-wrapper">
+      {{^justOneText}}{{#canDelete}}<span class="button delete"></span>{{/canDelete}}{{/justOneText}}
       {{#is_original}}
         <div class="metadata title"  title="{{i_title}}">{{work_title}}</div>
         <input type="text" class="editedMeta title" name="title"
@@ -79,7 +87,8 @@
             value="{{language}}" data-language="{{language}}"></select>
         </div>
       {{/is_original}}
-        <input type="button" class="edit" value="{{i_edit}}" />
+        {{#canEdit}}<input type="button" class="edit" value="{{i_edit}}" />{{/canEdit}}
+        <div class="owner">{{owner}}</div>
         <span class="button hide">{{i_hide}}</span>
       </div></th>
     {{/headers}}
@@ -115,9 +124,9 @@
   </tbody>
   <tfoot><tr>
   {{#headers}}
-    <th class="pleat open" data-version="{{id}}">
+    <th class="pleat open" data-version="{{version}}">
       <div class="relative-wrapper">
-        <input type="button" class="edit" value="{{i_edit}}" />
+        {{#canEdit}}<input type="button" class="edit" value="{{i_edit}}" />{{/canEdit}}
         <div class="button edit-license" title="{{i_edit_license}}"></div>
         <div class="license">
         {{#creativeCommons}}
@@ -129,12 +138,26 @@
           {{i_all_rights_reserved}}.
         {{/creativeCommons}}
         </div>
+        <div class="link"><a href="{{prefix}}/works/{{id}}/print/{{version}}">{{i_print}}</a></div>
         <div class="button hide">{{i_hide}}</div>
+        <div class="share">
+        <select data-value="{{shareValue}}">
+          <option value="public" class="public">{{i_public}}</option>
+          <option value="shared" class="shared">{{i_shared}}</option>
+          <option value="private" class="private">{{i_private}}</option>
+        </select>
+        <div class="list-shares">
+          <!--<span class="total">{{sharedTo.length}}</span> {{i_shares}}-->
+          {{#sharedTo}}
+          <span class="shared">{{.}}</span>
+          {{/sharedTo}}
+        </div>
+      </div>
       </div>
     </th>
   {{/headers}}
   </tr></tfoot>
 </table>
-
+{{/canAccess}}
 {{/i18n}}
 {{> footer}}

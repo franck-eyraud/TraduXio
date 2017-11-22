@@ -15,8 +15,8 @@ function(work, req) {
   }
   var actions=[];
   var result={};
+  var version_name = req.query.version;
   if (["PUT","DELETE"].indexOf(req.method)!=-1) {
-    var version_name = req.query.version;
 
     if (work===null) {
       return [null,{code:404,body:"Not found"}];
@@ -26,7 +26,6 @@ function(work, req) {
 
     if(!version_name || version_name == "original") {
       original=true;
-
     } else {
       if(!work.translations[version_name]) {
         return [null,{code:404,body:version_name+" not found"}];
@@ -34,9 +33,6 @@ function(work, req) {
       doc = work.translations[version_name];
     }
   } else { //req.method==POST
-    if (version_name) {
-      return [null,{code:400,body:"Can't specify version"}];
-    }
     if (work!==null) {
       if (args.creator) {
         version_name=args.creator.trim();
@@ -55,6 +51,12 @@ function(work, req) {
       original=true;
       version_name="original";
       Traduxio.doc=doc=work={};
+      doc.privileges={};
+      if (!Traduxio.getUser().anonymous) {
+        doc.privileges.owner=Traduxio.getUser().name;
+      } else {
+        doc.privileges.public=true;
+      }
       work._id=work.id || req.uuid;
       delete work.id;
       work.edits=[];
@@ -77,18 +79,26 @@ function(work, req) {
       delete args.original;
     } else if (version_name) {
       if (!work.translations[version_name]) {
-        work.translations[version_name] = { title: "", language: "", creator:"", text: emptyText(work) };
+        work.translations[version_name] = {
+          title: "", language: "", creator:"", text: emptyText(work)
+        };
         doc=work.translations[version_name];
+        if (Traduxio.getUser().name) {
+          doc.privileges ={ owner: Traduxio.getUser().name};
+        }
         actions.push("created "+version_name+" version");
         Traduxio.addActivity(work.edits,{action:"created",version:version_name});
         created=true;
       } else {
+        log("Version "+version_name+" already exists");
         return [null,{code:403,body:"Version "+version_name+" already exists"}];
       }
     }
   }
 
   work.edits=work.edits||[];
+
+  work.privileges=work.privileges || {public:true};
 
   if (req.method=="DELETE") {
     if (!version_name && original) {
@@ -155,7 +165,7 @@ function(work, req) {
         delete args["work-creator"];
       }
     }
-    var keysOK=["date","language","title","text","creativeCommons"];
+    var keysOK=["date","language","title","text","creativeCommons","shareTo","public"];
     for (var key in args) {
       if (keysOK.indexOf(key)!=-1) {
         if (key=="text") {
@@ -165,6 +175,34 @@ function(work, req) {
             actions.push("set text for "+version_name);
             doc[key]=args[key];
           }
+        } else if (key == "public") {
+          doc.privileges=doc.privileges || {};
+          if (args[key]=="true" || args[key]==true) {
+            doc.privileges.public=true;
+            var name=version_name || "original";
+            actions.push(name+" becomes public");
+          } else {
+            return [null,{code:400,body:"Can't set value "+args[key]+" to public"}];
+          }
+        } else if (key == "shareTo") {
+          var shared=args[key];
+          if (typeof shared=="string") {
+            shared=[shared];
+          }
+          if (typeof shared.indexOf !="function") {
+            return [null,{code:400,body:key+" must be a string or array"}];
+          }
+          doc.privileges=doc.privileges || {public:true};
+          doc.privileges.sharedTo=doc.privileges.sharedTo || [];
+          shared.forEach(function(user) {
+            if (doc.privileges.sharedTo.indexOf(user)==-1) {
+              doc.privileges.sharedTo.push(user);
+              actions.push("shared "+version_name+" to "+user);
+            } else {
+              actions.push(version_name+" already shared to "+user);
+            }
+          });
+          continue;
         } else if (!typeof args[key] == "string") {
           return [null,{code:400,body:key+" must be a string"}];
         }
@@ -186,7 +224,12 @@ function(work, req) {
   }
   result.actions=actions;
   adjustLength(work);
-  var code=req.query=="POST"?201:200;
+  var code;
+  if (actions.length) {
+    code=req.query=="POST"?201:200;
+  } else {
+    code=204;
+  }
   return [work, {code:code,body:JSON.stringify(result)}];
 
 }

@@ -10,3 +10,5 @@ for i in "$dirname"/samples/*.json; do
     echo Failed; exit 1;
   fi
 done
+#Force view update because rewrite rules have update_after set
+time curl $DATABASE/_design/traduxio/_view/works | wc

@@ -94,14 +94,21 @@ function editGlossaryEntry(glossaryEntry,language) {
   }
 }
 
+var runningEdit;
+
 function request(options) {
-  return $.ajax(options)
-    .retry({times:3,statusCodes:[0,409]})
-    .fail(function (jqXHR) {
-      if (jqXHR.responseText) {
-        alert("request failed "+jqXHR.responseText);
-      }
-    });
+  if (!runningEdit) {
+    runningEdit=$.Deferred().resolve();
+  }
+  var nextDfd=runningEdit.then(function() {
+    return $.ajax(options).retry({times:3,statusCodes:[0,409]});
+  }).fail(function (jqXHR) {
+    if (jqXHR.responseText) {
+      alert("request failed "+jqXHR.responseText);
+    }
+  });
+  runningEdit=nextDfd;
+  return nextDfd.promise();
 }
 
 function find(version) {
@@ -229,7 +236,7 @@ function fixWidths() {
   if (nbOpen==0) {
     $("#hexapla").removeClass("full");
   } else {
-    $("#hexapla").addClass("full");
+    $("#hexapla").addClass("full").css({height:"100%"}).css({height:null});
     $("thead tr:first-child th.pleat.open:visible").css("width",100/nbOpen+"%");
   }
 }
@@ -386,12 +393,26 @@ function toggleEdit (e) {
         finish();
       }
     } else {
+      doc.find("input.copy").remove();
       units.find("textarea").prop("disabled",false);
       units.addClass("edit");
       if (getVersions().indexOf(version)>0) {
         units.parents("td.pleat").not("[rowspan=1]").find(".unit").each(function () {
             createSplits($(this));
           });
+      }
+      if (getVersions().indexOf(version)>0) {
+        var empty=true;
+        units.each(function () {
+          if ($(this).find("textarea").val()) {
+            empty=false;
+            return;
+          }
+        });
+        if (empty) {
+          var inputCopy=$("<input>").attr("type","button").addClass("copy").val(getTranslated("i_copy_from"));
+          inputCopy.insertBefore(doc.find("input.edit"));
+        }
       }
       positionSplits(units);
       applyToggle();
@@ -673,6 +694,9 @@ function saveUnit(callback) {
         if (callback && typeof(callback) == "function") {
           callback();
         }
+        if (content) {
+          find(textarea.getVersion("td")).find("input.copy").remove();
+        }
       } else {
         alert(result+":"+message);
       }
@@ -721,7 +745,7 @@ function saveMetadata() {
     }).done(function(result) {
       if (ref=="original") updateDocInfo(result);
       var target=elem.siblings("div.metadata."+name);
-      newValue=result[name] || newValue;
+      newValue=result && result[name] || newValue;
       elem.val(newValue);
       if(name == "creator") {
         changeVersion(ref, newValue);
@@ -850,6 +874,42 @@ function findUnit(version,line) {
   return false;
 }
 
+function copyFrom(unit,version) {
+  var line=unit.getLine();
+  var source=findUnit(version,line);
+  if (source) {
+    var content=source.find("textarea").val();
+    var existingContent=unit.find("textarea").val();
+    if (!existingContent && existingContent!=content) {
+      if (fillUnit(unit,content)) {
+        unit.find("textarea").addClass("dirty");
+        editOnServer(content,unit.getReference()).done(function() {
+          unit.find("textarea").removeClass("dirty");
+          if (content) {
+            find(unit.getVersion("td")).find("input.copy").remove();
+          }
+        });
+      }
+    } else {
+      console.log("skipped line "+line+" already filled");
+    }
+  } else {
+    console.log("can't find version for line "+line);
+  }
+}
+
+function copyText(version,sourceVersion) {
+  var units=findUnits(version);
+  sourceVersion=sourceVersion || getVersions()[0];
+  if (sourceVersion!=version) {
+    units.each(function () {
+      copyFrom($(this),sourceVersion);
+    });
+  } else {
+    alert("trying to copy from same version!");
+  }
+}
+
 function findLine(line) {
   return $("tr[data-line='"+line+"']");
 }
@@ -949,6 +1009,154 @@ var editOnServer = function(content, reference) {
   });
 };
 
+var modifyVersion = function(version,modify) {
+  return request({
+    type: "PUT",
+    url: "work/"+Traduxio.getId()+"/"+encodeURIComponent(version),
+    contentType: 'text/plain',
+    data: JSON.stringify(modify),
+    dataType: "json"
+  });
+}
+
+var searchUser = function(userid,callback) {
+  $.ajax({
+    url: getPrefix()+"/users/search/"+userid,
+    dataType:"json"
+  }).done(function(result) {
+    if (result) {
+      result.forEach(function(user) {
+        if (user.value && user.value==userid) {
+          callback(user);
+          return false;
+        }
+      });
+    }
+  });
+}
+
+var shareText = function(version) {
+
+  function sharedItem(userid) {
+    var item=$("<div>").addClass("shared-user").text(userid);
+    searchUser(userid,function(userDetails) {
+      if (userDetails.label) {
+        item.text(userDetails.label+" ("+userDetails.value+")");
+      }
+    });
+    return item;
+  }
+
+  var shareDiv=$("<div>").addClass("share-dialog")
+    .append($("<h2>").append(getTranslated("i_share_participants")));
+  var alreadyShares=find(version).find(".list-shares .shared").map(function() {return $(this).text()}).toArray();
+  var shareList=$("<div>").addClass("share-list").appendTo(shareDiv);
+
+  alreadyShares.forEach(function(userid) {
+    sharedItem(userid).appendTo(shareList);
+  });
+  var addPanel=$("<div>").addClass("add-panel").appendTo(shareDiv);
+  addPanel.append($("<label>").addClass("share").text(getTranslated("i_share_invite")));
+  var input=$("<input>").appendTo(addPanel);
+  var add=$("<input>").attr("type","button").attr("value",getTranslated("i_share")).appendTo(addPanel);
+  add.on("click submit",function() {
+    var val=input.val();
+    if (val) {
+      if (alreadyShares.indexOf(val)!=-1) {
+        input.val("");
+        return;
+      }
+      var req=request({
+        url: "work/"+Traduxio.getId()+"/"+encodeURIComponent(version),
+        type:"PUT",
+        data:JSON.stringify({shareTo:val}),
+        dataType:"json"
+      }).done(function(result) {
+        input.val("");
+        alreadyShares.push(val);
+        find(version).find(".list-shares").append($("<span>").addClass("shared").text(val));
+        find(version).find(".list-shares .total").text(find(version).find(".list-shares .shared").length);
+        var newItem=sharedItem(val).appendTo(shareList);
+        find(version).find("div.share select").val("shared");
+        updatePrivacyInfo.apply(find(version).find("div.share select"));
+        shareList.scrollTop(newItem.position().top);
+      });
+    }
+  });
+  var req;
+  input.autocomplete({
+    source: function( request, response ) {
+      val=request.term;
+      if (val) {
+        if (req && req.state()=="pending") {
+          req.abort();
+        }
+        req=$.ajax({
+          url: getPrefix()+"/users/search/"+val,
+          dataType:"json"
+        }).done(function(result) {
+          var send=result || [];
+          send=send.filter(function(o) {return alreadyShares.indexOf(o.value)==-1});
+          console.log(send);
+          response(send);
+        }).error(function() {
+          console.log(arguments);
+          response([]);
+        });
+      }
+    }
+  });
+  addModal(shareDiv,getTranslated("i_share")+" "+version);
+
+}
+
+var updatePrivacyInfo=function() {
+  var ref = $(this).closest("th").data("version");
+  var val=$(this).val();
+  $(this).data("value",val);
+  if ($(this).data("value")=="public") {
+    $("option.private",this).attr("disabled",true);
+    $("option.shared",this).attr("disabled",true).attr("value","Shared");
+  } else if ($(this).data("value")=="shared") {
+    $("option.private",this).attr("disabled",true);
+    if (!$(this).parent().find("input.share-button").length) {
+      $("<input>").attr("type","button").addClass("share-button").val(getTranslated("i_share_")).on("click",function() {
+        shareText(ref);
+      }).appendTo($(this).siblings(".list-shares"));
+    }
+  }
+}
+
+var changePrivacy = function () {
+  var val=$(this).val();
+  var ref = $(this).closest("th").data("version");
+  if (val!=$(this).data("value")) {
+    var modify;
+    if (val=="public") {
+      var select=$(this);
+      if (confirm("Are you sure you want to switch this work to public ? ")) {
+        modify={public:true};
+        modifyVersion(ref,modify)
+        .done(function(result) {
+          if (result.actions) {
+            $("option",select).attr("disabled",true);
+            select.siblings(".list-shares").hide();
+            select.data("value","public");
+            updatePrivacyInfo.apply(select);
+          }
+        });
+      } else {
+        //Cancel change
+        $(this).val($(this).data("value"));
+      }
+    } else if (val=="shared") {
+      shareText(ref);
+      //value will change if a share is effectively done
+      $(this).val($(this).data("value"));
+    }
+  }
+}
+
 $(document).ready(function() {
 
   $("#hexapla").on("click", ".button.hide", toggleShow);
@@ -1023,6 +1231,17 @@ $(document).ready(function() {
   $("thead").on("focusout","input.editedMeta", saveMetadata);
   $("thead").on("change","select.editedMeta", saveMetadata);
   $("#hexapla").on("click","span.delete", clickDeleteVersion);
+
+  $("thead").on("click","input.copy", function () {
+    var version=$(this).getVersion("th");
+    copyText(version);
+  });
+
+  $("tfoot").on("change","div.share select", changePrivacy);
+  $("div.share select").each(function() {
+    $(this).val($(this).data("value"));
+    updatePrivacyInfo.apply(this);
+  })
 
   $("input[type=text],select").each(function() {
     if (!$(this).prop("placeholder")) {
@@ -1221,5 +1440,4 @@ $(window).load(function() {
     },500);
   }
   $("div.top").appendTo("#header");
-  Traduxio.headerPos();
 });

@@ -91,14 +91,17 @@ function fixLanguages(container) {
     }
     language.each(function() {
       var lang=$(this);
-      var langID=lang.data("id");
+      var langID=lang.data("id") || lang.text();
       if (langID) {
         var langName=langID?getLanguageName(langID):"";
-        if (lang.is(".expand")) {
-          lang.text(langName);
-          lang.prop('title',langID);
-        } else {
-          lang.prop('title',langName);
+        if (langName) {
+          lang.data("id",langID);
+          if (lang.is(".expand")) {
+            lang.text(langName);
+            lang.prop('title',langID);
+          } else {
+            lang.prop('title',langName);
+          }
         }
       }
     });
@@ -117,11 +120,33 @@ function getTranslated(name) {
   return translation;
 }
 
+function addModal (content,title) {
+  function modalClean() {
+    modal.remove();
+    $("body").css("overflow",body_overfolw);
+  }
+  var modal=$("<div>").addClass("modal").appendTo("body");
+  var body_overfolw=$("body").css("overflow");
+  $("body").css("overflow","hidden");
+
+  var dialog=$("<div>").addClass("dialog").appendTo(modal);
+  if (title) {
+    $("<div>").addClass("title").text(title).appendTo(dialog);
+  }
+  var close=$("<span>").addClass("button close").appendTo(dialog).append("X");
+  dialog.on("click",function(e) {e.stopPropagation();});
+  modal.on("click",modalClean);
+  close.on("click",modalClean);
+
+  var contentPane=$("<div>").addClass("content").appendTo(dialog);
+  contentPane.append(content);
+  return modal;
+}
+
 $(document).ready(function() {
   fixLanguages();
   $("form.concordance").concordancify();
   $("#nav li."+$(document.body).attr("id")).addClass("active");
-  Traduxio.headerPos();
 });
 
 Traduxio=$.extend({},{
@@ -142,9 +167,6 @@ Traduxio=$.extend({},{
     },
     getSeqNum:function() {
       return $(document.body).data("seq");
-    },
-    headerPos:function() {
-      $("#main").css("top",$("#header").height()).css("padding-bottom",$("#footer").height());
     }
   }
 );

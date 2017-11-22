@@ -56,8 +56,7 @@ body,html,input,textarea {
 }
 
 #header {
-  z-index:100;
-  position: fixed;
+  z-index:10;
   top: 0;
   width: 100%;
   font-size:0.85em;
@@ -70,7 +69,7 @@ body,html,input,textarea {
   background-color: #333;
   width:100%;
   position:fixed;
-  z-index:99;
+  z-index:9;
   bottom:0px;
   font-size: 0.8em;
   height:2.1em;
@@ -177,7 +176,7 @@ li.closed > ul {
   width:10em;
 }
 
-#session-info input.bad {
+form input.bad {
   border-color:red;
 }
 
@@ -208,4 +207,82 @@ http://kizu.ru/en/fun/rotated-text/
    float: left;
    margin-top: 100%;
  }
+
+.modal {
+  position: fixed; /* Stay in place */
+  z-index: 11; /* Sit on top */
+  left: 0;
+  top: 0;
+  width: 100%; /* Full width */
+  height: 100%; /* Full height */
+  overflow: hidden;
+  background-color: rgb(0,0,0); /* Fallback color */
+  background-color: rgba(0,0,0,0.4); /* Black w/ opacity */
+}
+
+ /* Modal Content/Box */
+.modal .dialog {
+  background-color: #fefefe;
+  margin: auto;
+  padding: 0px;
+  border: 1px solid #888;
+  width: 80%;
+  height: 80%;
+  position: absolute;
+  top: 0; left: 0; bottom: 0; right: 0;
+  box-sizing:initial;
+  -o-box-sizing:initial;
+  -webkit-box-sizing:initial;
+}
+
+.modal .title {
+  border: solid 2px;
+  padding: 3px;
+  font-weight: bold;
+}
+
+.modal .button.close {
+  top:0px; right:0px;
+  border:2px solid;
+  padding:3px;
+  position:absolute;
+  cursor: pointer;
+}
+
+.modal .dialog .content {
+  padding: 20px;
+}
+
+form.user-info input {
+  display:block;
+  margin:1em;
+  padding:0.2em;
+  font-size:1.5em;
+  width:75%;
+}
+
+form.user-info input[type=button],
+form.user-info input[type=submit] {
+  width:auto;
+}
+
+
 /* ==== */
+
+@media print {
+  #header > *,
+  #header div.top > *,
+  #footer {
+    display: none;
+  }
+  #header .top,
+  #header div.top h1 {
+    display: inherit;
+  }
+
+  #header div.top h1 {
+    background-color: none;
+    font-size: 2em;
+    font-weight: bold;
+  }
+}
