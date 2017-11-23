@@ -147,6 +147,11 @@ function (newDoc, oldDoc, userCtx, secObj) {
     return;
   }
 
+  if (newDoc.type=="password_request") {
+    mandatoryFields(["email"]);
+    return;
+  }
+
   if (!Traduxio.canAccess(oldDoc)) {
     Traduxio.config.debug && log("can't access old");
     throw({forbidden:"Access denied"});

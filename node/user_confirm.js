@@ -48,7 +48,7 @@ function isValidEmail(email) {
 
 var known_users;
 
-function recordUser(user) {
+function recordUser(user,callback) {
   if (user._modified) {
     delete user._modified;
     console.log("insert modified user");
@@ -58,6 +58,7 @@ function recordUser(user) {
       } else {
         console.log("error saving user "+user.name+" "+user._rev+" "+err);
       }
+      callback(err);
     });
   } else {
     if (user._deleted) {
@@ -185,6 +186,81 @@ function isEmail(doc, req) {
   return doc.email !== undefined;
 }
 
+function generatePassword(length) {
+  var string="";
+  while (string.length < length) {
+    string+=Math.random().toString(36).slice(2);
+  }
+  return string.slice(0,length);
+}
+
+function sendPassword(emailAddress,password,callback) {
+  email_server.send({
+    text: "Your password has been reset, please use "+password+" and CHANGE IT first thing",
+    from: config.email_sender,
+    to: emailAddress,
+    subject: "Traduxio change password"
+  },function(err,message) {
+    if (!err) {
+      console.log("Sent new password to " + emailAddress+" "+message);
+    } else {
+      console.log("Error sending new password to " + emailAddress+" "+err);
+    }
+    callback(err,message);
+  });
+}
+
+
+function resetPasswords() {
+  var password_follow=db.follow({
+      include_docs:true,
+      filter:function(doc,req) {
+        return doc.type=="password_request";
+      }
+    });
+  password_follow.on("change",function (change) {
+    console.log(change);
+    if (change.doc.error || change.doc.success) { //ignore it, already users_db
+      console.log("already used");
+      return;
+    }
+    if (change.doc.email) {
+      console.log("received password reset request for "+change.doc.email);
+      for (var username in known_users) {
+        if (known_users[username].email==change.doc.email) {
+          console.log("found user "+username);
+          var user=known_users[username];
+          var password=generatePassword(12);
+          user.password=password;
+          user._modified=true;
+          recordUser(user,function(err) {
+            if (err) {
+              change.doc.error=err;
+              db.insert(change.doc);
+            } else {
+              sendPassword(change.doc.email,user.password,function(err,message) {
+                if (!err) {
+                  change.doc.success="New password sent";
+                } else {
+                  console.log("found error "+err);
+                  change.doc.error=err;
+                }
+                db.insert(change.doc);
+              });
+            }
+          });
+          return;
+        }
+      }
+      console.log("email "+change.doc.email+" unknown");
+      change.doc.success="searched";
+      db.insert(change.doc);
+    }
+    console.log("no email found");
+  });
+  password_follow.follow();
+}
+
 function followUsers() {
   users_db=admin_db.server.use("_users");
 
@@ -232,6 +308,7 @@ db.get("known_users",function(error,doc) {
         console.log("inserted known_users "+body.rev);
         known_users._rev=body.rev;
         followUsers();
+        resetPasswords();
       } else {
         console.log(error);
         console.log("error not started");
@@ -240,6 +317,7 @@ db.get("known_users",function(error,doc) {
   } else if (!error) {
     known_users=doc;
     followUsers();
+    resetPasswords();
   } else {
     console.log(error);
     console.log("error not started");
