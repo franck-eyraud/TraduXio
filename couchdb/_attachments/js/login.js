@@ -27,7 +27,8 @@ function updateUserInfo(ctx) {
     var password=$("<input>").addClass("password").attr("type","password").attr("placeholder",Traduxio.getTranslated("i_password"));
     var go=$("<input>").addClass("go").attr("type","submit").val(Traduxio.getTranslated("i_login"));
     var signup=$("<input>").addClass("signup").attr("type","button").val(Traduxio.getTranslated("i_signup"));
-    form.append(username).append(password).append(go).append(signup).on("submit",function(e) {
+    var forgot=$("<input>").addClass("forgot").attr("type","button").val(Traduxio.getTranslated("i_forgot_password"));
+    form.append(username).append(password).append(go).append(signup).append(forgot).on("submit",function(e) {
       e.preventDefault();
       var name=username.val();
       var passwd=password.val();
@@ -40,6 +41,11 @@ function updateUserInfo(ctx) {
     sessionInfo.empty().append(form);
     signup.on("click",function() {
       var modal=addModal(signUpForm(function() {
+        modal.remove();
+      }));
+    });
+    forgot.on("click",function() {
+      var modal=addModal(forgotForm(function() {
         modal.remove();
       }));
     });
@@ -144,6 +150,54 @@ function editUserForm(userInfo,callback) {
     userInfo.email=email.val();
     userInfo.fullname=fullname.val();
     $.couch.db("_users").saveDoc(userInfo,{success:callback});
+  });
+  return form;
+}
+
+function isValidEmail(email) {
+  var emailRegExp=/^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
+  return emailRegExp.test(email);
+}
+
+function waitForRequest(id,tries,callback) {
+  $.ajax({
+    url:getPrefix()+"/password_request/"+id,
+    dataType:"json"
+  }).success(function(result) {
+    callback();
+  }).error(function(){
+    tries--;
+    if (tries) {
+      setTimeout(waitForRequest,500,id,tries,callback);
+    } else {
+      alert("error while managing request");
+      callback();
+    }
+  });
+}
+
+function forgotForm(callback) {
+  var form=$("<form>").addClass("forgot-password");
+  var emailInput=$("<input>").addClass("email").attr("placeholder",Traduxio.getTranslated("i_email"));
+  var go=$("<input>").addClass("go").attr("type","submit").val(Traduxio.getTranslated("i_reset_password"));
+  form.append(emailInput).append(go).on("submit",function(e) {
+    e.preventDefault();
+    var email=emailInput.val();
+    if (!isValidEmail(email)) {
+      emailInput.addClass("bad");
+      return;
+    }
+    $.ajax({
+      url:getPrefix()+"/password_request",
+      method:"PUT",
+      data:JSON.stringify({email:email}),
+      contentType:"application/json",
+      dataType:"json"
+    }).success(function(result) {
+      waitForRequest(result.id,10,callback);
+    }).error(function() {
+      alert("error while sending request");
+    });
   });
   return form;
 }

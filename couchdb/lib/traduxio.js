@@ -13,6 +13,8 @@ js_i18n_elements.push("i_logout");
 js_i18n_elements.push("i_search");
 js_i18n_elements.push("i_signup");
 js_i18n_elements.push("i_confirm_password");
+js_i18n_elements.push("i_forgot_password");
+js_i18n_elements.push("i_reset_password");
 js_i18n_elements.push("i_fullname");
 js_i18n_elements.push("i_email");
 js_i18n_elements.push("i_save");

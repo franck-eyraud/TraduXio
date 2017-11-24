@@ -65,6 +65,14 @@
   "from": "works/:id/presence",
   "to": "_update/presence/:id"
 },{
+  "from": "password_request",
+  "method":"PUT",
+  "to": "_update/password_request"
+},{
+  "from": "password_request/:id",
+  "method":"GET",
+  "to": "_show/password_request/:id"
+},{
   "from": "",
   "to": "_show/welcome"
 },{
