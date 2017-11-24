@@ -1258,6 +1258,15 @@ $(document).ready(function() {
   addPanelFormUpdate();
   $("#addPanel").on("submit", addVersion);
 
+  session().done(function(result) {
+    if (result.userCtx && result.userCtx.name) {
+      getUserInfo(result.userCtx.name,function(userInfo) {
+        var name=userInfo.fullname || result.userCtx.name;
+        $("#addPanel input[name='work-creator']").val(name);
+      });
+    }
+  });
+
   $(".top").on("click", "#removeDoc", toggleRemoveDoc);
   $("#removePanel").on("click", removeDoc);
 
