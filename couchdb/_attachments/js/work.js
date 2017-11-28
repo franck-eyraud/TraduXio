@@ -511,6 +511,16 @@ function toggleHeader(item) {
 }
 
 function toggleAddVersion() {
+  var existingLanguages=$("#hexapla .metadata.language").map(
+    function(i,t) {console.log(t);return $(t).data("id");}
+  ).get();
+  $("#addPanel select.language option").each(function() {
+    var optVal=$(this).val();
+    if (optVal && existingLanguages.indexOf(optVal)==-1) {
+      $(this).parent().val(optVal);
+      return false;
+    }
+  });
   toggleHeader("#addPanel");
 }
 
