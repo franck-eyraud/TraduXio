@@ -2,7 +2,7 @@
 
 function getMyLanguage() {
   if (req.headers["Accept-Language"]) {
-    return req.headers["Accept-Language"].split(",")[0];
+    return req.headers["Accept-Language"].split(",")[0].substring(0,2);
   }
   return "en";
 }
