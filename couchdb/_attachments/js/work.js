@@ -419,10 +419,19 @@ function fillLanguages(controls,callback) {
     });
     controls.each(function(i,c) {
       var control=$(c);
+      if (control.data("language"))
+        control.val(control.data("language"));
       if (control.attr("placeholder")) {
-        control.prepend($("<option>").val("").text(control.attr("placeholder")).prop("disabled",true));
+        var firstOption=$("<option>").val("")
+          .text(control.attr("placeholder"))
+          .prop("disabled",true);
+        if (!control.val())
+          firstOption.attr("selected",true);
+        control.prepend(firstOption);
       }
-      control.val(control.data("language"));
+    });
+    controls.each(function(i,c) {
+      var control=$(c);
     });
     if (typeof callback=="function")
       callback();
