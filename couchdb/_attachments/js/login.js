@@ -8,47 +8,26 @@ function session() {
 function updateUserInfo(ctx) {
   var sessionInfo=$("#session-info");
   if (ctx.name) {
-    var userSpan=$("<span>").addClass("user").text(ctx.name);
-    var logoutSpan=$("<span>").addClass("logout").text(Traduxio.getTranslated("i_logout")).on("click",function(){
+    var userSpan=$("<span>").addClass("user click-enabled").text(ctx.name);
+    var logoutSpan=$("<span>").addClass("logout click-enabled").text(Traduxio.getTranslated("i_logout")).on("click",function(){
       logout();
     });
-    var edit=$("<input>").addClass("signup").attr("type","button").val(Traduxio.getTranslated("i_edit_user"));
-    edit.on("click",function() {
+    userSpan.on("click",function() {
       getUserInfo(ctx.name,function(userInfo) {
         var modal=addModal(editUserForm(userInfo,function() {
           modal.remove();
         }));
       })
     });
-    sessionInfo.empty().append(userSpan).append(" - ").append(logoutSpan).append(edit);
+    sessionInfo.empty().append(userSpan).append(" - ").append(logoutSpan);
   } else {
-    var form=$("<form>").addClass("login");
-    var username=$("<input>").addClass("username").attr("placeholder",Traduxio.getTranslated("i_username"));
-    var password=$("<input>").addClass("password").attr("type","password").attr("placeholder",Traduxio.getTranslated("i_password"));
-    var go=$("<input>").addClass("go").attr("type","submit").val(Traduxio.getTranslated("i_login"));
-    var signup=$("<input>").addClass("signup").attr("type","button").val(Traduxio.getTranslated("i_signup"));
-    var forgot=$("<input>").addClass("forgot").attr("type","button").val(Traduxio.getTranslated("i_forgot_password"));
-    form.append(username).append(password).append(go).append(signup).append(forgot).on("submit",function(e) {
-      e.preventDefault();
-      var name=username.val();
-      var passwd=password.val();
-      if (name && passwd)
-        login(username.val(),password.val()).fail(function() {
-          username.add(password).addClass("bad");
-        });
-      else username.add(password).addClass("bad");
-    });
-    sessionInfo.empty().append(form);
-    signup.on("click",function() {
-      var modal=addModal(signUpForm(function() {
+    var userSpan=$("<span>").addClass("anonymous").append("anonymous");
+    var loginSpan=$("<span>").addClass("login click-enabled").text(Traduxio.getTranslated("i_login")).on("click",function(){
+      var modal=addModal(loginForm(function() {
         modal.remove();
       }));
     });
-    forgot.on("click",function() {
-      var modal=addModal(forgotForm(function() {
-        modal.remove();
-      }));
-    });
+    sessionInfo.empty().append(userSpan).append(" - ").append(loginSpan);
   }
 }
 
@@ -123,6 +102,38 @@ function emailConfirm(username,confirm_key,retrycount) {
   },function(error) {
     alert("error confirming "+error);
   });
+}
+
+function loginForm(callback) {
+  var form=$("<form>").addClass("login");
+  var username=$("<input>").addClass("username").attr("placeholder",Traduxio.getTranslated("i_username"));
+  var password=$("<input>").addClass("password").attr("type","password").attr("placeholder",Traduxio.getTranslated("i_password"));
+  var go=$("<input>").addClass("go").attr("type","submit").val(Traduxio.getTranslated("i_login"));
+  var signup=$("<p>").append($("<span>").addClass("signup click-enabled").text(Traduxio.getTranslated("i_signup")));
+  var forgot=$("<p>").append($("<span>").addClass("forgot click-enabled").text(Traduxio.getTranslated("i_forgot_password")));
+  form.append(username).append(password).append(go).append(signup).append(forgot).on("submit",function(e) {
+    e.preventDefault();
+    var name=username.val();
+    var passwd=password.val();
+    if (name && passwd)
+      login(name,passwd).fail(function() {
+        username.add(password).addClass("bad");
+      });
+    else username.add(password).addClass("bad");
+  });
+  signup.on("click",function() {
+    callback();
+    var modal=addModal(signUpForm(function() {
+      modal.remove();
+    }));
+  });
+  forgot.on("click",function() {
+    callback();
+    var modal=addModal(forgotForm(function() {
+      modal.remove();
+    }));
+  });
+  return form;
 }
 
 function editUserForm(userInfo,callback) {
