@@ -16,7 +16,7 @@ function updateUserInfo(ctx) {
       getUserInfo(ctx.name,function(userInfo) {
         var modal=addModal(editUserForm(userInfo,function() {
           modal.remove();
-        }));
+        }),getTranslated("i_edit_user"));
       })
     });
     sessionInfo.empty().append(userSpan).append(" - ").append(logoutSpan);
@@ -25,7 +25,7 @@ function updateUserInfo(ctx) {
     var loginSpan=$("<span>").addClass("login click-enabled").text(Traduxio.getTranslated("i_login")).on("click",function(){
       var modal=addModal(loginForm(function() {
         modal.remove();
-      }));
+      }),getTranslated("i_login"));
     });
     sessionInfo.empty().append(userSpan).append(" - ").append(loginSpan);
   }
@@ -125,13 +125,13 @@ function loginForm(callback) {
     callback();
     var modal=addModal(signUpForm(function() {
       modal.remove();
-    }));
+    }),getTranslated("i_signup"));
   });
   forgot.on("click",function() {
     callback();
     var modal=addModal(forgotForm(function() {
       modal.remove();
-    }));
+    }),getTranslated("i_forgot_password"));
   });
   return form;
 }

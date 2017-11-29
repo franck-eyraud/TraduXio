@@ -229,7 +229,7 @@ http://kizu.ru/en/fun/rotated-text/
   background-color: #fefefe;
   margin: auto;
   padding: 0px;
-  border: 1px solid #888;
+  border: 3px solid #333;
   width: 80%;
   height: 80%;
   position: absolute;
@@ -240,15 +240,19 @@ http://kizu.ru/en/fun/rotated-text/
 }
 
 .modal .title {
-  border: solid 2px;
+  border-bottom: solid 3px #333;
   padding: 3px;
   font-weight: bold;
+  font-size: 1.5em;
+  text-align: center;
 }
 
 .modal .button.close {
   top:0px; right:0px;
-  border:2px solid;
+  border-bottom: solid 3px #333;
+  border-left: solid 3px #333;
   padding:3px;
+  font-size: 1.5em;
   position:absolute;
   cursor: pointer;
 }
@@ -263,6 +267,10 @@ http://kizu.ru/en/fun/rotated-text/
   padding:0.2em;
   font-size:1.5em;
   width:75%;
+}
+
+.modal .dialog p {
+  padding: 5px;
 }
 
 .modal .dialog input[type=button],
