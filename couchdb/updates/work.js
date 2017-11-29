@@ -166,6 +166,9 @@ function(work, req) {
       }
     }
     var keysOK=["date","language","title","text","creativeCommons","shareTo","public"];
+    if (Traduxio.config.canUnShare) {
+      keysOK.push("unshare");
+    }
     for (var key in args) {
       if (keysOK.indexOf(key)!=-1) {
         if (key=="text") {
@@ -185,11 +188,8 @@ function(work, req) {
             return [null,{code:400,body:"Can't set value "+args[key]+" to public"}];
           }
         } else if (key == "shareTo") {
-          var shared=args[key];
-          if (typeof shared=="string") {
-            shared=[shared];
-          }
-          if (typeof shared.indexOf !="function") {
+          var shared=validateArray(args[key]);
+          if (shared === null) {
             return [null,{code:400,body:key+" must be a string or array"}];
           }
           doc.privileges=doc.privileges || {public:true};
@@ -201,6 +201,21 @@ function(work, req) {
             } else {
               actions.push(version_name+" already shared to "+user);
             }
+          });
+          continue;
+        } else if (key == "unshare") {
+          var unshared=validateArray(args[key]);
+          if (unshared === null) {
+            return [null,{code:400,body:key+" must be a string or array"}];
+          }
+          doc.privileges=doc.privileges || {public:true};
+          doc.privileges.sharedTo=doc.privileges.sharedTo || [];
+          doc.privileges.sharedTo=doc.privileges.sharedTo.filter(function(user) {
+            if (unshared.indexOf(user)!=-1) {
+              actions.push("unshared "+version_name+" to "+user);
+              return false;
+            }
+            return true;
           });
           continue;
         } else if (!typeof args[key] == "string") {
@@ -257,6 +272,16 @@ function textLength(work) {
     }
   }
   return l;
+}
+
+function validateArray(value) {
+  if (typeof value=="string") {
+    value=[value];
+  }
+  if (typeof value.indexOf !="function") {
+    return null;
+  }
+  return value;
 }
 
 function emptyText(work) {

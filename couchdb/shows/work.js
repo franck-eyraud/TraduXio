@@ -142,6 +142,8 @@ function(o, req) {
       data.justOneText=true;
       data.version=data.headers[0].version
     }
+
+    if (Traduxio.config.canUnShare) data.canUnShare=Traduxio.config.canUnShare;
   }
 
   data.prefix="..";

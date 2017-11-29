@@ -1038,12 +1038,39 @@ var searchUser = function(userid,callback) {
 var shareText = function(version) {
 
   function sharedItem(userid) {
-    var item=$("<div>").addClass("shared-user").text(userid);
+    var item=$("<div>").addClass("shared-user");
+    var userSpan=$("<span>").text(userid);
+    item.append(userSpan);
     searchUser(userid,function(userDetails) {
       if (userDetails.label) {
-        item.text(userDetails.label+" ("+userDetails.value+")");
+        userSpan.text(userDetails.label+" ("+userDetails.value+")");
       }
     });
+    if (typeof canUnShare !== 'undefined' && canUnShare) {
+      item.prepend($("<span>").text("X").css("padding","5px").addClass("click-enabled").on("click",function(e) {
+        var req=request({
+          url: "work/"+Traduxio.getId()+"/"+encodeURIComponent(version),
+          type:"PUT",
+          data:JSON.stringify({unshare:userid}),
+          dataType:"json"
+        }).done(function(result) {
+          item.remove();
+          find(version).find(".list-shares .shared").each(function() {
+            if($(this).text()==userid) {
+              $(this).remove();
+            }
+          });
+          var nShares=find(version).find(".list-shares .shared").length;
+          find(version).find(".list-shares .total").text(nShares);
+          if (!nShares) {
+            find(version).find(".list-shares").hide();
+            var select=$(find(version).find("div.share select"));
+            select.val("private");
+            updatePrivacyInfo.apply(select);
+          }
+        });
+      }));
+    }
     return item;
   }
 
@@ -1141,7 +1168,6 @@ var changePrivacy = function () {
           if (result.actions) {
             $("option",select).attr("disabled",true);
             select.siblings(".list-shares").hide();
-            select.data("value","public");
             updatePrivacyInfo.apply(select);
           }
         });
