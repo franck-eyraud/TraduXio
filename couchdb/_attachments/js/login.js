@@ -73,33 +73,54 @@ function register(data, password, callback) {
   );
 }
 
+function waitConfirm(username,retrycount) {
+  if (retrycount) {
+    retrycount--
+    setTimeout(function() {
+      getUserInfo(username,function(userInfo) {
+        if(userInfo.roles.indexOf("confirmed")!=-1) {
+          alert("email confirmed");
+          window.location.search="";
+          return;
+        } else if (userInfo.confirm_error) {
+          alert("confirmation failed : "+userInfo.confirm_error);
+          window.location.search="";
+          return;
+        } else {
+          waitConfirm(username,retrycount);
+        }
+      },function(error) {
+        if (retrycount) {
+          retrycount--;
+          waitConfirm(username,retrycount);
+        } else {
+          alert("confirmation failed : timeout");
+          window.location.search="";
+          return;
+        }
+      });
+    },1000);
+  } else {
+    alert("confirmation failed : timeout");
+    window.location.search="";
+    return;
+  }
+}
+
 function emailConfirm(username,confirm_key,retrycount) {
   getUserInfo(username,function(userInfo) {
-    if (userInfo.confirm_key) {
-      if(userInfo.roles.indexOf("confirmed")!=-1) {
-        if (retrycount) {
-          alert("email confirmed");
-        } else {
-          alert("email already confirmed");
-        }
-        window.location.search="";
-        return;
-      } else if (retrycount>4) {
-        alert("confirmation failed");
-        window.location.search="";
-        return;
-      }
-    } else if (userInfo.failed_confirm_key && userInfo.failed_confirm_key==confirm_key) {
-      alert("confirmation failed")
+    if(userInfo.roles.indexOf("confirmed")!=-1) {
+      alert("email already confirmed");
       window.location.search="";
       return;
     }
     userInfo.confirm_key=confirm_key;
     $.couch.db("_users").saveDoc(userInfo,{
       success:function() {
-        retrycount=retrycount || 0;
-        retrycount++;
-        setTimeout(emailConfirm,2000,username,confirm_key,retrycount);
+        waitConfirm(username,5);
+      },
+      error:function(error) {
+        alert("error confirming "+error);
       }
     });
   },function(error) {
@@ -171,27 +192,34 @@ function editUserForm(userInfo,callback) {
   var div=$("<div>").insertAfter(email);
   if (userInfo.roles.indexOf("confirmed")==-1) {
     var unconfirmed=$("<span>").addClass("info").text(getTranslated("i_email_not_confirmed")).appendTo(div);
-    if (userInfo.confirm_sent_timestamp) {
-      var sent=$("<span>").addClass("info").text(getTranslated("i_confirmation_sent")).appendTo(div);
+    var status=$("<span>").addClass("info").appendTo(div);
+    if (userInfo.confirm_error) {
+      status.text(userInfo.confirm_error);
+    } else {
+      if (userInfo.confirm_sent_timestamp) {
+        status.text(getTranslated("i_confirmation_sent"));
+      }
     }
     var resendConfirmation=$("<span>").addClass("info click-enabled").text(getTranslated("i_confirmation_resend")).appendTo(div)
     .on("click",function() {
       delete userInfo.confirm_sent_timestamp;
-      sent.text(getTranslated("i_confirmation_sending"));
+      status.text(getTranslated("i_confirmation_sending"));
       $.couch.db("_users").saveDoc(userInfo,{
         success:function() {
           function waitSent(tries) {
             getUserInfo(userInfo.name,function(userInfo) {
+              if (userInfo.confirm_error) {
+                status.text(userInfo.confirm_error);
+              }
               if (userInfo.confirm_sent_timestamp) {
-                div.empty();
-                sent.text(getTranslated("i_confirmation_sent"));
+                status.text(getTranslated("i_confirmation_sent"));
                 resendConfirmation.remove();
               } else {
                 if (tries) {
                   tries--;
                   setTimeout(waitSent,1000,tries);
                 } else {
-                  sent.text("error");
+                  status.text("error");
                 }
               }
             });
@@ -199,7 +227,7 @@ function editUserForm(userInfo,callback) {
           waitSent(5);
         },
         error:function() {
-          sent.text("error");
+          status.text("error");
         }
       });
     });

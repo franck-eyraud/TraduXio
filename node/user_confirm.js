@@ -58,7 +58,7 @@ function recordUser(user,callback) {
       } else {
         console.log("error saving user "+user.name+" "+user._rev+" "+err);
       }
-      callback(err);
+      if (typeof callback === "function") callback(err);
     });
   } else {
     if (user._deleted) {
@@ -102,9 +102,8 @@ function confirm(user) {
       user._modified=true;
     }
     if (user.confirm_key) {
-      user.failed_confirm_key=user.confirm_key;
+      user.confirm_error="Bad confirm key, user the latest one";
       delete user.confirm_key;
-      delete confirm_sent_timestamp;
       console.log("remove confirm key");
       user._modified=true;
     }
@@ -136,11 +135,11 @@ function confirm(user) {
               console.log("confirmed");
               console.log("add role confirmed");
               user.roles.push("confirmed");
+              delete user.confirm_error;
               user._modified=true;
             }
           } else {
             console.log("already role confirmed");
-            console.log(user.roles);
             confirmed=true;
           }
         } else {
@@ -157,6 +156,7 @@ function confirm(user) {
       if (toBeConfirmed) {
         var timestamp=new Date().toISOString();
         user.confirm_sent_timestamp=timestamp;
+        delete user.confirm_error;
         user._modified=true;
         console.log("getting key for "+user.email+" "+timestamp);
         key=getConfirmKey(user.email,timestamp);
@@ -219,9 +219,8 @@ function resetPasswords() {
       }
     });
   password_follow.on("change",function (change) {
-    console.log(change);
     if (change.doc.error || change.doc.success) { //ignore it, already users_db
-      console.log("already used");
+      console.log("password request "+change.id+" already used");
       return;
     }
     if (change.doc.email) {
