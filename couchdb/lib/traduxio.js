@@ -12,9 +12,8 @@ js_i18n_elements.push("i_login");
 js_i18n_elements.push("i_logout");
 js_i18n_elements.push("i_search");
 js_i18n_elements.push("i_signup");
-js_i18n_elements.push("i_confirm_password");
-js_i18n_elements.push("i_forgot_password");
-js_i18n_elements.push("i_reset_password");
+js_i18n_elements.push("i_confirm");
+js_i18n_elements.push("i_password");
 js_i18n_elements.push("i_fullname");
 js_i18n_elements.push("i_email");
 js_i18n_elements.push("i_save");
@@ -287,6 +286,10 @@ Traduxio= {
     }
   },
 
+  _isConfirmed:function (userCtx,secObj) {
+    if (userCtx.roles.indexOf('confirmed') != -1) return true;
+  },
+
   isAdmin:function () {
     return this.getUser().isAdmin;
   },
@@ -313,6 +316,7 @@ Traduxio= {
 
     if (this.req.userCtx.name) {
       user.name=this.req.userCtx.name;
+      if (!this._isConfirmed(this.req.userCtx)) user.anonymous=true;
     } else {
 
       hashCode = function(string) {

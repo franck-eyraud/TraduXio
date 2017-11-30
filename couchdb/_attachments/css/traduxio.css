@@ -269,7 +269,9 @@ http://kizu.ru/en/fun/rotated-text/
   width:75%;
 }
 
+.modal .dialog span.info,
 .modal .dialog p {
+  margin:1em;
   padding: 5px;
 }
 

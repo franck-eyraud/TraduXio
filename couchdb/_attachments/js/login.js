@@ -9,6 +9,9 @@ function updateUserInfo(ctx) {
   var sessionInfo=$("#session-info");
   if (ctx.name) {
     var userSpan=$("<span>").addClass("user click-enabled").text(ctx.name);
+    if (ctx.roles && ctx.roles.indexOf("confirmed")==-1) {
+      userSpan.append(" - not confirmed");
+    }
     var logoutSpan=$("<span>").addClass("logout click-enabled").text(Traduxio.getTranslated("i_logout")).on("click",function(){
       logout();
     });
@@ -109,8 +112,8 @@ function loginForm(callback) {
   var username=$("<input>").addClass("username").attr("placeholder",Traduxio.getTranslated("i_username"));
   var password=$("<input>").addClass("password").attr("type","password").attr("placeholder",Traduxio.getTranslated("i_password"));
   var go=$("<input>").addClass("go").attr("type","submit").val(Traduxio.getTranslated("i_login"));
-  var signup=$("<p>").append($("<span>").addClass("signup click-enabled").text(Traduxio.getTranslated("i_signup")));
-  var forgot=$("<p>").append($("<span>").addClass("forgot click-enabled").text(Traduxio.getTranslated("i_forgot_password")));
+  var signup=$("<span>").addClass("info signup click-enabled").text(Traduxio.getTranslated("i_signup"));
+  var forgot=$("<span>").addClass("info forgot click-enabled").text(Traduxio.getTranslated("i_password_forgot"));
   form.append(username).append(password).append(go).append(signup).append(forgot).on("submit",function(e) {
     e.preventDefault();
     var name=username.val();
@@ -131,7 +134,7 @@ function loginForm(callback) {
     callback();
     var modal=addModal(forgotForm(function() {
       modal.remove();
-    }),getTranslated("i_forgot_password"));
+    }),getTranslated("i_password_forgot"));
   });
   return form;
 }
@@ -142,7 +145,7 @@ function editUserForm(userInfo,callback) {
   var fullname=$("<input>").addClass("fullname").attr("placeholder",Traduxio.getTranslated("i_fullname")).val(userInfo.fullname);
   var email=$("<input>").addClass("email").attr("placeholder",Traduxio.getTranslated("i_email")).val(userInfo.email);
   var password=$("<input>").addClass("password").attr("type","password").attr("placeholder",Traduxio.getTranslated("i_password"));
-  var confirm_password=$("<input>").addClass("password").attr("type","password").attr("placeholder",Traduxio.getTranslated("i_confirm_password"));
+  var confirm_password=$("<input>").addClass("password").attr("type","password").attr("placeholder",Traduxio.getTranslated("i_password_confirm"));
   var go=$("<input>").addClass("go").attr("type","submit").val(Traduxio.getTranslated("i_save"));
   form.append(username).append(fullname).append(email).append(password).append(confirm_password).append(go).on("submit",function(e) {
     e.preventDefault();
@@ -160,8 +163,49 @@ function editUserForm(userInfo,callback) {
     if (password.val()) userInfo.password=password.val();
     userInfo.email=email.val();
     userInfo.fullname=fullname.val();
+    if (userInfo.roles.indexOf("confirmed")==-1 && userInfo.confirm_sent_timestamp) {
+      delete userInfo.confirm_sent_timestamp;
+    }
     $.couch.db("_users").saveDoc(userInfo,{success:callback});
   });
+  var div=$("<div>").insertAfter(email);
+  if (userInfo.roles.indexOf("confirmed")==-1) {
+    var unconfirmed=$("<span>").addClass("info").text(getTranslated("i_email_not_confirmed")).appendTo(div);
+    if (userInfo.confirm_sent_timestamp) {
+      var sent=$("<span>").addClass("info").text(getTranslated("i_confirmation_sent")).appendTo(div);
+    }
+    var resendConfirmation=$("<span>").addClass("info click-enabled").text(getTranslated("i_confirmation_resend")).appendTo(div)
+    .on("click",function() {
+      delete userInfo.confirm_sent_timestamp;
+      sent.text(getTranslated("i_confirmation_sending"));
+      $.couch.db("_users").saveDoc(userInfo,{
+        success:function() {
+          function waitSent(tries) {
+            getUserInfo(userInfo.name,function(userInfo) {
+              if (userInfo.confirm_sent_timestamp) {
+                div.empty();
+                sent.text(getTranslated("i_confirmation_sent"));
+                resendConfirmation.remove();
+              } else {
+                if (tries) {
+                  tries--;
+                  setTimeout(waitSent,1000,tries);
+                } else {
+                  sent.text("error");
+                }
+              }
+            });
+          }
+          waitSent(5);
+        },
+        error:function() {
+          sent.text("error");
+        }
+      });
+    });
+  } else {
+    var confirmed=$("<span>").addClass("info").text(getTranslated("i_email_confirmed")).appendTo(div);
+  }
   return form;
 }
 
@@ -176,7 +220,7 @@ function waitForRequest(id,tries,callback) {
     dataType:"json"
   }).success(function(result) {
     callback();
-  }).error(function(){
+  }).error(function() {
     tries--;
     if (tries) {
       setTimeout(waitForRequest,500,id,tries,callback);
@@ -190,7 +234,7 @@ function waitForRequest(id,tries,callback) {
 function forgotForm(callback) {
   var form=$("<form>").addClass("forgot-password");
   var emailInput=$("<input>").addClass("email").attr("placeholder",Traduxio.getTranslated("i_email"));
-  var go=$("<input>").addClass("go").attr("type","submit").val(Traduxio.getTranslated("i_reset_password"));
+  var go=$("<input>").addClass("go").attr("type","submit").val(Traduxio.getTranslated("i_password_reset"));
   form.append(emailInput).append(go).on("submit",function(e) {
     e.preventDefault();
     var email=emailInput.val();
@@ -219,7 +263,7 @@ function signUpForm(callback) {
   var fullname=$("<input>").addClass("fullname").attr("placeholder",Traduxio.getTranslated("i_fullname"));
   var email=$("<input>").addClass("email").attr("placeholder",Traduxio.getTranslated("i_email"));
   var password=$("<input>").addClass("password").attr("type","password").attr("placeholder",Traduxio.getTranslated("i_password"));
-  var confirm_password=$("<input>").addClass("password").attr("type","password").attr("placeholder",Traduxio.getTranslated("i_confirm_password"));
+  var confirm_password=$("<input>").addClass("password").attr("type","password").attr("placeholder",Traduxio.getTranslated("i_password_confirm"));
   var go=$("<input>").addClass("go").attr("type","submit").val(Traduxio.getTranslated("i_signup"));
   form.append(username).append(fullname).append(email).append(password).append(confirm_password).append(go).on("submit",function(e) {
     e.preventDefault();
