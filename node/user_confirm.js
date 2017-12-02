@@ -21,17 +21,19 @@ var email_server = email.server.connect({
 
 config.base_url=config.base_url || config.database+ "/_design/traduxio/_rewrite/works/"
 
-function sendConfirm(emailAddress,url,callback) {
+function sendConfirm(user,url,callback) {
+  var name=user.fullname?user.fullname : user.name;
+  var toEmailAddress='"'+name+'" <'+user.email+'>';
   email_server.send({
-    text: "Please confirm your email address by clicking on this link : "+url,
+    text: "Please confirm your email address by clicking on this link : "+url+"\n\nYour username is : "+user.name+".",
     from: config.email_sender,
-    to: emailAddress,
+    to: toEmailAddress,
     subject: "Traduxio confirmation d'adresse email"
   },function(err,message) {
     if (!err) {
-      console.log("Sent confirmation email to " + emailAddress+" "+message);
+      console.log("Sent confirmation email to " + toEmailAddress+" "+message);
     } else {
-      console.log("Error sending confirmation email to " + emailAddress+" "+err);
+      console.log("Error sending confirmation email to " + toEmailAddress+" "+err);
     }
     callback(err,message);
   });
@@ -167,7 +169,7 @@ function confirm(user) {
       //defer user save to after email sending
       let modified=user._modified;
       delete user._modified;
-      sendConfirm(user.email,config.base_url+"?email_confirm="+key,function(err,message) {
+      sendConfirm(user,config.base_url+"?email_confirm="+key,function(err,message) {
         user._modified=modified;
         if (err) {
           console.log("recording email send error "+err);
