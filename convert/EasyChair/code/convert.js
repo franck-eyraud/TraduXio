@@ -238,7 +238,8 @@ function treatRow(row,callback) {
   // if (work.metadata["IATIS Policy"]!="Agree") {
   //   console.log("#"+row["#"]+" did not accept IATIS Policy "+work.metadata["IATIS Policy"]);
   // }
-  if (row.decision!='accept' || work.metadata["IATIS Policy"]!="Agree") {
+  if (row.decision!='accept' || work.metadata["IATIS Policy"]!="Agree"
+    || work.metadata["Thematic Panels"]=="Panel02") {
     //console.log("not accepted, skip");
     return callback();
   } else {
