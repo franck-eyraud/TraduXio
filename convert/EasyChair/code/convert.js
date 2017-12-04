@@ -186,12 +186,13 @@ function treatRow(row,callback) {
     }
   }
   work.text=[];
-  work.text.push("Keywords : "+work.metadata.keywords.join(", "));
-  work.text.push("Biographical notes");
+  work.text.push("======= Keywords =======");
+  work.text.push(work.metadata.keywords.join(", "));
+  work.text.push("======= Abstract =======");
+  work.text=work.text.concat(row.abstract ? splitText(row.abstract) : []);
+  work.text.push("======= Biographical notes =======");
   work.text=work.text.concat(work.metadata["Biographical Note(s)"] ?
       splitText(work.metadata["Biographical Note(s)"]) : []);
-  work.text.push("Abstract");
-  work.text=work.text.concat(row.abstract ? splitText(row.abstract) : []);
   // if (work.metadata["Language of Presentation"]!="English") {
   //   console.log("#"+row["#"]+" does not use English : "+work.metadata["Language of Presentation"]);
   // }
