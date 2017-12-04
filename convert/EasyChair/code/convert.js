@@ -32,6 +32,41 @@ var cookies={};
 
 console.log("Logging in on "+config.server+" as "+config.user);
 
+function removeAll(callback) {
+  console.log("Will remove all documents except design docs in 10 seconds");
+  setTimeout(function() {
+    db.list({},function(err, body) {
+      if (body.rows) {
+        toBeDeleted=0;
+        body.rows.forEach(function(row) {
+          if (row.id.indexOf("_design/") != 0) {
+            toBeDeleted++;
+            db.destroy(row.id,row.value.rev,function(err,res) {
+              if (!err) {
+                toBeDeleted--;
+                console.log("deleted document "+row.id);
+              } else {
+                console.log(row.id+" : "+err);
+                toBeDeleted--;
+              }
+              if (finished && toBeDeleted==0) {
+                console.log("finished deleting");
+                callback();
+              }
+            });
+          }
+        });
+        finished=true;
+      }
+      if (finished && toBeDeleted==0) {
+        console.log("finished deleting");
+        callback();
+      }
+    });
+  },10000);
+}
+
+
 nano(config.server).auth(config.user,config.password,function (err, body, headers) {
   if (err) {
     console.log("error logging in");
@@ -47,7 +82,11 @@ nano(config.server).auth(config.user,config.password,function (err, body, header
   db=nano({url:config.server,
     cookie:headers['set-cookie']
   }).use(config.database);
-  readStep();
+  if (config.removeAll) {
+    removeAll(readStep);
+  } else {
+    readStep();
+  }
 });
 
 function readFull() {

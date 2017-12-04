@@ -2,5 +2,6 @@
   "server":"http://couchdb:5984",
   "database":"traduxio",
   "user":"user",
-  "password":"password"
+  "password":"password",
+  "removeAll":true
 }
