@@ -205,15 +205,15 @@ function treatRow(row,callback) {
     console.log("#"+row['#']+" accepted, store");
   }
   work.translations={};
-  var new_trans={};
-  var possible_languages=translation_languages.slice();
-  if (possible_languages.indexOf(work.language)!=-1) {
-    possible_languages.splice(possible_languages.indexOf(work.language),1);
-  }
-  new_trans.language=possible_languages.length ? possible_languages[0] : translation_languages[0];
-  new_trans.text=new Array(work.text.length).fill("");
-  new_trans.privileges={owner:config.user};
-  work.translations["iatis"]=new_trans;
+  // var new_trans={};
+  // var possible_languages=translation_languages.slice();
+  // if (possible_languages.indexOf(work.language)!=-1) {
+  //   possible_languages.splice(possible_languages.indexOf(work.language),1);
+  // }
+  // new_trans.language=possible_languages.length ? possible_languages[0] : translation_languages[0];
+  // new_trans.text=new Array(work.text.length).fill("");
+  // new_trans.privileges={owner:config.user};
+  // work.translations["iatis"]=new_trans;
   //console.log(work.text);
   //return callback();
   tostore++;
