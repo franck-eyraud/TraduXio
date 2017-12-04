@@ -336,7 +336,9 @@ $(document).ready(function() {
     updateUserInfo(result.userCtx);
     if (getParameterByName("email_confirm")) {
       if (!result.userCtx.name) {
-        alert("Please log in to confirm your email");
+        var modal=addModal(loginForm(function() {
+          modal.remove();
+        }),"Please log in to confirm your email");
       } else {
         emailConfirm(result.userCtx.name,getParameterByName("email_confirm"));
       }
