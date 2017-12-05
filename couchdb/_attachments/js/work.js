@@ -101,19 +101,28 @@ function editGlossaryEntry(glossaryEntry,language) {
 
 var runningEdit;
 
-function request(options) {
+function chainRequest(options) {
   if (!runningEdit) {
     runningEdit=$.Deferred().resolve();
   }
-  var nextDfd=runningEdit.then(function() {
-    return $.ajax(options).retry({times:3,statusCodes:[0,409]});
-  }).fail(function (jqXHR) {
-    if (jqXHR.responseText) {
-      alert("request failed "+jqXHR.responseText);
-    }
+  var nextDfd=$.Deferred();
+  runningEdit.then(function() {
+    return request(options).always(function() {
+      nextDfd.resolve.apply(this, arguments);
+    });
   });
   runningEdit=nextDfd;
   return nextDfd.promise();
+}
+
+function request(options) {
+  return $.ajax(options)
+    .retry({times:3,statusCodes:[0,409]})
+    .fail(function (jqXHR) {
+      if (jqXHR.responseText) {
+        alert("request failed "+jqXHR.responseText);
+      }
+    });
 }
 
 function find(version) {
@@ -898,7 +907,7 @@ function copyFrom(unit,version) {
     if (!existingContent && existingContent!=content) {
       if (fillUnit(unit,content)) {
         unit.find("textarea").addClass("dirty");
-        editOnServer(content,unit.getReference()).done(function() {
+        editOnServerChain(content,unit.getReference()).done(function() {
           unit.find("textarea").removeClass("dirty");
           if (content) {
             find(unit.getVersion("td")).find("input.copy").remove();
@@ -1084,6 +1093,15 @@ function getPreviousUnit(unit) {
   var units=findUnits(version);
   return $(units.eq(units.index(unit)-1));
 }
+
+var editOnServerChain = function(content, reference) {
+  return chainRequest({
+    type: "PUT",
+    url: "version/"+Traduxio.getId()+"?"+ $.param(reference),
+    contentType: "text/plain",
+    data: content
+  });
+};
 
 var editOnServer = function(content, reference) {
   return request({
