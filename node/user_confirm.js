@@ -21,6 +21,24 @@ var email_server = email.server.connect({
 
 config.base_url=config.base_url || config.database+ "/_design/traduxio/_rewrite/works/"
 
+function sendAdminEmail(message,subject,callback) {
+  console.log("sending notification "+message+" to "+config.email_receiver);
+  email_server.send({
+    text: message,
+    from: config.email_sender,
+    to: config.email_receiver,
+    subject: "Traduxio "+subject
+  },function(err,message) {
+    if (!err) {
+      console.log("Notification message sent to " + config.email_receiver+ " "+message);
+    } else {
+      console.log("Error sending notification message to " + config.email_receiver+" "+err);
+    }
+    if (typeof callback =="function") callback(err,message);
+  });
+}
+
+
 function sendConfirm(user,url,callback) {
   var name=user.fullname?user.fullname : user.name;
   var toEmailAddress='"'+name+'" <'+user.email+'>';
@@ -118,9 +136,19 @@ function confirm(user) {
     //update user db in database (to allow user search)
     if (known_users[user.name] && known_users[user.name].email!=user.email) {
       toBeConfirmed=true;
+      sendAdminEmail("user "+user.name+" changed email address from "+known_users[user.name].email+" to "+user.email,
+        user.name+" changed email address");
     } else {
-      var existing_timestamp=user.confirm_sent_timestamp;
-      console.log("found existing_timestamp "+existing_timestamp);
+      var existing_timestamp;
+      if (!known_users[user.name]) {
+        sendAdminEmail("user "+user.name+" just registered with email address "+user.email,
+          user.fullname+" ("+user.name+") registered");
+      } else {
+        if (user.confirm_sent_timestamp) {
+          existing_timestamp=user.confirm_sent_timestamp;
+          console.log("found existing_timestamp "+existing_timestamp);
+        }
+      }
       if (existing_timestamp) {
         var key=getConfirmKey(user.email,existing_timestamp);
         if (user.confirm_key && user.confirm_key==key) {
@@ -134,8 +162,9 @@ function confirm(user) {
               user._modified=true;
             } else {
               confirmed=true;
-              console.log("confirmed");
-              console.log("add role confirmed");
+              sendAdminEmail("user "+user.name+" just confirmed email address "+user.email,
+                user.fullname+" ("+user.name+") confirmed email address");
+                console.log("add role confirmed");
               user.roles.push("confirmed");
               delete user.confirm_error;
               user._modified=true;
