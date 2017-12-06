@@ -212,6 +212,41 @@ function sendPassword(emailAddress,password,callback) {
   });
 }
 
+function followGroups () {
+  var group_follow=db.follow({
+      include_docs:true,
+      filter:function(doc,req) {
+        return doc.type=="group";
+      }
+    });
+  group_follow.on("change",function (change) {
+    console.log("receive group definition");
+    if (change.doc.group && change.doc.emails) {
+      console.log("receive group definition "+change.doc.group);
+      for (var username in known_users) {
+        var user=known_users[username];
+        if (user.email) {
+          if (user.email && change.doc.emails.indexOf(user.email)!=-1) {
+            console.log("found email "+user.email);
+            if (user.roles.indexOf(change.doc.group)==-1) {
+              user.roles.push(change.doc.group);
+              console.log("Adding user "+user.name+" to group "+change.doc.group);
+              user._modified=true;
+            }
+          } else {
+            if (user.roles.indexOf(change.doc.group)!=-1) {
+              user.roles=user.roles.filter(function(g) {return g!=change.doc.group;});
+              console.log("Removing user "+user.name+" from group "+change.doc.group);
+              user._modified=true;
+            }
+          }
+          recordUser(user);
+        }
+      }
+    }
+  });
+  group_follow.follow();
+}
 
 function resetPasswords() {
   var password_follow=db.follow({
@@ -310,6 +345,7 @@ db.get("known_users",function(error,doc) {
         known_users._rev=body.rev;
         followUsers();
         resetPasswords();
+        followGroups();
       } else {
         console.log(error);
         console.log("error not started");
@@ -319,6 +355,7 @@ db.get("known_users",function(error,doc) {
     known_users=doc;
     followUsers();
     resetPasswords();
+    followGroups();
   } else {
     console.log(error);
     console.log("error not started");
