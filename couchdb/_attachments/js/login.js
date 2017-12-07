@@ -195,7 +195,14 @@ function editUserForm(userInfo,callback) {
     if (userInfo.roles.indexOf("confirmed")==-1 && userInfo.confirm_sent_timestamp) {
       delete userInfo.confirm_sent_timestamp;
     }
-    $.couch.db("_users").saveDoc(userInfo,{success:callback});
+    $.couch.db("_users").saveDoc(userInfo,{success:function() {
+      if (password.val()) {
+        //need to log the user again
+        login(userInfo.name,userInfo.password).done(callback);
+      } else {
+        callback();
+      }
+    }});
   });
   if (userInfo.forcedPassword) {
     var changePassword=$("<div>").insertAfter(password).append(
