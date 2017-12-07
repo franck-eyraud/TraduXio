@@ -137,6 +137,7 @@ function confirm(user) {
 
   if (!user.name) {console.log("user doesn't have name");return;}
   if (!user._deleted && user.email && isValidEmail(user.email)) {
+    checkGroups(user);
     var toBeConfirmed=false,
       confirmed=false;
     //update user db in database (to allow user search)
@@ -144,13 +145,11 @@ function confirm(user) {
       toBeConfirmed=true;
       sendAdminEmail("user "+user.name+" changed email address from "+known_users[user.name].email+" to "+user.email,
         user.fullname+" ("+user.name+") changed email address");
-      checkGroups(user);
     } else {
       var existing_timestamp;
       if (!known_users[user.name]) {
         sendAdminEmail("user "+user.name+" just registered with email address "+user.email+" and name "+user.fullname,
           user.fullname+" ("+user.name+") registered");
-        checkGroups(user);
       } else {
         if (known_users[user.name].fullname!=user.fullname) {
           sendAdminEmail("user "+user.name+" changed name from "+known_users[user.name].fullname+" to "+user.fullname,
