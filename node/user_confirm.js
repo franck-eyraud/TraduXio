@@ -142,11 +142,13 @@ function confirm(user) {
       toBeConfirmed=true;
       sendAdminEmail("user "+user.name+" changed email address from "+known_users[user.name].email+" to "+user.email,
         user.name+" changed email address");
+      checkGroups(user);
     } else {
       var existing_timestamp;
       if (!known_users[user.name]) {
         sendAdminEmail("user "+user.name+" just registered with email address "+user.email,
           user.fullname+" ("+user.name+") registered");
+        checkGroups(user);
       } else {
         if (user.confirm_sent_timestamp) {
           existing_timestamp=user.confirm_sent_timestamp;
@@ -240,6 +242,40 @@ function sendPassword(emailAddress,password,callback) {
   });
 }
 
+var groups={};
+
+function checkGroups(user) {
+  for (var groupname in groups) {
+    checkGroup(user,groupname);
+  }
+}
+
+function checkGroup(user,groupname) {
+  var emails=groups[groupname];
+  if (user.name && user.email && emails) {
+    if (user.email && emails.indexOf(user.email)!=-1) {
+      if (user.roles.indexOf(groupname)==-1) {
+        user.roles.push(groupname);
+        console.log("Adding user "+user.name+" to group "+groupname);
+        user._modified=true;
+      } else {
+        console.log("user "+user.name+" with email "+user.email+ " is part of group "+groupname);
+      }
+    } else {
+      if (user.roles.indexOf(groupname)!=-1) {
+        user.roles=user.roles.filter(function(g) {return g!=groupname;});
+        console.log("Removing user "+user.name+" from group "+groupname);
+        user._modified=true;
+      }
+    }
+  } else {
+    if (!user.name) {
+      console.log("trying to check group "+groupname+" on bad user");
+      console.log(arguments);
+    }
+  }
+}
+
 function followGroups () {
   var group_follow=db.follow({
       include_docs:true,
@@ -249,24 +285,12 @@ function followGroups () {
     });
   group_follow.on("change",function (change) {
     if (change.doc.group && change.doc.emails) {
+      groups[change.doc.group]=change.doc.emails;
       console.log("receive group definition "+change.doc.group);
       for (var username in known_users) {
         var user=known_users[username];
-        if (user.email) {
-          if (user.email && change.doc.emails.indexOf(user.email)!=-1) {
-            console.log("found email "+user.email);
-            if (user.roles.indexOf(change.doc.group)==-1) {
-              user.roles.push(change.doc.group);
-              console.log("Adding user "+user.name+" to group "+change.doc.group);
-              user._modified=true;
-            }
-          } else {
-            if (user.roles.indexOf(change.doc.group)!=-1) {
-              user.roles=user.roles.filter(function(g) {return g!=change.doc.group;});
-              console.log("Removing user "+user.name+" from group "+change.doc.group);
-              user._modified=true;
-            }
-          }
+        if (user.name) {
+          checkGroup(user,change.doc.group);
           recordUser(user);
         }
       }
