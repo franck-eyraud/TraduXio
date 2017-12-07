@@ -141,15 +141,19 @@ function confirm(user) {
     if (known_users[user.name] && known_users[user.name].email!=user.email) {
       toBeConfirmed=true;
       sendAdminEmail("user "+user.name+" changed email address from "+known_users[user.name].email+" to "+user.email,
-        user.name+" changed email address");
+        user.fullname+" ("+user.name+") changed email address");
       checkGroups(user);
     } else {
       var existing_timestamp;
       if (!known_users[user.name]) {
-        sendAdminEmail("user "+user.name+" just registered with email address "+user.email,
+        sendAdminEmail("user "+user.name+" just registered with email address "+user.email+" and name "+user.fullname,
           user.fullname+" ("+user.name+") registered");
         checkGroups(user);
       } else {
+        if (known_users[user.name].fullname!=user.fullname) {
+          sendAdminEmail("user "+user.name+" changed name from "+known_users[user.name].fullname+" to "+user.fullname,
+            known_users[user.name].fullname+" ("+user.name+") changed name");
+        }
         if (user.confirm_sent_timestamp) {
           existing_timestamp=user.confirm_sent_timestamp;
         }
@@ -256,6 +260,8 @@ function checkGroup(user,groupname) {
     if (user.email && emails.indexOf(user.email)!=-1) {
       if (user.roles.indexOf(groupname)==-1) {
         user.roles.push(groupname);
+        sendAdminEmail("user "+user.name+" was added to group "+groupname,
+          user.fullname+" ("+user.name+") added to a group");
         console.log("Adding user "+user.name+" to group "+groupname);
         user._modified=true;
       } else {
@@ -264,6 +270,8 @@ function checkGroup(user,groupname) {
     } else {
       if (user.roles.indexOf(groupname)!=-1) {
         user.roles=user.roles.filter(function(g) {return g!=groupname;});
+        sendAdminEmail("user "+user.name+" was removed from group "+groupname,
+          user.fullname+" ("+user.name+") removed from a group");
         console.log("Removing user "+user.name+" from group "+groupname);
         user._modified=true;
       }
