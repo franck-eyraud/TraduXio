@@ -338,6 +338,7 @@ function resetPasswords() {
           var user=known_users[username];
           var password=generatePassword(12);
           user.password=password;
+          user.forcedPassword=true;
           user._modified=true;
           recordUser(user,function(err) {
             if (err) {

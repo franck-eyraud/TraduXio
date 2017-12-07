@@ -180,8 +180,16 @@ function editUserForm(userInfo,callback) {
       confirm_password.addClass("bad");
       bad=true;
     }
+    if (userInfo.forcedPassword && !password.val()) {
+      password.addClass("bad");
+      confirm_password.addClass("bad");
+      bad=true;
+    }
     if (bad) return;
-    if (password.val()) userInfo.password=password.val();
+    if (password.val()) {
+      userInfo.password=password.val();
+      delete userInfo.forcedPassword;
+    }
     userInfo.email=email.val();
     userInfo.fullname=fullname.val();
     if (userInfo.roles.indexOf("confirmed")==-1 && userInfo.confirm_sent_timestamp) {
@@ -189,6 +197,12 @@ function editUserForm(userInfo,callback) {
     }
     $.couch.db("_users").saveDoc(userInfo,{success:callback});
   });
+  if (userInfo.forcedPassword) {
+    var changePassword=$("<div>").insertAfter(password).append(
+      $("<span>").addClass("info").text("Please change your password")
+    );
+    password.addClass("bad");
+  }
   var div=$("<div>").insertAfter(email);
   if (userInfo.roles.indexOf("confirmed")==-1) {
     var unconfirmed=$("<span>").addClass("info").text(getTranslated("i_email_not_confirmed")).appendTo(div);
@@ -342,6 +356,14 @@ $(document).ready(function() {
       } else {
         emailConfirm(result.userCtx.name,getParameterByName("email_confirm"));
       }
+    } else if (result.userCtx.name) {
+      getUserInfo(result.userCtx.name,function(userInfo) {
+        if (userInfo.forcedPassword) {
+          var modal=addModal(editUserForm(userInfo,function() {
+            modal.remove();
+          }),"Please change your password");
+        }
+      });
     }
   });
 });
