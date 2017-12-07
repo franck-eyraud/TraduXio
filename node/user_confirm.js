@@ -90,8 +90,8 @@ function recordUser(user,callback) {
     if (user._deleted) {
       if (known_users[user.name]) {
         console.log("user "+user.name+" is deleted");
-        delete known_users[user.name]
-        saveKnownUsers();
+        delete known_users[user.name];
+        known_users._modified=true;
       }
     } else if (!user.name) {
       console.log("no name for user ????");
@@ -99,27 +99,23 @@ function recordUser(user,callback) {
     } else if (!known_users[user.name] || !known_users[user.name]._rev || known_users[user.name]._rev!=user._rev) {
       console.log("updating entry of "+user.name);
       known_users[user.name]=user;
-      saveKnownUsers();
+      known_users._modified=true;
     }
   }
 }
 
-var savingLock;
 function saveKnownUsers() {
-  if (!savingLock) {
-    savingLock=true;
+  if (known_users._modified) {
+    delete(known_users._modified);
     console.log("insert known users");
     admin_db.insert(known_users,function(err,body) {
       if (!err) {
         known_users._rev=body.rev;
       } else {
+        known_users._modified=true;
         console.log("error saving known users "+err);
       }
-      savingLock=false;
     });
-  } else {
-    console.log("already inserting known users");
-    setTimeout(saveKnownUsers,5000);
   }
 }
 
@@ -311,7 +307,7 @@ function followGroups () {
         }
       }
     } else {
-      console.log("receive bad group definition");
+      console.log("received bad group definition");
       console.log(change.doc);
     }
   });
@@ -417,6 +413,7 @@ db.get("known_users",function(error,doc) {
         followUsers();
         resetPasswords();
         followGroups();
+        setInterval(saveKnownUsers, 1000);
       } else {
         console.log(error);
         console.log("error not started");
@@ -427,6 +424,7 @@ db.get("known_users",function(error,doc) {
     followUsers();
     resetPasswords();
     followGroups();
+    setInterval(saveKnownUsers, 1000);
   } else {
     console.log(error);
     console.log("error not started");
