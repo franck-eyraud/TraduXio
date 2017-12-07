@@ -58,12 +58,18 @@ function sendConfirm(user,url,callback) {
 }
 
 function getConfirmKey(email,timestamp) {
-  return crypto.createHash('sha1').update(config.salt).update(email).update(timestamp).digest("hex");
+  return crypto.createHash('sha1').update(config.salt).update(email.toLowerCase()).update(timestamp).digest("hex");
 }
 
 function isValidEmail(email) {
   var emailRegExp=/^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
   return emailRegExp.test(email);
+}
+
+function isSameEmail(mail1,mail2) {
+  mail1=typeof mail1=="string" ? mail1 : "";
+  mail2=typeof mail2=="string" ? mail2 : "";
+  return mail1.toLowerCase()==mail2.toLowerCase();
 }
 
 var known_users;
@@ -138,7 +144,7 @@ function confirm(user) {
     var toBeConfirmed=false,
       confirmed=false;
     //update user db in database (to allow user search)
-    if (known_users[user.name] && known_users[user.name].email!=user.email) {
+    if (known_users[user.name] && !isSameEmail(known_users[user.name].email,user.email)) {
       toBeConfirmed=true;
       sendAdminEmail("user "+user.name+" changed email address from "+known_users[user.name].email+" to "+user.email,
         user.fullname+" ("+user.name+") changed email address");
@@ -218,10 +224,6 @@ function confirm(user) {
   recordUser(user);
 }
 
-function isEmail(doc, req) {
-  return doc.email !== undefined;
-}
-
 function generatePassword(length) {
   var string="";
   while (string.length < length) {
@@ -255,9 +257,15 @@ function checkGroups(user) {
 }
 
 function checkGroup(user,groupname) {
+  function isLike(email) {
+    return function(element) {
+        return isSameEmail(element,email);
+    }
+  }
+
   var emails=groups[groupname];
   if (user.name && user.email && emails) {
-    if (user.email && emails.indexOf(user.email)!=-1) {
+    if (user.email && emails.filter(isLike(user.email)).length>0) {
       if (user.roles.indexOf(groupname)==-1) {
         user.roles.push(groupname);
         sendAdminEmail("user "+user.name+" was added to group "+groupname,
@@ -325,7 +333,7 @@ function resetPasswords() {
     if (change.doc.email) {
       console.log("received password reset request for "+change.doc.email);
       for (var username in known_users) {
-        if (known_users[username].email==change.doc.email) {
+        if (isSameEmail(known_users[username].email,change.doc.email)) {
           console.log("found user "+username);
           var user=known_users[username];
           var password=generatePassword(12);
@@ -336,7 +344,7 @@ function resetPasswords() {
               change.doc.error=err;
               db.insert(change.doc);
             } else {
-              sendPassword(change.doc.email,user.password,function(err,message) {
+              sendPassword(known_users[username].email,user.password,function(err,message) {
                 if (!err) {
                   change.doc.success="New password sent";
                 } else {
