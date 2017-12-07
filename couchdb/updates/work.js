@@ -77,7 +77,14 @@ function(work, req) {
       delete args.original;
     } else if (version_name) {
       if (!work.translations[version_name]) {
-        work.translations[version_name] = { title: "", language: "", creator:"", text: emptyText(work) };
+        var date=new Date().toISOString().substring(0, 10);
+        work.translations[version_name] = {
+          title: "",
+          language: "",
+          creator:"",
+          text: emptyText(work),
+          date:date
+        };
         doc=work.translations[version_name];
         actions.push("created "+version_name+" version");
         Traduxio.addActivity(work.edits,{action:"created",version:version_name});
