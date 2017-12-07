@@ -30,7 +30,7 @@ function sendAdminEmail(message,subject,callback) {
     subject: "Traduxio "+subject
   },function(err,message) {
     if (!err) {
-      console.log("Notification message sent to " + config.email_receiver+ " "+message);
+      console.log("Notification message sent to " + config.email_receiver);
     } else {
       console.log("Error sending notification message to " + config.email_receiver+" "+err);
     }
@@ -49,7 +49,7 @@ function sendConfirm(user,url,callback) {
     subject: "Traduxio confirmation d'adresse email"
   },function(err,message) {
     if (!err) {
-      console.log("Sent confirmation email to " + toEmailAddress+" "+message);
+      console.log("Sent confirmation email to " + toEmailAddress);
     } else {
       console.log("Error sending confirmation email to " + toEmailAddress+" "+err);
     }
@@ -71,7 +71,7 @@ var known_users;
 function recordUser(user,callback) {
   if (user._modified) {
     delete user._modified;
-    console.log("insert modified user");
+    console.log("insert modified user "+user.name);
     users_db.insert(user,function(err,body) {
       if (!err) {
         user._rev=body.rev;
@@ -87,7 +87,11 @@ function recordUser(user,callback) {
         delete known_users[user.name]
         saveKnownUsers();
       }
+    } else if (!user.name) {
+      console.log("no name for user ????");
+      console.log(user);
     } else if (!known_users[user.name] || !known_users[user.name]._rev || known_users[user.name]._rev!=user._rev) {
+      console.log("updating entry of "+user.name);
       known_users[user.name]=user;
       saveKnownUsers();
     }
@@ -109,7 +113,7 @@ function saveKnownUsers() {
     });
   } else {
     console.log("already inserting known users");
-    setTimeout(saveKnownUsers,100);
+    setTimeout(saveKnownUsers,5000);
   }
 }
 
@@ -146,7 +150,6 @@ function confirm(user) {
       } else {
         if (user.confirm_sent_timestamp) {
           existing_timestamp=user.confirm_sent_timestamp;
-          console.log("found existing_timestamp "+existing_timestamp);
         }
       }
       if (existing_timestamp) {
@@ -170,11 +173,8 @@ function confirm(user) {
               user._modified=true;
             }
           } else {
-            console.log("already role confirmed");
             confirmed=true;
           }
-        } else {
-          console.log("not confirmed");
         }
       } else {
         toBeConfirmed=true;
@@ -189,7 +189,6 @@ function confirm(user) {
         user.confirm_sent_timestamp=timestamp;
         delete user.confirm_error;
         user._modified=true;
-        console.log("getting key for "+user.email+" "+timestamp);
         key=getConfirmKey(user.email,timestamp);
       }
     }
@@ -233,7 +232,7 @@ function sendPassword(emailAddress,password,callback) {
     subject: "Traduxio change password"
   },function(err,message) {
     if (!err) {
-      console.log("Sent new password to " + emailAddress+" "+message);
+      console.log("Sent new password to " + emailAddress);
     } else {
       console.log("Error sending new password to " + emailAddress+" "+err);
     }
@@ -249,7 +248,6 @@ function followGroups () {
       }
     });
   group_follow.on("change",function (change) {
-    console.log("receive group definition");
     if (change.doc.group && change.doc.emails) {
       console.log("receive group definition "+change.doc.group);
       for (var username in known_users) {
@@ -272,6 +270,9 @@ function followGroups () {
           recordUser(user);
         }
       }
+    } else {
+      console.log("receive bad group definition");
+      console.log(change.doc);
     }
   });
   group_follow.follow();
