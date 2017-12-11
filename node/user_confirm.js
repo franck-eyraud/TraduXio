@@ -4,10 +4,38 @@
   Update _shows/copyright.js when server_url or private_key are changed
 */
 
+var confirmationEmail=[
+"Hello {{fullname}},",
+"",
+"Welcome to {{site_name}}.",
+"",
+"Your username is {{username}}",
+"",
+"Please confirm your email by clicking on this link {{{confirm_url}}}",
+""
+].join("\n");
+
+var confirmationSubject="{{site_name}} email address confirmation";
+
+
+var passwordResetSubject="{{site_name}} password reset"
+
+var passwordResetEmail=[
+"Hello {{fullname}},",
+"",
+"Your password is {{password}}.",
+"",
+"Please CHANGE IT first thing when you access {{site_name}}.",
+""
+].join("\n");
+
+
+
 var email = require('emailjs/email');
 var Url  = require('url');
 var nano=require('nano');
 var crypto=require('crypto');
+var mustache=require('mustache');
 console.log(Url);
 
 var config = JSON.parse(require("fs").readFileSync("node_config.json", "UTF-8"));
@@ -19,7 +47,9 @@ var email_server = email.server.connect({
    host: config.email_host
 });
 
-config.base_url=config.base_url || config.database+ "/_design/traduxio/_rewrite/works/"
+config.base_url=config.base_url || config.database+ "/_design/traduxio/_rewrite/works/";
+
+var templateBase=config;
 
 function sendAdminEmail(message,subject,callback) {
   console.log("sending notification "+message+" to "+config.email_receiver);
@@ -40,13 +70,17 @@ function sendAdminEmail(message,subject,callback) {
 
 
 function sendConfirm(user,url,callback) {
-  var name=user.fullname?user.fullname : user.name;
-  var toEmailAddress='"'+name+'" <'+user.email+'>';
+  var template=templateBase;
+  template.fullname=user.fullname?user.fullname : user.name;
+  template.email_address=user.email;
+  template.confirm_url=url;
+  template.username=user.name;
+  var toEmailAddress='"'+template.fullname+'" <'+user.email+'>';
   email_server.send({
-    text: "Please confirm your email address by clicking on this link : "+url+"\n\nYour username is : "+user.name+".",
+    text: mustache.render(confirmationEmail,template),
     from: config.email_sender,
     to: toEmailAddress,
-    subject: "Traduxio confirmation d'adresse email"
+    subject: mustache.render(confirmationSubject,template)
   },function(err,message) {
     if (!err) {
       console.log("Sent confirmation email to " + toEmailAddress);
@@ -228,11 +262,14 @@ function generatePassword(length) {
 }
 
 function sendPassword(emailAddress,password,callback) {
+  var template=templateBase;
+  template.email_address=emailAddress;
+  template.password=password;
   email_server.send({
-    text: "Your password has been reset, please use "+password+" and CHANGE IT first thing",
+    text: mustache.render(passwordResetEmail,template),
     from: config.email_sender,
     to: emailAddress,
-    subject: "Traduxio change password"
+    subject: mustache.render(passwordResetSubject,template)
   },function(err,message) {
     if (!err) {
       console.log("Sent new password to " + emailAddress);
