@@ -25,12 +25,13 @@ $.fn.concordancify = function() {
     event.preventDefault();
     var query = form.find('#query').val().toLowerCase();
     var language = $("#language").val();
-    window.location.href = getPrefix()+'/works/concordance?' + $.param({
+    var url = getPrefix()+'/works/concordance?' + $.param({
       startkey: '["' + language + '","' + query + '"]',
       endkey: '["' + language + '","' + query + '\\u9999"]',
       query: query,
       language: language
     });
+    window.open(url, 'concordance');
   };
 
   this.on("submit",submitForm);

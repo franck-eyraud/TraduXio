@@ -6,8 +6,9 @@ function(o, req) {
     "i_glossary_add_translation",
     "i_share","i_share_","i_share_invite","i_share_participants",
     "i_public","i_shared","i_public","i_private"
-
+    ,"i_activity_","i_chat_"
   ];
+
 
   var doc=o;
   // !code lib/traduxio.js

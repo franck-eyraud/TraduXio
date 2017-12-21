@@ -6,6 +6,7 @@ function(doc,req) {
   }
 
   var delay=req.query.delay || 60 * 10;
+  var max=req.query.max;
   var now=new Date();
   if (req.query.since) {
     if (req.query.since.indexOf("@")==0) {
@@ -30,6 +31,9 @@ function(doc,req) {
 
   activity=activity.filter(Traduxio.canAccessActivity);
   activity.sort(Traduxio.compareActivities);
+  if (activity.length>max) {
+    activity=activity.splice(activity.length-max,max);
+  }
 
   return JSON.stringify({since:since,now:now,activity:activity});
 

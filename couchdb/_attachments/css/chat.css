@@ -54,6 +54,15 @@ div.chat div.message.unread {
   margin:0.5em;
 }
 
+div.chat div.message.forum {
+  font-weight: bold;
+}
+
+div.chat div.message.edit {
+  color:gray;
+  font-style: italic;
+}
+
 div.chat span.date {
   font-style: italic;
   display:block;

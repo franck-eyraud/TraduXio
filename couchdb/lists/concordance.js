@@ -53,7 +53,7 @@ function(head, req) {
 
   start({headers: {"Content-Type": "text/html;charset=utf-8"}});
   var data = {
-    lang: req.query.language,
+    search_language: req.query.language,
     query: req.query.query,
     occurrences:[],
     glossary_entries:[]
