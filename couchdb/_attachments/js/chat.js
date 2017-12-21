@@ -1,7 +1,5 @@
 (function($,Traduxio){
 
-  var defaultMessage="Ceci est le chat traduxio pour ce texte";
-
   var chatContent,firstMessage;
 
   function createChat() {
@@ -10,15 +8,17 @@
     var header=$("<h1/>").text("Chat");
     var chatWindow=$("<div/>").addClass("chat");
     chatContent=$("<div/>").addClass("chat-content");
+    var messageInput=$("<input/>",{type:"text",name:"message",placeholder:getTranslated("i_chat_enter_message")});
     var chatForm=$("<form>")
-      .append($("<input/>",{type:"text",name:"message"}))
-      .append($("<input/>",{type:"submit",name:"submit"}));
+      .append(messageInput)
+      .append($("<input/>",{type:"submit",name:"submit",value:getTranslated("i_chat_send_message")}));
     chatOuter.append(header).append(chatWindow);
     chatWindow.append(chatContent).append(chatForm);
     var button=$("<span/>").attr("id","show-chat").attr("title","Chat")
       .on("click",function() {
-        chatOuter.slideToggle(function(){
+        chatOuter.slideToggle(function() {
           var unread=chatOuter.find("div.message.unread");
+          messageInput.focus();
           if (chatContent.is(":visible") && unread.length) {
             chatContent.clearQueue().animate({scrollTop:chatContent.scrollTop()+unread.filter(":first").position().top});
             unread.delay(1000).queue(function() {
@@ -49,13 +49,14 @@
           },
           complete:function() {
             $(input,this).attr("disabled",null);
+            input.focus();
             Traduxio.activity.wasActive();
           }
         });
       }
     });
     $("#body").append(chatOuter);
-    firstMessage=addMessage({author:"TraduXio",when:new Date().toISOString(),message:defaultMessage});
+    firstMessage=addMessage({author:"TraduXio",when:new Date().toISOString(),message:getTranslated("i_chat_first_message")});
   }
 
   function addMessage(message) {
@@ -65,6 +66,7 @@
       if (message.anonymous || !message.author) author.addClass("anonymous");
       var date=$("<span/>").addClass("date").attr("title",message.when || "date inconnue")
         .text(new Date(message.when).toLocaleString());
+      if (message.type) div.addClass(message.type);
       div.append(date).append(author).append(message.message || "empty");
       author.css({color:message.color});
 
