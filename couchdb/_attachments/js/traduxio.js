@@ -144,6 +144,16 @@ function addModal (content,title) {
   return modal;
 }
 
+function autoSize() {
+  // Copy textarea contents; browser will calculate correct height of copy,
+  // which will make overall container taller, which will make textarea taller.
+  var text = stringToHtml($(this).val());
+  $(this).parent().find("div.text").html(text);
+  if ($(this).parents().is(".box-wrapper")) {
+      $(this).css({'width':'100%','height':'100%'});
+  }
+}
+
 $(document).ready(function() {
   fixLanguages();
   $("form.concordance").concordancify();
