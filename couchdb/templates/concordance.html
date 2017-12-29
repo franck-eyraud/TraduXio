@@ -41,7 +41,7 @@
         {{/original}}
         {{#translation}}
         <div class="translation">
-          <div class="creator">{{i_trad}} {{creator}}</div>
+          {{#creator}}<div class="creator">{{i_trad}} {{creator}}</div>{{/creator}}
           <div>{{#publisher}}<span class="publisher">{{publisher}}</span>{{/publisher}}
           {{#date}}{{#publisher}}, {{/publisher}}<span class="data">{{date}}</span>{{/date}}</div>
          </div>
