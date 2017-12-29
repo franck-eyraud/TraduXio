@@ -1,6 +1,6 @@
 $.fn.concordancify = function() {
 
-  default_language=$("html").prop("lang") || currentLanguage;
+  default_language=$("table.concordance").data("search-language") || $("html").prop("lang") || currentLanguage;
   default_query=$("body").data("query") || "";
 
   var search = $("#nav").data("i_search");
@@ -17,7 +17,11 @@ $.fn.concordancify = function() {
       $.each(result.rows, function(i, o) {
         $("#language").append("<option value=\""+o.key+"\">" + o.key + " - " + getLanguageName(o.key) + "</option>");
       });
-      $("#language").val($("html").prop("lang"));
+      var oldLanguage=$("#language").val();
+      $("#language").val(default_language);
+      if (!$("#language").val() && oldLanguage) {
+         $("#language").val(oldLanguage);
+      }
     });
   });
 
