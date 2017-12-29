@@ -205,8 +205,8 @@
     "i_title": "Titre",
     "i_translated_title": "Titre traduit"
 
-    ,"i_activity_entered":"Version {0} modifiée à la ligne {1}"
-    ,"i_activity_exited":"Version {0} modifiée à la ligne {1}"
+    ,"i_activity_entered":"est entré dans la traduction"
+    ,"i_activity_exited":"est sorti de la traduction"
     ,"i_activity_version_created":"Nouvelle version {0} créée"
     ,"i_activity_version_edited":"Informations de la version {0} modifiées"
     ,"i_activity_version_renamed":"Version {0} renomée"
