@@ -179,7 +179,7 @@ function splitText(text) {
   //exceptions are looked after sentecne match because of javascript limitation
   //of look back feature
   var sentence=/([^\n\.\?\!]+?|[\!\?\.][^\s\!\?\.])+([\?\.\!\n]+\s*|$)/;
-  var exceptions=/(\W|^)((\w|al|cf|eds|eg|ie|no|pp|qtd|vol|vs|et|etc\.*|Mrs|Miss|Dr|Ph|Ph\.?D|Prof|No|Dept|Univ|Bros))\.\s*$/
+  var exceptions=/(\W|^)((\w|al|cf|ed|eds|eg|ie|no|pp|qtd|vol|vs|et|etc\.*|Mrs|Miss|Dr|Ph|Ph\.?D|Prof|No|Dept|Univ|Bros))\.\s*$/
 
   var sentences=[];
   var workingText=text;
