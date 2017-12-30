@@ -278,19 +278,23 @@ function treatRow(row,callback) {
     }
   }
   work.text=[];
+  work.metadata.positions={};
+
   work.text.push("======= Keywords =======");
+  work.metadata.positions.keywords={start:work.text.length};;
   work.text.push(work.metadata.keywords.join(", "));
+  work.metadata.positions.keywords.end=work.text.length-1;
+
   work.text.push("======= Abstract =======");
+  work.metadata.positions.abstract={start:work.text.length};
   work.text=work.text.concat(row.abstract ? splitText(row.abstract) : []);
+  work.metadata.positions.abstract.end=work.text.length-1;
+
   work.text.push("======= Biographical notes =======");
+  work.metadata.positions.bionotes={start:work.text.length};
   work.text=work.text.concat(work.metadata["Biographical Note(s)"] ?
       splitText(work.metadata["Biographical Note(s)"]) : []);
-  // if (work.metadata["Language of Presentation"]!="English") {
-  //   console.log("#"+row["#"]+" does not use English : "+work.metadata["Language of Presentation"]);
-  // }
-  // if (work.metadata["IATIS Policy"]!="Agree") {
-  //   console.log("#"+row["#"]+" did not accept IATIS Policy "+work.metadata["IATIS Policy"]);
-  // }
+  work.metadata.positions.bionotes.end=work.text.length-1;
   if (row.decision!='accept' || work.metadata["IATIS Policy"]!="Agree"
     || work.metadata["Thematic Panels"]=="Panel02") {
     //console.log("not accepted, skip");
