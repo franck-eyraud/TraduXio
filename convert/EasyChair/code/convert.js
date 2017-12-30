@@ -98,13 +98,13 @@ function forAll(treatment,callback) {
             if (finished && toBeTreated==0) {
               finish(total,success);
             }
-          })
-          finished=true;
-        }
-        if (finished && toBeTreated==0) {
-          finish(total,success);
+          });
         }
       });
+      finished=true;
+      if (finished && toBeTreated==0) {
+        finish(total,success);
+      }
     }
   });
 }
