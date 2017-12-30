@@ -14,6 +14,29 @@
   'abstract' ]
 */
 
+var db;
+
+var importFile=function() {
+  if (config.removeAll) {
+    removeAll(readStep);
+  } else {
+    readStep();
+  }
+}
+
+var fixPrivileges=function() {
+  var newPrivileges={"owner":"iatis","sharedTo":["approved/*"]};
+  forAll(function(row,callback) {
+    changePrivileges(row.id,newPrivileges,callback);
+  },function() {
+    console.log("finished");
+  });
+}
+
+var process=function() {
+  fixPrivileges();
+}
+
 var fs=require("fs");
 var papa=require("./papaparse.min.js");
 var nano=require('nano');
@@ -25,47 +48,10 @@ if (!config.server || !config.database || !config.user || !config.password) {
   console.log("config requires server, database, user and password");
 }
 
-var db;
-
 
 var cookies={};
 
 console.log("Logging in on "+config.server+" as "+config.user);
-
-function removeAll(callback) {
-  console.log("Will remove all documents except design docs in 10 seconds");
-  setTimeout(function() {
-    db.list({},function(err, body) {
-      if (body.rows) {
-        toBeDeleted=0;
-        body.rows.forEach(function(row) {
-          if (row.id.indexOf("_design/") != 0) {
-            toBeDeleted++;
-            db.destroy(row.id,row.value.rev,function(err,res) {
-              if (!err) {
-                toBeDeleted--;
-                console.log("deleted document "+row.id);
-              } else {
-                console.log(row.id+" : "+err);
-                toBeDeleted--;
-              }
-              if (finished && toBeDeleted==0) {
-                console.log("finished deleting");
-                callback();
-              }
-            });
-          }
-        });
-        finished=true;
-      }
-      if (finished && toBeDeleted==0) {
-        console.log("finished deleting");
-        callback();
-      }
-    });
-  },10000);
-}
-
 
 nano(config.server).auth(config.user,config.password,function (err, body, headers) {
   if (err) {
@@ -82,12 +68,79 @@ nano(config.server).auth(config.user,config.password,function (err, body, header
   db=nano({url:config.server,
     cookie:headers['set-cookie']
   }).use(config.database);
-  if (config.removeAll) {
-    removeAll(readStep);
-  } else {
-    readStep();
-  }
+  process();
 });
+
+function forAll(treatment,callback) {
+  function finish(total,success) {
+    console.log("finished treating "+total+" doc, "+success+" succeeded");
+    callback();
+  }
+  db.list({},function(err, body) {
+    if (body.rows) {
+      var toBeTreated=0;
+      var success=0;
+      var total=0;
+      var finished=false;
+      body.rows.forEach(function(row) {
+        if (row.id.indexOf("_design/") != 0) {
+          toBeTreated++;
+          total++;
+          console.log("treating document "+row.id);
+          treatment(row,function(err,res) {
+            if (!err) {
+              success++;
+              toBeTreated--;
+            } else {
+              console.log("error treating "+row.id+" : "+err);
+              toBeTreated--;
+            }
+            if (finished && toBeTreated==0) {
+              finish(total,success);
+            }
+          })
+          finished=true;
+        }
+        if (finished && toBeTreated==0) {
+          finish(total,success);
+        }
+      });
+    }
+  });
+}
+
+function changePrivileges(docid,privileges,callback) {
+  callback=callback || function(){};
+  db.get(docid,function(err,doc) {
+    if (!err) {
+      doc.privileges=privileges;
+      db.insert(doc,function(err) {
+        if (err) {
+          console.log("error inserting doc "+err);
+        } else {
+          console.log("changed doc "+docid);
+        }
+        callback(err);
+      });
+    } else {
+      console.log("error getting doc "+err);
+      callback(err);
+    }
+  });
+}
+
+function remove(row,callback) {
+  db.destroy(row.id,row.value.rev,callback);
+}
+
+
+function removeAll(callback) {
+  console.log("Will remove all documents except design docs in 10 seconds");
+  setTimeout(function() {
+    forAll(remove,callback);
+  },10000);
+}
+
 
 function readFull() {
   var stream=fs.createReadStream("/data/submission.csv");
@@ -179,7 +232,7 @@ function treatRow(row,callback) {
   work.metadata.original_text=row.abstract;
   work.date=row["last updated"];
   work.language="en"; //default
-  work.privileges={owner:config.user,"sharedTo":["*"]};
+  work.privileges={owner:config.user,"sharedTo":["approved/*"]};
 
   // Check if sentences are correctly split
   // work.text.forEach(function(line,i) {
