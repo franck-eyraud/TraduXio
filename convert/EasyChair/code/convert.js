@@ -34,7 +34,7 @@ var fixPrivileges=function() {
 }
 
 var process=function() {
-  fixPrivileges();
+  importFile();
 }
 
 var fs=require("fs");
@@ -76,14 +76,14 @@ function forAll(treatment,callback) {
     console.log("finished treating "+total+" doc, "+success+" succeeded");
     callback();
   }
-  db.list({},function(err, body) {
+  db.list({include_docs:true},function(err, body) {
     if (body.rows) {
       var toBeTreated=0;
       var success=0;
       var total=0;
       var finished=false;
       body.rows.forEach(function(row) {
-        if (row.id.indexOf("_design/") != 0) {
+        if (row.id.indexOf("_design/") != 0 && row.doc && row.doc.text) {
           toBeTreated++;
           total++;
           console.log("treating document "+row.id);
