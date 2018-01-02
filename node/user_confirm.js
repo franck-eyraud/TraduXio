@@ -5,27 +5,27 @@
 */
 
 var confirmationEmail=[
-"Hello {{fullname}},",
+"Hello {{{fullname}}},",
 "",
-"Welcome to {{site_name}}.",
+"Welcome to {{{site_name}}}.",
 "",
-"Your username is {{username}}",
+"Your username is {{{username}}}",
 "",
 "Please confirm your email by clicking on this link {{{confirm_url}}}",
 ""
 ].join("\n");
 
-var confirmationSubject="{{site_name}} email address confirmation";
+var confirmationSubject="{{{site_name}}} email address confirmation";
 
 
-var passwordResetSubject="{{site_name}} password reset"
+var passwordResetSubject="{{{site_name}}} password reset"
 
 var passwordResetEmail=[
-"Hello {{fullname}},",
+"Hello {{{fullname}}},",
 "",
-"Your password is {{password}}.",
+"Your password is {{{password}}}",
 "",
-"Please CHANGE IT first thing when you access {{site_name}}.",
+"Please CHANGE IT first thing when you access {{{site_name}}}.",
 ""
 ].join("\n");
 
@@ -49,7 +49,10 @@ var email_server = email.server.connect({
 
 config.base_url=config.base_url || config.database+ "/_design/traduxio/_rewrite/works/";
 
-var templateBase=config;
+var templateBase={
+  site_name:config.site_name,
+  base_url:config.base_url
+};
 
 function sendAdminEmail(message,subject,callback) {
   console.log("sending notification "+message+" to "+config.email_receiver);
@@ -71,10 +74,10 @@ function sendAdminEmail(message,subject,callback) {
 
 function sendConfirm(user,url,callback) {
   var template=templateBase;
-  template.fullname=user.fullname?user.fullname : user.name;
   template.email_address=user.email;
   template.confirm_url=url;
   template.username=user.name;
+  template.fullname=user.fullname?user.fullname : user.name;
   var toEmailAddress='"'+template.fullname+'" <'+user.email+'>';
   email_server.send({
     text: mustache.render(confirmationEmail,template),
@@ -261,20 +264,22 @@ function generatePassword(length) {
   return string.slice(0,length);
 }
 
-function sendPassword(emailAddress,password,callback) {
+function sendPassword(user,callback) {
   var template=templateBase;
-  template.email_address=emailAddress;
-  template.password=password;
+  template.email_address=user.email;
+  template.password=user.password;
+  template.fullname=user.fullname?user.fullname : user.name;
+  var toEmailAddress='"'+template.fullname+'" <'+user.email+'>';
   email_server.send({
     text: mustache.render(passwordResetEmail,template),
     from: config.email_sender,
-    to: emailAddress,
+    to: toEmailAddress,
     subject: mustache.render(passwordResetSubject,template)
   },function(err,message) {
     if (!err) {
-      console.log("Sent new password to " + emailAddress);
+      console.log("Sent new password to " + toEmailAddress);
     } else {
-      console.log("Error sending new password to " + emailAddress+" "+err);
+      console.log("Error sending new password to " + toEmailAddress+" "+err);
     }
     callback(err,message);
   });
@@ -377,7 +382,7 @@ function resetPasswords() {
               change.doc.error=err;
               db.insert(change.doc);
             } else {
-              sendPassword(known_users[username].email,user.password,function(err,message) {
+              sendPassword(user,function(err,message) {
                 if (!err) {
                   change.doc.success="New password sent";
                 } else {
