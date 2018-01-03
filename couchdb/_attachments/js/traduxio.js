@@ -35,7 +35,11 @@ $.fn.concordancify = function() {
       query: query,
       language: language
     });
-    window.open(url, 'concordance');
+    if ($("body").is("#concordance")) {
+      window.location.href=url;
+    } else {
+      window.open(url, 'concordance');
+    }
   };
 
   this.on("submit",submitForm);
