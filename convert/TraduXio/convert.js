@@ -9,8 +9,50 @@ var fixPrivileges=function() {
   });
 }
 
+var exportCsv=function(conversionFunction) {
+  var exports=[];
+  exports.push(conversionFunction());
+  function finish() {
+    console.log(require("array-to-csv")(exports));
+  }
+
+  forAll(function(row,callback) {
+    console.log("getting "+row.id);
+    if (row.doc) {
+      exports.push(conversionFunction(row.doc));
+      callback();
+    } else db.get(row.id,function(err,doc) {
+      console.log("exporting "+row.id+" "+doc.creator+","+doc.title);
+      if (!err) {
+        exports.push(conversionFunction(doc));
+        callback();
+      } else {
+        callback(err);
+      }
+    });
+  },finish);
+}
+
 var process=function() {
-  fixPrivileges();
+  exportCsv(tdxToCsv);
+}
+
+var tdxToCsv=function(doc,callback) {
+  if (!doc) {
+    var headers=[
+      "id","author","title","language","owner"
+    ];
+    return headers;
+  }
+  var csv=[];
+  csv.push(doc._id);
+  csv.push(doc.creator);
+  csv.push(doc.title);
+  csv.push(doc.language);
+  if (doc.privileges) {
+    csv.push(doc.privileges.owner || null);
+  }
+  return csv;
 }
 
 var fs=require("fs");
@@ -47,22 +89,25 @@ nano(config.server).auth(config.user,config.password,function (err, body, header
 });
 
 function forAll(treatment,callback) {
-  var maxTreat=50;
+  var maxTreat=0;
   function finish(total,success) {
     console.log("finished treating "+total+" doc, "+success+" succeeded");
     callback();
   }
+  console.log("listing");
   db.list({include_docs:true},function(err, body) {
     if (err) {
       console.log(err);
     } else if (body.rows) {
+      console.log("listed "+body.rows.length);
       var toBeTreated=0;
       var success=0;
+      var done=0;
       var total=0;
       var finished=false;
       var treating=false;
       body.rows.forEach(function(row) {
-        if (total<maxTreat && row.id.indexOf("_design/") != 0 && row.doc && row.doc.text) {
+        if ((!maxTreat || total<maxTreat) && row.id.indexOf("_design/") != 0 && row.doc && row.doc.text) {
           toBeTreated++;
           total++;
           treat();
@@ -72,9 +117,10 @@ function forAll(treatment,callback) {
               setTimeout(treat,wait);
             } else {
               treating=true;
-              console.log("treating document "+row.id);
+              console.log("treating document "+(done+1)+"/"+body.rows.length+" "+row.id);
               treatment(row,function(err,res) {
                 treating=false;
+                done++;
                 if (!err) {
                   success++;
                   toBeTreated--;
