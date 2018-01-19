@@ -5,6 +5,16 @@ function session() {
   });
 };
 
+function fixUsername(username) {
+  var fixedUsername=username.toLowerCase().trim().replace(/\s+/g,".");
+  var usernameRegExp=/^[a-z][\.a-z0-9-_]+$/;
+
+  if (!usernameRegExp.test(fixedUsername)) {
+    return false;
+  }
+  return fixedUsername;
+}
+
 function updateUserInfo(ctx) {
   var sessionInfo=$("#session-info");
   if (ctx.name) {
@@ -137,7 +147,7 @@ function loginForm(callback) {
   var forgot=$("<span>").addClass("info forgot click-enabled").text(Traduxio.getTranslated("i_password_forgot"));
   form.append(username).append(password).append(go).append(signup).append(forgot).on("submit",function(e) {
     e.preventDefault();
-    var name=username.val();
+    var name=fixUsername(username.val());
     var passwd=password.val();
     if (name && passwd)
       login(name,passwd).fail(function() {
@@ -333,11 +343,17 @@ function signUpForm(callback) {
       email.addClass("bad");
       bad=true;
     }
+    var fixedUsername=fixUsername(username.val())
+    if (!fixedUsername || fixedUsername!==username.val()) {
+      if (fixedUsername) username.val(fixedUsername);
+      username.addClass("bad");
+      bad=true;
+    }
     if (bad) return;
     var data={
-      name:username.val(),
+      name:fixedUsername,
       email:email.val(),
-      fullname:fullname.val()
+      fullname:fullname.val().trim()
     }
     register(data,password.val(),function(err) {
       console.log(err);
