@@ -3,9 +3,9 @@ var db;
 var fixPrivileges=function() {
   var newOwner="traduxio";
   forAll(function(row,callback) {
-    changePrivileges(row.id,newOwner,callback);
+    changePrivileges(row.doc,newOwner,callback);
   },function() {
-    console.log("finished");
+    console.log("finished fixingPrivileges");
   });
 }
 
@@ -34,7 +34,8 @@ var exportCsv=function(conversionFunction) {
 }
 
 var process=function() {
-  exportCsv(tdxToCsv);
+  fixPrivileges();
+  //exportCsv(tdxToCsv);
 }
 
 var tdxToCsv=function(doc,callback) {
@@ -90,8 +91,8 @@ nano(config.server).auth(config.user,config.password,function (err, body, header
 
 function forAll(treatment,callback) {
   var maxTreat=0;
-  function finish(total,success) {
-    console.log("finished treating "+total+" doc, "+success+" succeeded");
+  function finish(total,success,skipped) {
+    console.log("finished treating "+total+" doc, "+success+" succeeded, "+skipped+" skipped");
     callback();
   }
   console.log("listing");
@@ -104,10 +105,11 @@ function forAll(treatment,callback) {
       var success=0;
       var done=0;
       var total=0;
+      var skipped=0;
       var finished=false;
       var treating=false;
       body.rows.forEach(function(row) {
-        if ((!maxTreat || total<maxTreat) && row.id.indexOf("_design/") != 0 && row.doc && row.doc.text) {
+        if ((!maxTreat || total<maxTreat) && row.id.indexOf("_design/") != 0 && row.doc && row.doc.title && row.doc.translations) {
           toBeTreated++;
           total++;
           treat();
@@ -129,63 +131,60 @@ function forAll(treatment,callback) {
                   toBeTreated--;
                 }
                 if (finished && toBeTreated==0) {
-                  finish(total,success);
+                  finish(total,success,skipped);
                 }
               });
             }
           }
+        } else {
+          skipped++;
         }
       });
       finished=true;
       if (finished && toBeTreated==0) {
-        finish(total,success);
+        finish(total,success,skipped);
       }
     }
   });
 }
 
-function changePrivileges(docid,newOwner,callback) {
+function changePrivileges(doc,newOwner,callback) {
   callback=callback || function(){};
-  db.get(docid,function(err,doc) {
-    modified=false;
-    if (!err) {
-      if (!doc.privileges) {
-        doc.privileges={};
-        doc.privileges.owner=newOwner;
-        if (doc.creativeCommons) {
-          doc.privileges.public=true;
+  modified=false;
+  if (!doc.privileges) {
+    doc.privileges={};
+    doc.privileges.owner=newOwner;
+    if (doc.creativeCommons) {
+      doc.privileges.public=true;
+    }
+    console.log("missing privilges to full doc, set owner "+newOwner);
+    modified=true;
+  }
+  if (doc.translations) {
+    for (var transID in doc.translations) {
+      var translation=doc.translations[transID];
+      if (!translation.privileges) {
+        translation.privileges={};
+        translation.privileges.owner=newOwner;
+        if (translation.creativeCommons) {
+          translation.privileges.public=true;
         }
+        console.log("missing privileges to translation "+transID+", set owner "+newOwner);
         modified=true;
       }
-      if (doc.translations) {
-        for (var transID in doc.translations) {
-          var translation=doc.translations[transID];
-          if (!translation.privileges) {
-            translation.privileges={};
-            translation.privileges.owner=newOwner;
-            if (translation.creativeCommons) {
-              translation.privileges.public=true;
-            }
-            modified=true;
-          }
-        }
-      }
-      if (modified) db.insert(doc,function(err) {
-        if (err) {
-          console.log("error inserting doc "+err);
-        } else {
-          console.log("changed doc "+docid);
-        }
-        callback(err);
-      });
-      else {
-        callback();
-      }
-    } else {
-      console.log("error getting doc "+err);
-      callback(err);
     }
+  }
+  if (modified) db.insert(doc,function(err) {
+    if (err) {
+      console.log("error inserting doc "+err);
+    } else {
+      console.log("changed doc "+doc._id);
+    }
+    callback(err);
   });
+  else {
+    callback();
+  }
 }
 
 function remove(row,callback) {
