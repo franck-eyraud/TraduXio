@@ -244,6 +244,7 @@ function fixWidths() {
     $("#hexapla").addClass("full").css({height:"100%"}).css({height:null});
     $("thead tr:first-child th.pleat.open:visible").css("width",100/nbOpen+"%");
   }
+  positionSplits();
 }
 
 function toggleShow(e) {
@@ -252,7 +253,6 @@ function toggleShow(e) {
   findPleat(version).toggle();
   setTimeout(function(){
     fixWidths();
-    positionSplits();
   },0);
   if (e.cancelable) {
     updateUrl();
@@ -333,7 +333,7 @@ function toggleEdit (e) {
           var newTd=$("<td>").addClass("pleat open").attr("data-version",version)
             .append($("<div>").addClass("box-wrapper").append(newUnit));
           newUnit.setSize(1);
-          var tr=$("<tr/>").attr("id","line-"+i).data("line",i).prepend(newTd);
+          var tr=$("<tr/>").addClass("text-line").attr("id","line-"+i).data("line",i).prepend(newTd);
           $("#hexapla tbody").append(tr);
         });
         applyToggle();
@@ -657,20 +657,14 @@ function deleteVersion(version) {
   });
 }
 
-function createJoin(unit1,unit2) {
-    var p=($(unit2).offset().top-$(unit1).offset().top-$(unit1).outerHeight()+32)/(-2);
-    var join=$("<span/>").addClass("join").prop("title","merge with previous").css("top",p+"px");
-    unit2.prepend(join);
-}
-
-function createJoins(unit) {
+function createJoin(unit) {
   unit.find(".join").remove();
   var version=unit.getVersion("td.open");
   var units=findUnits(version);
   var currIndex=units.index(unit);
   if (currIndex>0) {
-    var prevUnit=units.eq(currIndex-1);
-    createJoin(prevUnit,unit);
+    var join=$("<span/>").addClass("join").prop("title","merge with previous");
+    unit.prepend(join);
   }
 }
 
@@ -691,6 +685,12 @@ function createSplits(unit) {
       unit.append(split);
     }
   }
+}
+
+function createInsert(unit) {
+  unit.find(".insert").remove();
+  var insert=$("<span/>").addClass("insert").prop("title","insert block");
+  unit.append(insert);
 }
 
 function saveUnit(callback) {
@@ -929,8 +929,78 @@ function findLine(line) {
   return $("tr[data-line='"+line+"']");
 }
 
-function updateOnScreen(version,line,content,color) {
-  var highlight=true;
+jQuery.fn.reverse = [].reverse;
+
+function insertBlock(line,local) {
+  var tr=$("#hexapla tr#line-"+line);
+  if (tr.hasClass("added") && !local) {
+    //replay of local change from change listener
+    tr.removeClass("added");
+    return;
+  }
+  if (tr.length==0) { //end of text
+    var last_tr=$("#hexapla tr#line-"+(line-1));
+    if (last_tr.length==0) {
+      //error, missing line
+      return;
+    }
+  }
+  var all_trs=$("#hexapla tr.text-line").reverse();
+  var new_tr=$("<tr>").addClass("text-line").attr("data-line",line).attr("id","line-"+line);
+  if (local) (new_tr.addClass("added"));
+  getVersions().forEach(function(version,index) {
+    var oldUnit=findUnits(version).filter(function() {
+      return $(this).closest("tr").data("line") <= line;
+    }).last();
+    if (oldUnit.closest("tr").data("line")==line) {
+      var newUnit=createUnit("").attr("data-version",version);
+      var direction=oldUnit.css("direction");
+      if (direction) newUnit.css("direction",direction);
+      var newTd=$("<td>").addClass("pleat open").attr("data-version",version)
+        .append($("<div>").addClass("box-wrapper").append(newUnit));
+      if (oldUnit.isEdited()) {
+        newUnit.addClass("edit");
+        newTd.addClass("edit");
+      }
+      new_tr.append(newTd);
+      if (!oldUnit.is(":visible")) newTd.hide();
+      createInsert(newUnit);
+    } else {
+      //no unit, so it is merge with before
+      var oldSize=getSize(oldUnit);
+      oldUnit.closest("td").prop("rowspan",oldSize+1);
+      if (oldUnit.isEdited()) {
+        createSplits(oldUnit);
+      }
+    }
+  });
+  //increase line number of all rows
+  all_trs.each(function() {
+    var old_line=$(this).data("line");
+    if (old_line>=line) {
+      var new_line=old_line+1;
+      $(this).attr("data-line",new_line);
+      $(this).data("line",new_line);
+      $(this).attr("id","line-"+new_line);
+    }
+  });
+  $("unit.edit .split").each(function() {
+    if ($(this).data("line")>=line) {
+        $(this).data("line",line+1);
+    }
+  });
+  if (last_tr) {
+    new_tr.insertAfter(last_tr);
+  } else {
+    new_tr.insertBefore(tr);
+  }
+  $("td.pleat.close").prop("rowspan",$("tbody tr").length);
+
+  positionSplits($("td.pleat.edit"));
+  return new_tr;
+}
+
+function updateOnScreen(version,line,content) {
   var unit=findUnit(version,line);
   if (unit) {
     if (content !== null) {
@@ -998,7 +1068,7 @@ function updateOnScreen(version,line,content,color) {
           }
         }
         createSplits(unit);
-        createJoins(newUnit);
+        createJoin(newUnit);
         createSplits(newUnit);
         positionSplits();
         $(".tosplit").removeClass("tosplit");
@@ -1019,8 +1089,8 @@ var editOnServer = function(content, reference) {
   return request({
     type: "PUT",
     url: "version/"+Traduxio.getId()+"?"+ $.param(reference),
-    contentType: "text/plain",
-    data: content
+    contentType: "application/json",
+    data: JSON.stringify(content)
   });
 };
 
@@ -1209,7 +1279,7 @@ $(document).ready(function() {
 
   $("input.edit").on("click",toggleEdit);
 
-  $("tr").on("mouseup select",".unit", function (e) {
+  $("#hexapla").on("mouseup select",".unit", function (e) {
     //requires jquery.selection plugin
     var txt=$.selection().trim(),language;
     var unit=$(this);
@@ -1234,12 +1304,23 @@ $(document).ready(function() {
     $("body .context-menu").remove();
   });
 
-  $("tr").on("click", ".join", function(e) {
+  $("#hexapla").on("click", ".insert", function(e) {
+    e.stopPropagation();
+    var unit=$(this).closest(".unit");
+    var reference=unit.getReference();
+    reference.version="original";
+    editOnServer(null, reference)
+      .done(function() {
+        insertBlock(unit.getLine(),true);
+      });
+  });
+
+  $("#hexapla").on("click", ".join", function(e) {
     e.stopPropagation();
     var unit=$(this).closest(".unit");
     var version=unit.getVersion("td");
     if (findUnits(version).index(unit)>0) {
-      editOnServer("null", $(this).closest(".unit").getReference())
+      editOnServer(null, unit.getReference())
         .done(function() {
           updateOnScreen(version,unit.getLine(),null);
         });
@@ -1253,7 +1334,7 @@ $(document).ready(function() {
       .css("min-height",size*40+"px");
   };
 
-  $("tr").on("click", ".split", function(e) {
+  $("#hexapla").on("click", ".split", function(e) {
     e.stopPropagation();
     var unit=$(this).closest(".unit");
     var line=$(this).data("line");
@@ -1268,7 +1349,7 @@ $(document).ready(function() {
 
   $("#hexapla").on('change input cut paste','textarea,input.editedMeta',modified);
 
-  $("tr").on("focusout", ".unit.edit textarea", saveUnit);
+  $("#hexapla").on("focusout", ".unit.edit textarea", saveUnit);
   $("thead").on("focusout","input.editedMeta", saveMetadata);
   $("thead").on("change","select.editedMeta", saveMetadata);
   $("#hexapla").on("click","span.delete", clickDeleteVersion);
@@ -1395,7 +1476,7 @@ $(document).ready(function() {
             if ("line" in edit && "content" in edit) {
               edit.message=getTranslated("i_activity_line_edited","<em>"+edit.version+"</em>","<a href='#line-"+edit.line+"'>"+edit.line+"</a>");
               if(!edit.isPast && version.length>0) {
-                var unit=updateOnScreen(edit.version,edit.line,edit.content,edit.me?edit.color:null);
+                var unit=updateOnScreen(edit.version,edit.line,edit.content);
                 if (unit && edit.color) {
                   highlightUnit(unit,edit.color);
                 }
@@ -1420,6 +1501,26 @@ $(document).ready(function() {
             if (!edit.isPast) edit.message+=", "+getTranslated("i_activity_refresh");
             break;
         }
+    } else {
+      if (edit.action=="inserted") {
+        if ("line" in edit) {
+          edit.message="bloc inséré à la ligne "+edit.line;
+          if(!edit.isPast) {
+            var tr=insertBlock(edit.line);
+            if (tr && edit.color) {
+              tr.find(".unit").each(function(unit) {
+                highlightUnit($(unit),edit.color);
+              });
+            }
+          }
+        }
+        if (edit.key=="creator") {
+          if (!edit.isPast) edit.message+=", svp rafraîchir la page pour voir les changements";
+        } else {
+          edit.message="informations de la version "+edit.version+" modifiées";
+          if (!edit.isPast) edit.message+=", svp rafraîchir la page pour voir les changements";
+        }
+      }
     }
     if (edit.message && Traduxio.chat && Traduxio.chat.addMessage) {
       Traduxio.chat.addMessage(edit);

@@ -275,25 +275,40 @@ tr.fulltext .unit .text {
 }
 
 #hexapla .unit .join,
-#hexapla .unit .split {
+#hexapla .unit .split,
+#hexapla .unit .insert {
   position:absolute;
   width:32px;
   height:32px;
   cursor:pointer;
   border:1px solid black;
   z-index:9;
-  right:0px;
   visibility: hidden;
 }
 
-#hexapla .unit .join{
+#hexapla .unit .join,
+#hexapla .unit .split {
+ right:0px;
+}
+
+#hexapla .unit .insert {
+ left:0px;
+}
+
+#hexapla .unit .join,
+#hexapla .unit .insert {
   top:-24px;
 }
 
-#hexapla .unit.edit .split,
-#hexapla .unit.edit .join {
+#hexapla td.pleat.open.edit:hover .unit.edit .split,
+#hexapla td.pleat.open.edit:hover .unit.edit .join {
   visibility: visible;
   right: -32px;
+}
+
+#hexapla td.pleat.open.edit:hover .unit.edit .insert {
+  visibility: visible;
+  left: -32px;
 }
 
 .dirty {
@@ -307,6 +322,11 @@ tr.fulltext .unit .text {
 
 #hexapla .unit .split {
   background-image:url(../img/split.png);
+  bottom:-32px;
+}
+
+#hexapla .unit .insert {
+  background-image:url(../img/merge.png);
   bottom:-32px;
 }
 

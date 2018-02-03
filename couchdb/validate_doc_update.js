@@ -200,7 +200,7 @@ function (newDoc, oldDoc, userCtx, secObj) {
       //check that edit forbidden translations are not modified
       log(oldTrans);
       log(newTrans);
-      if (!Traduxio.canEdit(oldTrans) &&
+      if (!Traduxio.isOwner(oldDoc) && !Traduxio.canEdit(oldTrans) &&
           !compare(oldTrans,newTrans)) {
         throw({forbidden:"Can't modify translation "+t});
       }
