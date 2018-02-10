@@ -14,7 +14,7 @@ function(old, req) {
         this.data.translations[version];
     };
     this.exists = function(version) {
-      return this.isOriginal(version) && this.data.text ||
+      return this.isOriginal(version) ||
         this.data.translations.hasOwnProperty(version);
     };
     this.isOriginal = function(version) {
@@ -22,7 +22,21 @@ function(old, req) {
     };
     this.getContent = function(version, line) {
       var text=this.getVersion(version).text;
-      return text[line];
+      return text ? text[line] : false;
+    };
+    this.textLength = function(version) {
+      if (version=="original") {
+        if (work.data.text) return work.data.text.length;
+        else {
+          length=1;
+          for (var tr in work.data.translations) {
+            length=Math.max(work.data.translations[tr].text.length,length);
+          }
+          return length;
+        }
+      } else {
+        return work.data.translations[version].text.length;
+      }
     };
     this.setContent = function(version, line, content) {
       if (this.isOriginal(version)) {
@@ -47,7 +61,9 @@ function(old, req) {
   if (!Traduxio.canEdit(work.get(VERSION_ID))) {
     return [null, {code:403,body:"can't modify "+VERSION_ID}];
   }
-  if (LINE!==parseInt(LINE, 10) || LINE<0 || LINE>work.getVersion(VERSION_ID).text.length) {
+  if (LINE!==parseInt(LINE, 10) || LINE<0
+    || LINE>work.textLength(VERSION_ID) && (new_content!=null || !work.isOriginal(VERSION_ID))
+    || LINE>work.textLength(VERSION_ID)+1) {
     return [null, {code:400,body:"incorrect line "+LINE}];
   }
   var old_content = work.getContent(VERSION_ID, LINE),
@@ -62,7 +78,7 @@ function(old, req) {
     error=(typeof new_content)+" is not a valid type";
   }
   if (error) {return [null, {code:400,body:"incorrect input "+error}];}
-  if (new_content!=old_content) {
+  if (new_content!==old_content) {
     if (new_content==null && !work.isOriginal(VERSION_ID)) {
       var previous_line = LINE;
       var previous_line_content;
