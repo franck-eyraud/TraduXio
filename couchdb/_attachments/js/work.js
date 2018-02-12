@@ -837,7 +837,7 @@ function createUnit(content) {
   var newUnit = $("<div/>").addClass("unit");
   var text = $("<div>").addClass("text");
   newUnit.append(text);
-  var textarea=$("<textarea>").addClass("autosize");
+  var textarea=$("<textarea>").addClass("autosize").attr("autocomplete","off");
   newUnit.prepend(textarea);
   fillUnit(newUnit,content);
   return newUnit;
