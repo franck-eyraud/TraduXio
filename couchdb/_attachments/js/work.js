@@ -859,7 +859,7 @@ jQuery.fn.reverse = [].reverse;
 function insertBlock(line,local) {
   var tr=$("#hexapla tr#line-"+line);
   if (tr.hasClass("added") && !local) {
-    //replay of local change from change listener
+    //ignore replay of local change from change listener
     tr.removeClass("added");
     return;
   }
@@ -873,6 +873,7 @@ function insertBlock(line,local) {
   var all_trs=$("#hexapla tr.text-line").reverse();
   var new_tr=$("<tr>").addClass("text-line").attr("data-line",line).attr("id","line-"+line);
   if (local) (new_tr.addClass("added"));
+  var newUnits=[];
   getVersions().forEach(function(version,index) {
     var oldUnit=findUnits(version).filter(function() {
       return $(this).closest("tr").data("line") <= line;
@@ -889,7 +890,11 @@ function insertBlock(line,local) {
       }
       new_tr.append(newTd);
       if (!oldUnit.is(":visible")) newTd.hide();
-      createInsert(newUnit);
+      if (index==0) {
+        createInsert(newUnit);
+      } else {
+        newUnits.push(newUnit);
+      }
     } else {
       //no unit, so it is merge with before
       var oldSize=getSize(oldUnit);
@@ -921,6 +926,7 @@ function insertBlock(line,local) {
   }
   $("td.pleat.close").prop("rowspan",$("tbody tr").length);
 
+  newUnits.forEach(createJoin);
   positionSplits($("td.pleat.edit"));
   return new_tr;
 }
