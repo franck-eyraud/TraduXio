@@ -50,10 +50,23 @@ function(old, req) {
         this.data.translations[version].text[line] = content;
       }
     };
+    this.getRubric = function(version, line) {
+      var rubrics=this.getVersion(version).rubrics;
+      if (rubrics && rubrics[line]){
+        return rubrics[line];
+      }
+      return false;
+    };
+    this.setRubric = function(version, line, rubric) {
+      this.getVersion(version).rubrics = this.getVersion(version).rubrics || [];
+      var rubrics=this.getVersion(version).rubrics;
+      rubrics[line]=rubric;
+    }
   }
 
   const VERSION_ID = req.query.version;
   const LINE = +req.query.line;
+  const CHANGE_RUBRIC = req.query.rubric ? true : false;
   var work = new Work();
   if (!work.exists(VERSION_ID)) {
     return [null, {code:400,body:"incorrect version "+VERSION_ID}];
@@ -66,7 +79,8 @@ function(old, req) {
     || LINE>work.textLength(VERSION_ID)+1) {
     return [null, {code:400,body:"incorrect line "+LINE}];
   }
-  var old_content = work.getContent(VERSION_ID, LINE),
+  var old_content = CHANGE_RUBRIC ? work.getRubric(VERSION_ID, LINE) :
+      work.getContent(VERSION_ID, LINE),
       new_content,error=false;
   try {
     new_content = JSON.parse(req.body);
@@ -74,12 +88,15 @@ function(old, req) {
     error="incorrect JSON";
     new_content=-1;
   }
-  if (!error && (typeof new_content != "string") && new_content != null) {
+  if (typeof new_content != "string") {
     error=(typeof new_content)+" is not a valid type";
   }
   if (error) {return [null, {code:400,body:"incorrect input "+error}];}
   if (new_content!==old_content) {
-    if (new_content==null && !work.isOriginal(VERSION_ID)) {
+    if (CHANGE_RUBRIC) {
+      work.setRubric(VERSION_ID, LINE, new_content);
+      return [work.data, VERSION_ID + " rubric changed at line " + LINE];
+    } else if (new_content==null && !work.isOriginal(VERSION_ID)) {
       var previous_line = LINE;
       var previous_line_content;
       if (previous_line==0) {
