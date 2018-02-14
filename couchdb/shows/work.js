@@ -98,6 +98,7 @@ function(o, req) {
           hexapla.addVersion({
             id: t,
             text: Traduxio.canAccess(translation) ? translation.text : [""],
+            rubrics: Traduxio.canAccess(translation) ? translation.rubrics : [],
           });
           var public=translation.privileges.public;
           var shared=translation.privileges.sharedTo && translation.privileges.sharedTo.length;

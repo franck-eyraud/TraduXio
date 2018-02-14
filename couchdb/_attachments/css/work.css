@@ -300,6 +300,44 @@ tr.fulltext .unit .text {
   top:-24px;
 }
 
+#hexapla .unit .rubric {
+  position: absolute;
+  color: #C11C1C;
+  opacity: 0.3;
+  top: 0px;
+  right: 0px;
+  height: 1em;
+  min-width: 1em;
+  cursor: default;
+  border-width:1px;
+  padding:2px;
+}
+
+#hexapla .unit .rubric.change {
+  opacity: 1;
+  background-color: #fff;
+}
+
+#hexapla .unit .rubric input {
+  position: absolute;
+  display: none;
+}
+
+#hexapla .unit .rubric.change input {
+  position: absolute;
+  top:0px;
+  right:0px;
+  display: initial;
+}
+
+#hexapla .edit .unit .rubric:hover {
+  height: auto;
+  opacity: 1;
+  background-color: #fff;
+  border-style:dashed;
+}
+
+
 #hexapla td.pleat.open.edit:hover .unit.edit .split,
 #hexapla td.pleat.open.edit:hover .unit.edit .join {
   visibility: visible;

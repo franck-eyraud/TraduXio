@@ -119,11 +119,19 @@ function Hexapla() {
             if (lastLines[vi]) {
               lastLines[vi].line.space=i-lastLines[vi].num;
             }
+            if (i==0) {
+              log("magic log "+vi);
+              log(this.versions[vi].rubrics);
+            }
+            var rubric=this.versions[vi].rubrics && this.versions[vi].rubrics[i] ?
+              this.versions[vi].rubrics[i] : "";
+              if (rubric) log("found rubric "+rubric+" for "+vi+":"+i);
             var line={
               version:this.versions[vi].id,
               htmlText:this.toHtml(this.versions[vi].text[i]),
               rawText:this.versions[vi].text[i],
-              firstVersion:firstVersion
+              firstVersion:firstVersion,
+              rubric:rubric
             };
             row.units.push(line);
             firstVersion=false;

@@ -884,7 +884,8 @@ function highlightUnit(unit,color) {
 function createUnit(content) {
   var newUnit = $("<div/>").addClass("unit");
   var text = $("<div>").addClass("text");
-  newUnit.append(text);
+  var rubric = $("<div>").addClass("rubric");
+  newUnit.append(text).append(rubric);
   var textarea=$("<textarea>").addClass("autosize").attr("autocomplete","off");
   newUnit.prepend(textarea);
   fillUnit(newUnit,content);
@@ -1303,7 +1304,7 @@ $(document).ready(function() {
 
   $("input.edit").on("click",toggleEdit);
 
-  $("#hexapla").on("mouseup select",".unit", function (e) {
+  $("#hexapla").on("mouseup select",".unit .text", function (e) {
     //requires jquery.selection plugin
     var txt=$.selection().trim(),language;
     var unit=$(this);
@@ -1337,6 +1338,45 @@ $(document).ready(function() {
       .done(function() {
         insertBlock(unit.getLine(),true);
       });
+  });
+
+  $("body").on("click",function(e) {
+    $("#hexapla .edit .rubric.change").each(function() {
+      var self=$(this);
+      var rubric=$("input",this).val();
+      if (rubric != $(this).text()) {
+        //send change to server
+        var unit=$(this).closest(".unit");
+        var reference=unit.getReference();
+        reference.rubric="true";
+        request({
+          type:"PUT",
+          data:JSON.stringify(rubric),
+          contentType: "application/json",
+          url:"version/"+Traduxio.getId()+"?"+ $.param(reference)
+        })
+        .done(function() {
+          self.text(rubric);
+          self.toggleClass("change");
+        });
+      } else {
+        self.text(rubric);
+        self.toggleClass("change");
+      }
+    });
+  });
+
+  $("#hexapla").on("click", ".edit .rubric", function(e) {
+    e.stopPropagation();
+    if (!$(this).is(".change")) {
+      $(this).toggleClass("change");
+      if (!$("input",this).length) {
+        $(this).append($("<input>"));
+      }
+      $("input",this).val($(this).text()).focus();
+    } else {
+    }
+
   });
 
   $("#hexapla").on("click", ".join", function(e) {
