@@ -39,6 +39,8 @@
     "i_glossary_source_language": "Source language",
     "i_glossary_target_language": "Target language",
 
+    "i_rubric_edit": "Edit rubric",
+
     "i_works": "Works",
     "i_my_translations": "My translations",
     "i_concordance": "Concordance",
@@ -173,6 +175,8 @@
     "i_glossary_add_entry": "Ajouter une entrée du glossaire",
     "i_glossary_source_language": "Depuis la langue",
     "i_glossary_target_language": "Vers la langue",
+
+    "i_rubric_edit": "Editer la rubrique",
 
     "i_works": "Œuvres",
     "i_my_translations": "Mes traductions",
