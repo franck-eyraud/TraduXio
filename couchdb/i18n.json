@@ -117,7 +117,7 @@
     "i_original": "Original work",
     "i_version_language": "Translation language",
     "i_author": "Author",
-    "i_version_author": "Author (transliterated if necessary)",
+    "i_version_author": "Transliterated author (if necessary)",
     "i_translator": "Translation author",
     "i_title": "Title",
     "i_translated_title": "Translated title",
@@ -252,7 +252,7 @@
     "i_original": "Œuvre originale",
     "i_version_language": "Langue de traduction",
     "i_author": "Auteur",
-    "i_version_author": "Auteur (translittéré si nécessaire)",
+    "i_version_author": "Auteur translittéré (si nécessaire)",
     "i_translator": "Auteur de la traduction",
     "i_title": "Titre",
     "i_translated_title": "Titre traduit"
@@ -345,7 +345,7 @@
     "i_original": "Obra original",
     "i_version_language": "Idioma de tradução",
     "i_author": "Autor",
-    "i_version_author": "Autor (transliterado se necessário)",
+    "i_version_author": "Autor transliterado (se necessário)",
     "i_translator": "Autor da tradução",
     "i_title": "Título",
     "i_translated_title": "Título traduzido"
@@ -426,7 +426,7 @@
     "i_original": "Obra original",
     "i_version_language": "Idioma de la traducción",
     "i_author": "Autor",
-    "i_version_author": "Autor (transliterado si es necesario)",
+    "i_version_author": "Autor transliterado (si es necesario)",
     "i_translator": "Autor de la traducción",
     "i_title": "Título",
     "i_translated_title": "Título traducido"
