@@ -117,11 +117,12 @@
     "i_original": "Original work",
     "i_version_language": "Translation language",
     "i_author": "Author",
-    "i_version_author": "Transliterated author (if necessary)",
+    "i_version_author": "Transliterated original author's name (if necessary)",
     "i_translator": "Translation author",
     "i_title": "Title",
-    "i_translated_title": "Translated title",
-    "i_enter_text": "Enter your text here"
+    "i_translated_title": "Translated title"
+    ,"i_text_enter": "Enter your text here. \n\nThe text must by divided in blocs. Division is obtained by separating them by 2 line successive breaks."
+
     ,"i_activity_entered":"entered the translation"
     ,"i_activity_exited":"exited from the translation"
     ,"i_activity_version_created":"New  version {0} created"
@@ -252,10 +253,11 @@
     "i_original": "Œuvre originale",
     "i_version_language": "Langue de traduction",
     "i_author": "Auteur",
-    "i_version_author": "Auteur translittéré (si nécessaire)",
+    "i_version_author": "Translittération du nom de l'auteur original (si nécessaire)",
     "i_translator": "Auteur de la traduction",
     "i_title": "Titre",
     "i_translated_title": "Titre traduit"
+    ,"i_text_enter": "Entrez votre texte ici. \n\nLe texte doit être divisé en blocs de traduction. La division est obtenue en séparant les blocs par 2 retrours à la ligne consécutifs."
 
     ,"i_activity_entered":"est entré dans la traduction"
     ,"i_activity_exited":"est sorti de la traduction"
