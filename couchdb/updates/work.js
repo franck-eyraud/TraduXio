@@ -18,7 +18,7 @@ function(work, req) {
   var version_name = req.query.version;
   if (["PUT","DELETE"].indexOf(req.method)!=-1) {
 
-    if (work===null) {
+    if (work===null || !Traduxio.sameTenant(work)) {
       return [null,{code:404,body:"Not found"}];
     }
     var original=false,
@@ -56,6 +56,9 @@ function(work, req) {
         doc.privileges.owner=Traduxio.getUser().name;
       } else {
         doc.privileges.public=true;
+      }
+      if (Traduxio.req.tenant) {
+        work.privileges.tenant=Traduxio.req.tenant;
       }
       work._id=work.id || req.uuid;
       delete work.id;

@@ -35,6 +35,9 @@ function(o, req) {
     } else {
       o.privileges.public=true;
     }
+    if (Traduxio.req.tenant) {
+      o.privileges.tenant=Traduxio.req.tenant;
+    }
   }
   o.privileges=o.privileges||{};
   var data = {

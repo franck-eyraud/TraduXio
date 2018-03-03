@@ -1,4 +1,9 @@
 {
   "index" : "_rewrite/",
-  "traduxio" : { "chat" : false, "sessions" : false }
+  "traduxio" : {
+    "chat" : false
+    , "sessions" : false
+    ,"multi-tenant":true
+    ,"default-tenant":"localhost"
+  }
 }

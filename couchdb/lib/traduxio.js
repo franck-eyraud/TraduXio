@@ -118,6 +118,24 @@ Traduxio= {
     return false;
   },
 
+  sameTenant: function(work) {
+    if (this.isOriginalWork(work) && this.config["multi-tenant"] && this.req) {
+      if (this.req.tenant) {
+        if (work.privileges.tenant) {
+          log("tenant :"+this.req.tenant+", work is from "+work.privileges.tenant);
+          return this.req.tenant==work.privileges.tenant;
+        } else {
+          return false;
+        }
+      } else {
+        //if req headers is absent, means that we are in validate function
+        //which has no access to req object, so we force access to doc
+        return !work.privileges.tenant || !this.req.headers;
+      }
+    }
+    return true;
+  },
+
   isOwner:function (work) {
     work=work || this.doc;
     if (work) {
@@ -147,6 +165,7 @@ Traduxio= {
       this.config.debug && log ("can access absent work");
       return true;
     } else {
+      if (!this.sameTenant(work)) return false;
       this.config.debug && log (this.getUser().name + " can access ?");
       if (this.isAdmin()) return true;
       if (this.isOwner(work)) return true;
@@ -393,4 +412,14 @@ Traduxio= {
 };
 
 if (typeof doc != "undefined" && doc!=null) Traduxio.doc=doc;
-if (typeof req != "undefined" && req!=null) Traduxio.req=req;
+if (typeof req != "undefined" && req!=null) {
+  Traduxio.req=req;
+  if (Traduxio.config["multi-tenant"] && Traduxio.req.headers && Traduxio.req.headers["Host"]) {
+    var tenant=Traduxio.req.headers["Host"].split(":");
+    tenant=tenant[0];
+    if (tenant!=Traduxio.config["defaul-tenant"]) {
+      Traduxio.req.tenant=tenant;
+      log("for this request, tenant is "+tenant);
+    }
+  }
+}
