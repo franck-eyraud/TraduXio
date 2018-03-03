@@ -12,7 +12,14 @@
         {{#original}}
         <div class="original">
           <div class="creator">{{creator}}</div>
-          <div class="title"><a href="{{work_id}}">{{title}}</a></div>
+          <div class="title">
+          {{#canAccess}}
+            <a href="{{work_id}}">{{title}}</a>
+          {{/canAccess}}
+          {{^canAccess}}
+            {{title}}
+          {{/canAccess}}
+          </div>
           <div>{{#publisher}}<span class="publisher">{{publisher}}</span>{{/publisher}}
           {{#date}}{{#publisher}}, {{/publisher}}<span class="data">{{date}}</span>{{/date}}</div>
         </div>
@@ -34,7 +41,14 @@
         {{#original}}
         <div class="original">
           <div class="creator">{{creator}}</div>
-          <div class="title"><a href="{{work_id}}?open={{/original}}{{open_list}}{{#original}}#line-{{line_number}}">{{title}}</a></div>
+          <div class="title">
+          {{^canAccess}}
+            {{title}}
+          {{/canAccess}}
+          {{#canAccess}}
+            <a href="{{work_id}}?open={{open_list}}#line-{{line_number}}">{{title}}</a>
+          {{/canAccess}}
+          </div>
           <div>{{#publisher}}<span class="publisher">{{publisher}}</span>{{/publisher}}
           {{#date}}{{#publisher}}, {{/publisher}}<span class="data">{{date}}</span>{{/date}}</div>
         </div>
