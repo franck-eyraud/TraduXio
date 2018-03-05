@@ -13,7 +13,8 @@ function (o) {
       title:o.title,
       original:o.text?true:false,
       languages: languages,
-      privileges: o.privileges
+      privileges: o.privileges,
+      translations: true
     });
   }
 }

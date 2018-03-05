@@ -417,9 +417,11 @@ if (typeof req != "undefined" && req!=null) {
   if (Traduxio.config["multi-tenant"] && Traduxio.req.headers && Traduxio.req.headers["Host"]) {
     var tenant=Traduxio.req.headers["Host"].split(":");
     tenant=tenant[0];
-    if (tenant!=Traduxio.config["defaul-tenant"]) {
+    if (tenant!=Traduxio.config["default-tenant"]) {
       Traduxio.req.tenant=tenant;
       log("for this request, tenant is "+tenant);
+    } else {
+      log("for this request tenant is default "+Traduxio.config["default-tenant"]);
     }
   }
 }
