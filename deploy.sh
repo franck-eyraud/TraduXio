@@ -3,8 +3,11 @@
 DATABASE=${1-http://localhost:5984/traduxio}
 
 echo Deploying on $DATABASE
-if couchapp push couchdb $DATABASE 2> /dev/null; then
-	curl -s $DATABASE/_design/traduxio/_view/works?stale=update_after -o /dev/null
+DB=$(couchapp push couchdb $DATABASE 2>&1 | tail -1)
+if [ $? -eq 0 ]; then
+  echo Deployed on $DB
+  echo Reindexing $DB/works
+	curl -s $DB/works -o /dev/null -w "Finished in %{time_total} seconds\\n"
 else
 	echo Failed; exit 1;
 fi
