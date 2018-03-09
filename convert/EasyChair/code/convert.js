@@ -14,13 +14,18 @@
   'abstract' ]
 */
 
+process.on('SIGINT', function() {
+    process.exit();
+});
+
+
 var db;
 
 var importFile=function() {
   if (config.removeAll) {
     removeAll(readStep);
   } else {
-    readStep();
+    readStep(config.update);
   }
 }
 
@@ -33,7 +38,7 @@ var fixPrivileges=function() {
   });
 }
 
-var process=function() {
+var runProcess=function() {
   importFile();
 }
 
@@ -46,6 +51,10 @@ var config = JSON.parse(require("fs").readFileSync("config.json", "UTF-8"));
 
 if (!config.server || !config.database || !config.user || !config.password) {
   console.log("config requires server, database, user and password");
+}
+
+if (config.insecure_ssl) {
+  process.env.NODE_TLS_REJECT_UNAUTHORIZED = "0";
 }
 
 
@@ -68,7 +77,10 @@ nano(config.server).auth(config.user,config.password,function (err, body, header
   db=nano({url:config.server,
     cookie:headers['set-cookie']
   }).use(config.database);
-  process();
+  console.log("will process "+config.server+"/"+config.database);
+  setTimeout(function() {
+    runProcess();
+  },config.wait_time || 20000);
 });
 
 function forAll(treatment,callback) {
@@ -142,7 +154,7 @@ function removeAll(callback) {
 }
 
 
-function readFull() {
+function readFull(checkExists) {
   var stream=fs.createReadStream("/data/submission.csv");
   papa.parse(stream,{
     header:true,
@@ -154,7 +166,7 @@ function readFull() {
         parsed.data.forEach(function(row,i) {
           console.log(row);
           for (var i in row) {
-            treatRow(row,callback);
+            treatRow(row,callback,checkExists);
           }
         });
       }
@@ -185,15 +197,15 @@ function splitText(text) {
   var workingText=text;
   while (m=workingText.match(sentence)) {
     var s=m[0];
-    console.log("extracted "+s);
+    //console.log("extracted "+s);
     workingText=workingText.substring(m.index+m[0].length);
-    console.log("new text "+workingText);
+    //console.log("new text "+workingText);
     while (s.match(exceptions) && (m=workingText.match(sentence))) {
-      console.log("exception");
+      //console.log("exception");
       s+=m[0];
-      console.log("extracted "+s);
+      //console.log("extracted "+s);
       workingText=workingText.substring(m.index+m[0].length);
-      console.log("new text "+workingText);
+      //console.log("new text "+workingText);
     }
     sentences.push(s);
   }
@@ -220,13 +232,18 @@ function store(work, callback) {
 
 var tostore=0,stored=0;
 
-function treatRow(row,callback) {
-  //console.log("treat Row "+row["#"]);
+function treatRow(row,callback,checkExists) {
+
+  var diff = require('deep-diff');
+
   var work={};
   work.id="EasyChairImport-"+row["#"];
   work.title=row.title;
   work.creator=row.authors;
   work.metadata=row;
+  // for (var m in row) {
+  //   work.metadata[m]=row[m];
+  // }
   work.metadata.id=row["#"];
   work.metadata.keywords=row.keywords ? row.keywords.split("\n") : [];
   work.metadata.original_text=row.abstract;
@@ -277,6 +294,13 @@ function treatRow(row,callback) {
       work.language=reverse_languages[language];
     }
   }
+
+  var accept=true;
+  if (row.decision!='accept' || work.metadata["IATIS Policy"]!="Agree"
+      || work.metadata["Thematic Panels"]=="Panel02") {
+    accept=false;
+  }
+
   work.text=[];
   work.metadata.positions={};
 
@@ -295,38 +319,114 @@ function treatRow(row,callback) {
   work.text=work.text.concat(work.metadata["Biographical Note(s)"] ?
       splitText(work.metadata["Biographical Note(s)"]) : []);
   work.metadata.positions.bionotes.end=work.text.length-1;
-  if (row.decision!='accept' || work.metadata["IATIS Policy"]!="Agree"
-    || work.metadata["Thematic Panels"]=="Panel02") {
-    //console.log("not accepted, skip");
-    return callback();
-  } else {
-    console.log("#"+row['#']+" accepted, store");
-  }
   work.translations={};
-  // var new_trans={};
-  // var possible_languages=translation_languages.slice();
-  // if (possible_languages.indexOf(work.language)!=-1) {
-  //   possible_languages.splice(possible_languages.indexOf(work.language),1);
-  // }
-  // new_trans.language=possible_languages.length ? possible_languages[0] : translation_languages[0];
-  // new_trans.text=new Array(work.text.length).fill("");
-  // new_trans.privileges={owner:config.user};
-  // work.translations["iatis"]=new_trans;
-  //console.log(work.text);
-  //return callback();
+
   tostore++;
-  db.insert(work,function(err,body) {
-    if (err) console.log(err);
-    else {
-      stored++;
-      console.log("stored "+work.id+" as "+body.id);
-      //console.log(body);
-    }
-    setTimeout(callback,100);
-  });
+  if (checkExists) {
+    db.view("traduxio","work-selection",{
+      startkey:["#",""+work.metadata.id+""],
+      endkey:["#",""+work.metadata.id+""],
+      reduce:false,
+      include_docs:true
+    },function(err,body) {
+      if (err) {
+        console.log("error searching #"+work.metadata.id);
+      } else {
+        if (body.rows.length==0) {
+          if (accept) {
+            console.log("new #"+work.metadata.id);
+            db.insert(work,function(err,body) {
+              if (err) console.log(err);
+              else {
+                stored++;
+                console.log("stored "+work.id+" as "+body.id);
+                //console.log(body);
+              }
+              setTimeout(callback,100);
+            });
+          }
+        } else if (body.rows.length==1) {
+          var existing_doc=body.rows[0].doc;
+          if (!accept) {
+            console.log("#"+work.metadata.id+ " to be deleted");
+            db.destroy(existing_doc._id,existing_doc._rev,function() {
+              console.log("#"+work.metadata.id+ " deleted");
+              callback();
+            });
+            return;
+          }
+          //console.log("found #"+work.metadata.id);
+          var differences=diff.diff(work,existing_doc);
+          if (differences) {
+            differences=differences.filter(function (d) {
+              if (["_id","_rev","edits","messages","privileges","translations","users","session","date"].indexOf(d.path[0])!=-1) return false;
+              if (d.path[0]=="metadata" && ["original_text","authors","last updated","title","form fields"].indexOf(d.path[1])!=-1) return false;
+              return true;
+            });
+          }
+          if (differences && differences.length) {
+            console.log("#"+work.metadata.id+" has changed");
+            differences.forEach(function(d) {
+              var p=d.path.join(".");
+              if (d.path[0]=="text" || p=="metadata.abstract" || p=="metadata.form fields" ||p=="metadata.original_text" || p=="metadata.Biographical Note(s)") {
+                var no_detail=true;
+              }
+              console.log("#"+work.metadata.id+" "+d.path.join(".")+" "+(!no_detail ? d.rhs+" => "+d.lhs : ""));
+            });
+            copy=JSON.parse(JSON.stringify(existing_doc));
+            if (Object.keys(existing_doc.translations).length) {
+              console.log("#"+work.metadata.id+" is translated "+Object.keys(existing_doc.translations).join(","));
+              // for (var t in existing_doc.translations) {
+              //   var trans=existing_doc.translations[t];
+              //   if (trans.status && trans.status!="translating") {
+              //     trans.status="translating";
+              //   }
+              // }
+            }
+            for (var m in work) {
+              if (m!="translations" && m!="privileges") existing_doc[m]=work[m];
+            }
+
+            var newdiff=diff.diff(existing_doc,copy);
+            if (newdiff) {
+              console.log("#"+work.metadata.id+" applying "+newdiff.length+" differences");
+              //console.log(newdiff);
+            }
+            db.insert(existing_doc,function(err,body) {
+              if (err) console.log(err);
+              else {
+                stored++;
+                console.log("stored "+work.id+" as "+body.id);
+                //console.log(body);
+              }
+              setTimeout(callback,100);
+            });
+
+          } else if (existing_doc.translations.length) {
+            console.log("#"+work.metadata.id+" is translated but has not changed "+Object.keys(existing_doc.translations).join(","));
+          } else {
+            return callback();
+          }
+        } else {
+          console.log("found more than one #"+work.metadata.id);
+          return callback();
+        }
+      }
+    });
+  } else {
+    db.insert(work,function(err,body) {
+      if (err) console.log(err);
+      else {
+        stored++;
+        console.log("stored "+work.id+" as "+body.id);
+        //console.log(body);
+      }
+      setTimeout(callback,100);
+    });
+  }
 }
 
-function readStep() {
+function readStep(checkExists) {
   var rows=0;
   var stream=fs.createReadStream("/data/submission.csv");
   console.log("step reading");
@@ -342,7 +442,7 @@ function readStep() {
           //p.pause();
           treatRow(row,function() {
             //console.log("finished "+done);
-          });
+          },checkExists);
           //p.resume();
         }
       } catch(e) {

@@ -6,6 +6,6 @@ WORKDIR /convert
 
 RUN curl -OL https://github.com/mholt/PapaParse/raw/master/papaparse.min.js
 
-RUN npm install nano
+RUN npm install nano deep-diff
 
 COPY . /convert
