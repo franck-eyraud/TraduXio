@@ -2,19 +2,19 @@
 
 build() {
 	cd code
-	docker tag traduxio-convert traduxio-convert:old
-        if ! docker build -t traduxio-convert .; then
+	docker tag traduxio-easychair traduxio-easychair:old
+        if ! docker build -t traduxio-easychair .; then
 		cd ..
 		exit 1
 	fi
-	docker rmi traduxio-convert:old
+	docker rmi traduxio-easychair:old
 	cd ..
 }
 
-#if ! docker images | grep -q traduxio-convert || [ "x$1" == "x--rebuild" ]; then
+#if ! docker images | grep -q traduxio-easychair || [ "x$1" == "x--rebuild" ]; then
 #always rebuild
 	build
 #fi
 
 echo run
-docker run -ti -v "$(pwd)/data:/data" --rm --link couchdb traduxio-convert node convert.js
+docker run -ti -v "$(pwd)/data:/data" --rm --link couchdb traduxio-easychair node convert.js
