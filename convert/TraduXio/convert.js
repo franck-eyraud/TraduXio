@@ -25,73 +25,77 @@ var fixStatus=function(doc) {
   return modified;
 }
 
-var runProcess=function(processFunction) {
+var runProcess=function(processFunction,callback) {
+  var args = Array.prototype.slice.call(arguments);
+  args.shift();
+  args.shift();
   forAll(function(row,callback) {
-    db.get(row.id,function(err,doc) {
-      if (err) {
-        console.log("error getting doc "+err);
-        return callback(err);
+    function run(doc) {
+      args.unshift(doc);
+      if (processFunction.apply(this,args)) {
+        console.log("doc "+doc._id+" is modified, post");
+        db.insert(doc,function(err) {
+          if (err) {
+            console.log("error inserting doc "+err);
+          } else {
+            console.log("changed doc "+doc._id);
+          }
+          callback(err);
+        });
       } else {
-        if (processFunction(doc)) {
-          console.log("doc "+doc._id+" is modified, post");
-          db.insert(doc,function(err) {
-            if (err) {
-              console.log("error inserting doc "+err);
-            } else {
-              console.log("changed doc "+doc._id);
-            }
-            callback(err);
-          });
-        } else {
-          callback();
-        }
+        callback();
       }
-    });
+      args.shift();
+    }
+    if (!row.doc) {
+      db.get(row.id,function(err,doc) {
+        if (err) {
+          console.log("error getting doc "+err);
+          return callback(err);
+        } else {
+          run(doc);
+        }
+      });
+    } else {
+      run(row.doc);
+    }
   },function() {
     console.log("finished fixingPrivileges");
+    if (callback) callback();
   });
 }
 
-var exportCsv=function(conversionFunction) {
-  var exports=[];
-  exports.push(conversionFunction());
-  function finish() {
-    console.log(require("array-to-csv")(exports));
-  }
-
-  forAll(function(row,callback) {
-    console.log("getting "+row.id);
-    if (row.doc) {
-      exports.push(conversionFunction(row.doc));
-      callback();
-    } else db.get(row.id,function(err,doc) {
-      console.log("exporting "+row.id+" "+doc.creator+","+doc.title);
-      if (!err) {
-        exports.push(conversionFunction(doc));
-        callback();
-      } else {
-        callback(err);
-      }
-    });
-  },finish);
-}
-
-var tdxToCsv=function(doc,callback) {
+var tdxToCsv=function(doc,stack) {
   if (!doc) {
     var headers=[
-      "id","author","title","language","owner"
+      "id","author","title","language","text","translation"
     ];
-    return headers;
+    stack.push(headers);
+    return false;
   }
+  console.log("to csv for "+doc._id);
   var csv=[];
   csv.push(doc._id);
   csv.push(doc.creator);
   csv.push(doc.title);
   csv.push(doc.language);
-  if (doc.privileges) {
-    csv.push(doc.privileges.owner || null);
+  csv.push(doc.metadata["original_text"]);
+  csv.push(doc.privileges && doc.privileges.owner || null);
+  var translated=false;
+  if (doc.translations) {
+    for (var t in doc.translations) {
+      var trans=doc.translations[t];
+      if (trans.language=="zh") {
+        translated=trans.text.join("\n\n");
+      }
+    }
+    if (translated) {
+      csv.push(translated);
+
+      stack.push(csv);
+    }
   }
-  return csv;
+  return false; //no modification
 }
 
 var fs=require("fs");
@@ -124,8 +128,14 @@ nano(config.server).auth(config.user,config.password,function (err, body, header
   db=nano({url:config.server,
     cookie:headers['set-cookie']
   }).use(config.database);
+  var csv=[];
+  tdxToCsv(null,csv);
+  runProcess(tdxToCsv,function() {
+    console.log("finished");
+    console.log(require("array-to-csv")(csv,",",true));
+  },csv);
   //runProcess(fixStatus);
-  runProcess(changePrivileges);
+  //runProcess(changePrivileges);
 });
 
 function forAll(treatment,callback) {
@@ -226,36 +236,4 @@ function removeAll(callback) {
   setTimeout(function() {
     forAll(remove,callback);
   },1000);
-}
-
-
-function splitText(text) {
-  //captures all non punctuation characters, except if they are not folowed by a space,
-  //or if they are preceded by a word of one letter or a list of abbrieviation words,
-  //plus the tailing punctuation characters and their following spaces.
-  //Also include new line as separation character
-  //exceptions are looked after sentecne match because of javascript limitation
-  //of look back feature
-  var sentence=/([^\n\.\?\!]+?|[\!\?\.][^\s\!\?\.])+([\?\.\!\n]+\s*|$)/;
-  var exceptions=/(\W|^)((\w|al|cf|ed|eds|eg|ie|no|pp|qtd|vol|vs|et|etc\.*|Mrs|Miss|Dr|Ph|Ph\.?D|Prof|No|Dept|Univ|Bros))\.\s*$/
-
-  var sentences=[];
-  var workingText=text;
-  while (m=workingText.match(sentence)) {
-    var s=m[0];
-    console.log("extracted "+s);
-    workingText=workingText.substring(m.index+m[0].length);
-    console.log("new text "+workingText);
-    while (s.match(exceptions) && (m=workingText.match(sentence))) {
-      console.log("exception");
-      s+=m[0];
-      console.log("extracted "+s);
-      workingText=workingText.substring(m.index+m[0].length);
-      console.log("new text "+workingText);
-    }
-    sentences.push(s);
-  }
-  // console.log(text);
-  // console.log(sentences);
-  return sentences;
 }

@@ -4,6 +4,6 @@ RUN mkdir /convert
 
 WORKDIR /convert
 
-RUN npm install nano array-to-csv
+RUN npm install nano jonathanong/array-to-csv
 
 COPY . /convert
