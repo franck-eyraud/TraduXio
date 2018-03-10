@@ -1,9 +1,52 @@
+process.on('SIGINT', function() {
+    process.exit();
+});
+
 var db;
 
-var fixPrivileges=function() {
-  var newOwner="traduxio";
+var fixStatus=function(doc) {
+  var modified;
+  if (doc.translations) {
+    for (var t in doc.translations) {
+      var trans=doc.translations[t];
+      if (trans.status) {
+        console.log(doc._id+" is "+trans.status);
+        if (trans.status=="validating") {
+          trans.status="proofreading";
+          modified=true;
+        }
+        if (trans.status=="validated") {
+          trans.status="proofread";
+          modified=true;
+        }
+      }
+    }
+  }
+  return modified;
+}
+
+var runProcess=function(processFunction) {
   forAll(function(row,callback) {
-    changePrivileges(row.doc,newOwner,callback);
+    db.get(row.id,function(err,doc) {
+      if (err) {
+        console.log("error getting doc "+err);
+        return callback(err);
+      } else {
+        if (processFunction(doc)) {
+          console.log("doc "+doc._id+" is modified, post");
+          db.insert(doc,function(err) {
+            if (err) {
+              console.log("error inserting doc "+err);
+            } else {
+              console.log("changed doc "+doc._id);
+            }
+            callback(err);
+          });
+        } else {
+          callback();
+        }
+      }
+    });
   },function() {
     console.log("finished fixingPrivileges");
   });
@@ -31,11 +74,6 @@ var exportCsv=function(conversionFunction) {
       }
     });
   },finish);
-}
-
-var process=function() {
-  fixPrivileges();
-  //exportCsv(tdxToCsv);
 }
 
 var tdxToCsv=function(doc,callback) {
@@ -86,7 +124,8 @@ nano(config.server).auth(config.user,config.password,function (err, body, header
   db=nano({url:config.server,
     cookie:headers['set-cookie']
   }).use(config.database);
-  process();
+  //runProcess(fixStatus);
+  runProcess(changePrivileges);
 });
 
 function forAll(treatment,callback) {
@@ -148,9 +187,9 @@ function forAll(treatment,callback) {
   });
 }
 
-function changePrivileges(doc,newOwner,callback) {
-  callback=callback || function(){};
-  modified=false;
+function changePrivileges(doc) {
+  var newOwner="newowner";
+  var modified=false;
   if (!doc.privileges) {
     doc.privileges={};
     doc.privileges.owner=newOwner;
@@ -174,17 +213,7 @@ function changePrivileges(doc,newOwner,callback) {
       }
     }
   }
-  if (modified) db.insert(doc,function(err) {
-    if (err) {
-      console.log("error inserting doc "+err);
-    } else {
-      console.log("changed doc "+doc._id);
-    }
-    callback(err);
-  });
-  else {
-    callback();
-  }
+  return modified;
 }
 
 function remove(row,callback) {
