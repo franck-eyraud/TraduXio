@@ -167,7 +167,11 @@ li.closed > ul {
   float:right;
 }
 
-#session-info .logout {
+#session-info .anonymous {
+  font-style: italic;
+}
+
+span.click-enabled {
   cursor:pointer;
 }
 
@@ -225,7 +229,7 @@ http://kizu.ru/en/fun/rotated-text/
   background-color: #fefefe;
   margin: auto;
   padding: 0px;
-  border: 1px solid #888;
+  border: 3px solid #333;
   width: 80%;
   height: 80%;
   position: absolute;
@@ -236,15 +240,19 @@ http://kizu.ru/en/fun/rotated-text/
 }
 
 .modal .title {
-  border: solid 2px;
+  border-bottom: solid 3px #333;
   padding: 3px;
   font-weight: bold;
+  font-size: 1.5em;
+  text-align: center;
 }
 
 .modal .button.close {
   top:0px; right:0px;
-  border:2px solid;
+  border-bottom: solid 3px #333;
+  border-left: solid 3px #333;
   padding:3px;
+  font-size: 1.5em;
   position:absolute;
   cursor: pointer;
 }
@@ -253,7 +261,7 @@ http://kizu.ru/en/fun/rotated-text/
   padding: 20px;
 }
 
-form.user-info input {
+.modal .dialog input {
   display:block;
   margin:1em;
   padding:0.2em;
@@ -261,8 +269,14 @@ form.user-info input {
   width:75%;
 }
 
-form.user-info input[type=button],
-form.user-info input[type=submit] {
+.modal .dialog span.info,
+.modal .dialog p {
+  margin:1em;
+  padding: 5px;
+}
+
+.modal .dialog input[type=button],
+.modal .dialog input[type=submit] {
   width:auto;
 }
 

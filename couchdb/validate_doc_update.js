@@ -140,10 +140,15 @@ function (newDoc, oldDoc, userCtx, secObj) {
     }
   }
 
-  if (newDoc._id=="known_users") {
+  if (newDoc._id=="known_users" || newDoc.type=="group") {
     if (!Traduxio.isAdmin()) {
       throw({forbidden:"Access denied"});
     }
+    return;
+  }
+
+  if (newDoc.type=="password_request") {
+    mandatoryFields(["email"]);
     return;
   }
 
@@ -166,11 +171,14 @@ function (newDoc, oldDoc, userCtx, secObj) {
     }
   }
 
-  if (newDoc._deleted && !Traduxio.canDelete(oldDoc)) {
-    throw({forbidden:"Can't delete!"});
+  if (newDoc._deleted) {
+
+    if (!Traduxio.canDelete(oldDoc)) {
+      throw({forbidden:"Can't delete!"});
+    }
+
+    return;
   }
-
-
 
   ensureArrays(["text"]);
   if (newDoc.text && !testArray(newDoc.text,isString)) {

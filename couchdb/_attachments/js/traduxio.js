@@ -1,6 +1,6 @@
 $.fn.concordancify = function() {
 
-  default_language=$("html").prop("lang") || currentLanguage;
+  default_language=$("table.concordance").data("search-language") || $("html").prop("lang") || currentLanguage;
   default_query=$("body").data("query") || "";
 
   var search = $("#nav").data("i_search");
@@ -17,7 +17,11 @@ $.fn.concordancify = function() {
       $.each(result.rows, function(i, o) {
         $("#language").append("<option value=\""+o.key+"\">" + o.key + " - " + getLanguageName(o.key) + "</option>");
       });
-      $("#language").val($("html").prop("lang"));
+      var oldLanguage=$("#language").val();
+      $("#language").val(default_language);
+      if (!$("#language").val() && oldLanguage) {
+         $("#language").val(oldLanguage);
+      }
     });
   });
 
@@ -25,12 +29,17 @@ $.fn.concordancify = function() {
     event.preventDefault();
     var query = form.find('#query').val().toLowerCase();
     var language = $("#language").val();
-    window.location.href = getPrefix()+'/works/concordance?' + $.param({
+    var url = getPrefix()+'/works/concordance?' + $.param({
       startkey: '["' + language + '","' + query + '"]',
       endkey: '["' + language + '","' + query + '\\u9999"]',
       query: query,
       language: language
     });
+    if ($("body").is("#concordance")) {
+      window.location.href=url;
+    } else {
+      window.open(url, 'concordance');
+    }
   };
 
   this.on("submit",submitForm);
@@ -87,7 +96,7 @@ function fixLanguages(container) {
     if (container) {
       var language=$(container).find(".language").andSelf().filter(".language");
     } else {
-      language=$(".language").not("select");
+      language=$(".language").not("select").not("li");
     }
     language.each(function() {
       var lang=$(this);
@@ -141,6 +150,16 @@ function addModal (content,title) {
   var contentPane=$("<div>").addClass("content").appendTo(dialog);
   contentPane.append(content);
   return modal;
+}
+
+function autoSize() {
+  // Copy textarea contents; browser will calculate correct height of copy,
+  // which will make overall container taller, which will make textarea taller.
+  var text = stringToHtml($(this).val());
+  $(this).parent().find("div.text").html(text);
+  if ($(this).parents().is(".box-wrapper")) {
+      $(this).css({'width':'100%','height':'100%'});
+  }
 }
 
 $(document).ready(function() {

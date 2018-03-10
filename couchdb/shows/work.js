@@ -6,8 +6,9 @@ function(o, req) {
     "i_glossary_add_translation",
     "i_share","i_share_","i_share_invite","i_share_participants",
     "i_public","i_shared","i_public","i_private"
-
+    ,"i_activity_","i_chat_"
   ];
+
 
   var doc=o;
   // !code lib/traduxio.js
@@ -79,7 +80,7 @@ function(o, req) {
           date: o.date,
           raw:o.text,
           creativeCommons: o.creativeCommons,
-          edited: (edited_versions.indexOf("original")!=-1),
+          edited: (edited_versions.indexOf("original")!=-1) && Traduxio.canEdit(o),
           opened: (opened_versions.indexOf("original")!=-1),
           owner:o.privileges.owner,
           shareValue:shareValue,
@@ -142,6 +143,8 @@ function(o, req) {
       data.justOneText=true;
       data.version=data.headers[0].version
     }
+
+    if (Traduxio.config.canUnShare) data.canUnShare=Traduxio.config.canUnShare;
   }
 
   data.prefix="..";

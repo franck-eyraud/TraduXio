@@ -130,13 +130,14 @@
     });
   };
 
-  function checkActivity(id,delay,callback) {
-    var url=id+"/activity";
+  function checkActivity(id,delay,max,callback) {
+    var url=window.location.pathname+"/activity";
     if (delay) url+="?delay="+delay;
     else if (current) url+="?since="+current;
     else {
       return {done:function(){}};
     }
+    if (max > 0) url+="&max="+max;
     var s=initialWaitTime;
     function go(){
       $.ajax({
@@ -193,10 +194,10 @@
   function sessionInfo(activity) {
     if (activity.author)
       if (activity.entered) {
-        activity.message="est entré dans la traduction";
+        activity.message=getTranslated("i_activity_entered");
       }
     if (activity.left) {
-      activity.message="est sorti de la traduction";
+      activity.message=getTranslated("i_activity_exited");
       if (!activity.isPast) {
         if (activity.isMe) {
           leaving ? null : presence();
@@ -205,7 +206,7 @@
     }
     var user;
     user=getUser(activity);
-    if (Traduxio.chat && Traduxio.chat.addMessage) {
+    if (Traduxio.chat && Traduxio.chat.addMessage && showPresence) {
       Traduxio.chat.addMessage(activity);
     }
     return user;
@@ -257,7 +258,7 @@
     if (id) {
       var p=initialWaitTime;
       presence(function() {
-        checkActivity(id,86600,function(){
+        checkActivity(id,60*24*3600/*2 months*/,300,function() {
           listenChanges(id,Traduxio.getSeqNum());
         });
       });

@@ -16,11 +16,15 @@ function(head, req) {
 
   function getHeaders(work, translation_id) {
     var translation = work.translations[translation_id];
-    return {
-      creator: translation_id,
-      publisher: translation.publisher,
-      date: translation.date
-    };
+    if (Traduxio.canAccess(work) && Traduxio.canAccess(translation)) {
+      return {
+        creator: translation_id,
+        publisher: translation.publisher,
+        date: translation.date
+      };
+    } else {
+      return {date: translation.date};
+    }
   }
 
   var MAXRESULTS=100;
@@ -53,7 +57,7 @@ function(head, req) {
 
   start({headers: {"Content-Type": "text/html;charset=utf-8"}});
   var data = {
-    lang: req.query.language,
+    search_language: req.query.language,
     query: req.query.query,
     occurrences:[],
     glossary_entries:[]
@@ -63,15 +67,18 @@ function(head, req) {
       var work = row.doc;
       var original = (work.text)? {
         id: "original",
-        text: work.text
+        text:work.text
       } : null;
-      var original_header = {
-        work_id: work._id,
-        creator: work.creator?work.creator:"Anonymus",
-        title: work.title,
-        publisher: work.publisher,
-        date: work.date
-      };
+      var original_header = {date: work.date};
+      if (Traduxio.canAccess(work)) {
+        original_header = {
+          work_id: work._id,
+          creator: work.creator?work.creator:"Anonymus",
+          title: work.title,
+          publisher: work.publisher,
+          date: work.date
+        };
+      }
       if (row.value.unit) {
         var translation_id = row.value.translation;
         var line_number = row.value.unit;

@@ -1,7 +1,5 @@
 (function($,Traduxio){
 
-  var defaultMessage="Ceci est le chat traduxio pour ce texte";
-
   var chatContent,firstMessage;
 
   function createChat() {
@@ -10,15 +8,24 @@
     var header=$("<h1/>").text("Chat");
     var chatWindow=$("<div/>").addClass("chat");
     chatContent=$("<div/>").addClass("chat-content");
+    var messageInput=$("<textarea/>",{type:"text",name:"message",placeholder:getTranslated("i_chat_enter_message")});
     var chatForm=$("<form>")
-      .append($("<input/>",{type:"text",name:"message"}))
-      .append($("<input/>",{type:"submit",name:"submit"}));
+      .append($("<div/>").addClass("box-wrapper")
+        .append($("<div/>").css("position","relative")
+          .append(messageInput)
+          .append($("<div/>").addClass("text"))
+      ))
+      .append($("<input/>",{type:"submit",name:"submit",value:getTranslated("i_chat_send_message")}));
+    messageInput.on("change input cut paste",autoSize);
+    messageInput.each(autoSize);
     chatOuter.append(header).append(chatWindow);
     chatWindow.append(chatContent).append(chatForm);
     var button=$("<span/>").attr("id","show-chat").attr("title","Chat")
       .on("click",function() {
-        chatOuter.slideToggle(function(){
+        chatOuter.slideToggle(function() {
           var unread=chatOuter.find("div.message.unread");
+          messageInput.each(autoSize);
+          messageInput.focus();
           if (chatContent.is(":visible") && unread.length) {
             chatContent.clearQueue().animate({scrollTop:chatContent.scrollTop()+unread.filter(":first").position().top});
             unread.delay(1000).queue(function() {
@@ -34,10 +41,9 @@
 
     chatForm.on("submit",function(e) {
       e.preventDefault();
-      var input=$("input[name=message]",this);
-      var msg=input.val();
+      var msg=messageInput.val();
       if (msg) {
-        $(input,this).attr("disabled","disabled");
+        $(messageInput,this).attr("disabled","disabled");
         $.ajax({
           url:Traduxio.getId()+"/chat",
           type:"POST",
@@ -45,17 +51,19 @@
           data:msg,
           success:function(result) {
             //addMessage(result);
-            input.val("");
+            messageInput.val("");
+            messageInput.each(autoSize);
           },
           complete:function() {
-            $(input,this).attr("disabled",null);
+            $(messageInput,this).attr("disabled",null);
+            messageInput.focus();
             Traduxio.activity.wasActive();
           }
         });
       }
     });
     $("#body").append(chatOuter);
-    firstMessage=addMessage({author:"TraduXio",when:new Date().toISOString(),message:defaultMessage});
+    firstMessage=addMessage({author:"TraduXio",when:new Date().toISOString(),message:getTranslated("i_chat_first_message")});
   }
 
   function addMessage(message) {
@@ -65,7 +73,10 @@
       if (message.anonymous || !message.author) author.addClass("anonymous");
       var date=$("<span/>").addClass("date").attr("title",message.when || "date inconnue")
         .text(new Date(message.when).toLocaleString());
-      div.append(date).append(author).append(message.message || "empty");
+      if (message.type) div.addClass(message.type);
+      div.append(date).append(author);
+      if (message.type=="forum") div.append(stringToHtml(message.message.replace(/\n\n+/g,"\n\n")));
+      else div.append(message.message || "empty");
       author.css({color:message.color});
 
       if (!message.isPast) {

@@ -3,13 +3,13 @@
 <div id="filters">
   {{i_language_}}
 </div>
-<table class="concordance">
+<table class="concordance" data-search-language="{{search_language}}">
   {{#glossary_entries}}
     <tr class="glossary">
       <td>{{{context}}}</td>
       <td>{{{mapping}}}</td>
       <td class="metadata">
-        {{#original}} 
+        {{#original}}
         <div class="original">
           <div class="creator">{{creator}}</div>
           <div class="title"><a href="{{work_id}}">{{title}}</a></div>
@@ -41,7 +41,7 @@
         {{/original}}
         {{#translation}}
         <div class="translation">
-          <div class="creator">{{i_trad}} {{creator}}</div>
+          {{#creator}}<div class="creator">{{i_trad}} {{creator}}</div>{{/creator}}
           <div>{{#publisher}}<span class="publisher">{{publisher}}</span>{{/publisher}}
           {{#date}}{{#publisher}}, {{/publisher}}<span class="data">{{date}}</span>{{/date}}</div>
          </div>

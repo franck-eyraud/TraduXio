@@ -6,11 +6,14 @@
 </div>
 {{/canAccess}}
 {{#canAccess}}
-{{#glossary}}
 <script type="text/javascript">
+  {{#glossary}}
   var glossary={{{glossary}}};
+  {{/glossary}}
+  {{#canUnShare}}
+  var canUnShare=true;
+  {{/canUnShare}}
 </script>
-{{/glossary}}
 <div class="top">
   <h1><span class="title">{{display_work_title}}</span> – <span class="creator">{{display_work_creator}}</span> (<span class="language expand" data-id="{{language}}">{{language}}</span>)</h1>
   {{#canEdit}}{{^original}}<a href="#" class="workButton" id="editDoc">{{i_edit}}</a>{{/original}}{{/canEdit}}

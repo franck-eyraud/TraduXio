@@ -12,7 +12,8 @@ js_i18n_elements.push("i_login");
 js_i18n_elements.push("i_logout");
 js_i18n_elements.push("i_search");
 js_i18n_elements.push("i_signup");
-js_i18n_elements.push("i_confirm_password");
+js_i18n_elements.push("i_confirm");
+js_i18n_elements.push("i_password");
 js_i18n_elements.push("i_fullname");
 js_i18n_elements.push("i_email");
 js_i18n_elements.push("i_save");
@@ -159,7 +160,10 @@ Traduxio= {
   canEdit:function(work) {
     if (this.isAdmin()) return true;
     if (this.isOwner(work)) return true;
-    if (this.hasSharedAccess(work) && !this.isOriginalWork(work)) return true;
+    if (!this.isOriginalWork(work)) {
+      if (this.hasSharedAccess(work,true)) return true;
+      if (this.hasSharedAccess(work) && this.config.allEdit) return true;
+    }
     if (work) {
       var privileges=work.privileges || {};
       if (Traduxio.config.anonymous_edit && !privileges.owner) {
@@ -285,6 +289,10 @@ Traduxio= {
     }
   },
 
+  _isConfirmed:function (userCtx,secObj) {
+    if (userCtx.roles.indexOf('confirmed') != -1) return true;
+  },
+
   isAdmin:function () {
     return this.getUser().isAdmin;
   },
@@ -311,6 +319,7 @@ Traduxio= {
 
     if (this.req.userCtx.name) {
       user.name=this.req.userCtx.name;
+      if (!this._isConfirmed(this.req.userCtx)) user.anonymous=true;
     } else {
 
       hashCode = function(string) {

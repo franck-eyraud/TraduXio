@@ -2,7 +2,7 @@ var i18n={"en":{},fr:{}};
 // !json i18n
 function getMyLanguage() {
   if (req.headers["Accept-Language"]) {
-    return req.headers["Accept-Language"].split(",")[0];
+    return req.headers["Accept-Language"].split(",")[0].substring(0,2);
   }
   return "en";
 }
@@ -34,8 +34,12 @@ function localized(language) {
   }
   if (js_i18n_elements) {
     var js_i18n={};
-    js_i18n_elements.forEach(function (item) {
-      if (items[item]) js_i18n[item]=items[item];
+    js_i18n_elements.forEach(function (match) {
+      for (var item in items) {
+        if (item.indexOf(match)==0) {
+          js_i18n[item]=items[item];
+        }
+      }
     });
     items.str=JSON.stringify(js_i18n);
   }

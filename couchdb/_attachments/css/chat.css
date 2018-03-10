@@ -7,7 +7,7 @@
   bottom:2em;
   right:10px;
   width:30%;
-  min-width:150px;
+  min-width:750px;
   z-index:50;
 }
 
@@ -54,6 +54,15 @@ div.chat div.message.unread {
   margin:0.5em;
 }
 
+div.chat div.message.forum {
+  font-weight: bold;
+}
+
+div.chat div.message.edit {
+  color:gray;
+  font-style: italic;
+}
+
 div.chat span.date {
   font-style: italic;
   display:block;
@@ -63,4 +72,23 @@ div.chat span.chat-author {
   padding-top:0.25em;
   font-weight: bold;
   padding-right:0.5em;
+}
+
+div.chat .box-wrapper div.text {
+  visibility: hidden;
+  padding-bottom:1em;
+}
+
+div.chat .box-wrapper textarea {
+  width:100%;
+  height:100%;
+  padding-bottom:5px;
+  position: absolute;
+}
+
+div.chat .box-wrapper {
+  height: 100%;
+  padding:5px;
+  width:50%;
+  display: inline-block;
 }

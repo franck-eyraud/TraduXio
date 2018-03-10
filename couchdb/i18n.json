@@ -20,7 +20,14 @@
     "i_my_works": "My translations",
     "i_username": "Username",
     "i_password": "Password",
-    "i_confirm_password": "Confirm password",
+    "i_password_confirm": "Confirm password",
+    "i_password_forgot": "Forgot password ?",
+    "i_password_reset": "Reset password",
+    "i_email_confirmed": "Email is confirmed",
+    "i_email_not_confirmed": "Email is not confirmed",
+    "i_confirmation_sent": "Confirmation email sent",
+    "i_confirmation_resend": "Send again confirmation email",
+    "i_confirmation_sending": "Sending confirmation email",
     "i_login": "Log in",
     "i_logout": "Log out",
     "i_signup": "Register",
@@ -115,6 +122,21 @@
     "i_title": "Title",
     "i_translated_title": "Translated title",
     "i_enter_text": "Enter your text here"
+    ,"i_activity_entered":"entered the translation"
+    ,"i_activity_exited":"exited from the translation"
+    ,"i_activity_version_created":"New  version {0} created"
+    ,"i_activity_version_edited":"Version {0} metadata modified"
+    ,"i_activity_version_renamed":"Version {0} renamed"
+    ,"i_activity_version_deleted":"Version {0} deleted"
+    ,"i_activity_glossary_added":"Glossary entry {0} added"
+    ,"i_activity_glossary_modified":"Glossary entry {0} changed in {1}"
+    ,"i_activity_glossary_removed":"Glossary entry {0} removed"
+    ,"i_activity_line_edited":"Version {0} modified at line {1}"
+    ,"i_activity_refresh":"please refresh the page to load the changes"
+
+    ,"i_chat_enter_message":"Enter chat message"
+    ,"i_chat_send_message":"Send message"
+    ,"i_chat_first_message":"This is the chat window for this text"
   },
   "fr": {
     "i_analyze_compare": "Analysez et comparez",
@@ -133,7 +155,14 @@
     "i_works_list": "Liste des œuvres",
     "i_username": "Nom de connexion",
     "i_password": "Mot de passe",
-    "i_confirm_password": "Confirmation",
+    "i_password_confirm": "Confirmation",
+    "i_password_forgot": "Mot de passe oublié ?",
+    "i_password_reset": "Réinitialiser le mot de passe",
+    "i_email_confirmed": "Adresse email confirmée",
+    "i_email_not_confirmed": "Adresse email non confirmée",
+    "i_confirmation_sent": "Email de confirmation envoyé",
+    "i_confirmation_resend": "Envoyer de nouveau l'email de confirmation",
+    "i_confirmation_sending": "En attente de l'envoi de l'email de confirmation",
     "i_login": "Connexion",
     "i_logout": "Se déconnecter",
     "i_signup": "S'enregistrer",
@@ -227,6 +256,18 @@
     "i_translator": "Auteur de la traduction",
     "i_title": "Titre",
     "i_translated_title": "Titre traduit"
+
+    ,"i_activity_entered":"est entré dans la traduction"
+    ,"i_activity_exited":"est sorti de la traduction"
+    ,"i_activity_version_created":"Nouvelle version {0} créée"
+    ,"i_activity_version_edited":"Informations de la version {0} modifiées"
+    ,"i_activity_version_renamed":"Version {0} renomée"
+    ,"i_activity_version_deleted":"Version {0} supprimée"
+    ,"i_activity_glossary_added":"Entrée du glossaire {0} ajoutée"
+    ,"i_activity_glossary_modified":"Entrée du glossaire {0} modifée en {1}"
+    ,"i_activity_glossary_removed":"Entrée du glossaire {0} supprimée"
+    ,"i_activity_line_edited":"Version {0} modifiée à la ligne {1}"
+    ,"i_activity_refresh":"svp rafraîchir la page pour voir les changements"
   },
   "pt": {
     "i_analyze_compare": "Analisar e comparar",
