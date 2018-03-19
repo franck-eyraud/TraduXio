@@ -56,7 +56,7 @@ var templateBase={
 
 function sendAdminEmail(message,subject,callback) {
   console.log("sending notification "+message+" to "+config.email_receiver);
-  email_server.send({
+  sendEmail({
     text: message,
     from: config.email_sender,
     to: config.email_receiver,
@@ -79,7 +79,7 @@ function sendConfirm(user,url,callback) {
   template.username=user.name;
   template.fullname=user.fullname?user.fullname : user.name;
   var toEmailAddress='"'+template.fullname+'" <'+user.email+'>';
-  email_server.send({
+  sendEmail({
     text: mustache.render(confirmationEmail,template),
     from: config.email_sender,
     to: toEmailAddress,
@@ -120,6 +120,7 @@ function recordUser(user,callback) {
         user._rev=body.rev;
       } else {
         console.log("error saving user "+user.name+" "+user._rev+" "+err);
+        if (known_users[user.name]) console.log("known user is now "+known_users[user.name]._rev);
       }
       if (typeof callback === "function") callback(err);
     });
@@ -138,6 +139,7 @@ function recordUser(user,callback) {
       known_users[user.name]=user;
       known_users._modified=true;
     }
+    if (typeof callback === "function") callback(true);
   }
 }
 
@@ -156,7 +158,7 @@ function saveKnownUsers() {
   }
 }
 
-function confirm(user) {
+function confirm(user,callback) {
   function unconfirm() {
     var confirmed_role=user.roles.indexOf("confirmed");
     if (confirmed_role != -1) {
@@ -172,7 +174,7 @@ function confirm(user) {
     }
   }
 
-  if (!user.name) {console.log("user doesn't have name");return;}
+  if (!user.name) {console.log("user doesn't have name");callback();return;}
   if (!user._deleted && user.email && isValidEmail(user.email)) {
     checkGroups(user);
     var toBeConfirmed=false,
@@ -187,6 +189,7 @@ function confirm(user) {
       if (!known_users[user.name]) {
         sendAdminEmail("user "+user.name+" just registered with email address "+user.email+" and name "+user.fullname,
           user.fullname+" ("+user.name+") registered");
+        known_users[user.name]=user;
       } else {
         if (known_users[user.name].fullname!=user.fullname) {
           sendAdminEmail("user "+user.name+" changed name from "+known_users[user.name].fullname+" to "+user.fullname,
@@ -230,9 +233,21 @@ function confirm(user) {
       unconfirm();
       if (toBeConfirmed) {
         var timestamp=new Date().toISOString();
-        user.confirm_sent_timestamp=timestamp;
-        delete user.confirm_error;
-        user._modified=true;
+        if (user.confirm_error) {
+          if (user.confirm_error_count && user.confirm_error_count>=3) {
+            console.log("definitively abort sending email to "+user.email);
+            return recordUser(user,callback);
+          } else {
+            delete user.confirm_error;
+            user.confirm_error_count=user.confirm_error_count || 0;
+            user.confirm_error_count++;
+          }
+        } else {
+          if (user.confirm_error_count) {
+            delete user.confirm_error_count;
+            user._modified=true;
+          }
+        }
         key=getConfirmKey(user.email,timestamp);
       }
     }
@@ -246,14 +261,19 @@ function confirm(user) {
         if (err) {
           console.log("recording email send error "+err);
           user.confirm_error="Error sending email : "+err.message;
+          if (user.confirm_error_count && user.confirm_error_count>=3) {
+            sendAdminEmail("error sending confirmation email to "+user.fullname+"("+user.name+")",
+              "aborted sending email after "+user.confirm_error_count+" attempts, due to "+user.confirm_error);
+          }
           delete user.confirm_sent_timestamp;
           user._modified=true;
         }
-        recordUser(user);
+        recordUser(user,callback);
       });
+      return;
     }
   }
-  recordUser(user);
+  recordUser(user,callback);
 }
 
 function generatePassword(length) {
@@ -264,13 +284,22 @@ function generatePassword(length) {
   return string.slice(0,length);
 }
 
+function sendEmail(message,callback) {
+  if (config.send) {
+    email_server.send(message,callback);
+  } else {
+    console.log("would send message to "+message.to+" from "+message.from+" with subject "+message.subject);
+    callback();
+  }
+}
+
 function sendPassword(user,callback) {
   var template=templateBase;
   template.email_address=user.email;
   template.password=user.password;
   template.fullname=user.fullname?user.fullname : user.name;
   var toEmailAddress='"'+template.fullname+'" <'+user.email+'>';
-  email_server.send({
+  sendEmail({
     text: mustache.render(passwordResetEmail,template),
     from: config.email_sender,
     to: toEmailAddress,
@@ -285,7 +314,7 @@ function sendPassword(user,callback) {
   });
 }
 
-var groups={};
+var groups=null;
 
 function checkGroups(user) {
   for (var groupname in groups) {
@@ -299,6 +328,8 @@ function checkGroup(user,groupname) {
         return isSameEmail(element,email);
     }
   }
+
+  if (!groups) return;
 
   var emails=groups[groupname];
   if (user.name && user.email && emails) {
@@ -325,11 +356,14 @@ function checkGroup(user,groupname) {
     if (!user.name) {
       console.log("trying to check group "+groupname+" on bad user");
       console.log(arguments);
+    } else {
+      console.log("no email for "+user.name);
     }
   }
 }
 
 function followGroups () {
+  groups={};
   var group_follow=db.follow({
       include_docs:true,
       filter:function(doc,req) {
@@ -339,12 +373,17 @@ function followGroups () {
   group_follow.on("change",function (change) {
     if (change.doc.group && change.doc.emails) {
       groups[change.doc.group]=change.doc.emails;
-      console.log("receive group definition "+change.doc.group);
+      console.log("receive group definition "+change.doc.group+" "+change.doc._id);
       for (var username in known_users) {
         var user=known_users[username];
         if (user.name) {
           checkGroup(user,change.doc.group);
-          recordUser(user);
+          if (user._modified) {
+            group_follow.pause();
+            recordUser(user,function() {
+              group_follow.resume();
+            });
+          }
         }
       }
     } else {
@@ -353,6 +392,7 @@ function followGroups () {
     }
   });
   group_follow.follow();
+  return group_follow;
 }
 
 function resetPasswords() {
@@ -403,6 +443,7 @@ function resetPasswords() {
     console.log("no email found");
   });
   password_follow.follow();
+  return password_follow;
 }
 
 function followUsers() {
@@ -416,12 +457,15 @@ function followUsers() {
     });
   user_follow.on('change', function(change) {
     console.log("received change "+change.id);
-    confirm(change.doc);
+    user_follow.pause();
+    confirm(change.doc,function() {
+      user_follow.resume();
+    });
   }).on("start",function() {
     console.log("Started");
   });
   user_follow.follow();
-
+  return user_follow;
 }
 
 var admin_db, users_db;
@@ -442,7 +486,7 @@ try {
   return;
 }
 
-var users_db=admin_db.server.use("/_users/");
+var users_db=admin_db.server.use("_users");
 db.get("known_users",function(error,doc) {
   console.log(error);
   if (error && error.statusCode==404) {
@@ -451,9 +495,13 @@ db.get("known_users",function(error,doc) {
       if (!err) {
         console.log("inserted known_users "+body.rev);
         known_users._rev=body.rev;
-        followUsers();
-        resetPasswords();
-        followGroups();
+        followUsers().on("catchup",function() {
+          console.log("catchup users");
+          followGroups().on("catchup",function() {
+            console.log("catchup groups");
+            resetPasswords();
+          });
+        });
         setInterval(saveKnownUsers, 1000);
       } else {
         console.log(error);
@@ -462,9 +510,13 @@ db.get("known_users",function(error,doc) {
     });
   } else if (!error) {
     known_users=doc;
-    followUsers();
-    resetPasswords();
-    followGroups();
+    followUsers().on("catchup",function() {
+      console.log("catchup users");
+      followGroups().on("catchup",function() {
+        console.log("catchup groups");
+        resetPasswords();
+      });
+    });
     setInterval(saveKnownUsers, 1000);
   } else {
     console.log(error);
