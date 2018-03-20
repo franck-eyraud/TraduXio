@@ -184,6 +184,8 @@ function confirm(user,callback) {
       toBeConfirmed=true;
       sendAdminEmail("user "+user.name+" changed email address from "+known_users[user.name].email+" to "+user.email,
         user.fullname+" ("+user.name+") changed email address");
+      known_users[user.name]=user;
+      known_users._modified=true;
     } else {
       var existing_timestamp;
       if (user.confirm_sent_timestamp) {
