@@ -186,17 +186,18 @@ function confirm(user,callback) {
         user.fullname+" ("+user.name+") changed email address");
     } else {
       var existing_timestamp;
+      if (user.confirm_sent_timestamp) {
+        existing_timestamp=user.confirm_sent_timestamp;
+      }
       if (!known_users[user.name]) {
         sendAdminEmail("user "+user.name+" just registered with email address "+user.email+" and name "+user.fullname,
           user.fullname+" ("+user.name+") registered");
         known_users[user.name]=user;
+        known_users._modified=true;
       } else {
         if (known_users[user.name].fullname!=user.fullname) {
           sendAdminEmail("user "+user.name+" changed name from "+known_users[user.name].fullname+" to "+user.fullname,
             known_users[user.name].fullname+" ("+user.name+") changed name");
-        }
-        if (user.confirm_sent_timestamp) {
-          existing_timestamp=user.confirm_sent_timestamp;
         }
       }
       if (existing_timestamp) {
@@ -232,7 +233,6 @@ function confirm(user,callback) {
     if (!confirmed) {
       unconfirm();
       if (toBeConfirmed) {
-        var timestamp=new Date().toISOString();
         if (user.confirm_error) {
           if (user.confirm_error_count && user.confirm_error_count>=3) {
             console.log("definitively abort sending email to "+user.email);
@@ -248,6 +248,9 @@ function confirm(user,callback) {
             user._modified=true;
           }
         }
+        var timestamp=new Date().toISOString();
+        user.confirm_sent_timestamp=timestamp;
+        user._modified=true;
         key=getConfirmKey(user.email,timestamp);
       }
     }
@@ -258,6 +261,7 @@ function confirm(user,callback) {
       delete user._modified;
       sendConfirm(user,config.base_url+"?email_confirm="+key,function(err,message) {
         user._modified=modified;
+        console.log("sent email to user "+user.name+", "+(user._modified ? "modified" : "not modified"));
         if (err) {
           console.log("recording email send error "+err);
           user.confirm_error="Error sending email : "+err.message;
@@ -307,6 +311,7 @@ function sendPassword(user,callback) {
   },function(err,message) {
     if (!err) {
       console.log("Sent new password to " + toEmailAddress);
+      if (!config.send) console.log(user.password);
     } else {
       console.log("Error sending new password to " + toEmailAddress+" "+err);
     }
