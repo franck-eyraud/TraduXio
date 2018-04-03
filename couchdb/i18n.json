@@ -32,7 +32,7 @@
     "i_logout": "Log out",
     "i_signup": "Register",
     "i_edit_user": "Details",
-    "i_fullname": "Full name",
+    "i_fullname": "Full name (e.g. John Smith)",
 
     "i_glossary_add_entry": "Add a glossary entry",
     "i_glossary_add_translation": "Add a translation of {0} into the glossary",

@@ -5,13 +5,13 @@ function session() {
   });
 };
 
+function isValidUsername(username) {
+  var usernameRegExp=/^[a-z][\.a-z0-9-_]+$/;
+  return usernameRegExp.test(username);
+}
+
 function fixUsername(username) {
   var fixedUsername=username.toLowerCase().trim().replace(/\s+/g,".");
-  var usernameRegExp=/^[a-z][\.a-z0-9-_]+$/;
-
-  if (!usernameRegExp.test(fixedUsername)) {
-    return false;
-  }
   return fixedUsername;
 }
 
@@ -337,11 +337,17 @@ function signUpForm(callback) {
   var form=$("<form>").addClass("user-info");
   var username=$("<input>").addClass("username").attr("placeholder",Traduxio.getTranslated("i_username"));
   var fullname=$("<input>").addClass("fullname").attr("placeholder",Traduxio.getTranslated("i_fullname"));
+
+  username.attr("disabled",true);
+  fullname.on("change",function() {
+    var uname=fixUsername($(this).val());
+    username.val(uname);
+  });
   var email=$("<input>").addClass("email").attr("placeholder",Traduxio.getTranslated("i_email"));
   var password=$("<input>").addClass("password").attr("type","password").attr("placeholder",Traduxio.getTranslated("i_password"));
   var confirm_password=$("<input>").addClass("password").attr("type","password").attr("placeholder",Traduxio.getTranslated("i_password_confirm"));
   var go=$("<input>").addClass("go").attr("type","submit").val(Traduxio.getTranslated("i_signup"));
-  form.append(username).append(fullname).append(email).append(password).append(confirm_password).append(go).on("submit",function(e) {
+  form.append(fullname).append(username).append(email).append(password).append(confirm_password).append(go).on("submit",function(e) {
     e.preventDefault();
     cleanErrors(form);
     var bad=false;
@@ -361,9 +367,13 @@ function signUpForm(callback) {
       bad=true;
     }
     var fixedUsername=fixUsername(username.val())
-    if (!fixedUsername || fixedUsername!==username.val()) {
-      if (fixedUsername) username.val(fixedUsername);
+    if (isValidUsername(fixedUsername) && fixedUsername!==username.val()) {
+       username.val(fixedUsername);
+       setError(username,"Username has been modified, please verify");
+       bad=true;
+    } else if (!isValidUsername(fixedUsername)) {
       setError(username,"Username must be composed of alphanumerical characters, '.', '_' or '-'");
+      username.attr("disabled",false);
       bad=true;
     }
     if (bad) return;
