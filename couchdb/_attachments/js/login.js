@@ -147,13 +147,18 @@ function loginForm(callback) {
   var forgot=$("<span>").addClass("info forgot click-enabled").text(Traduxio.getTranslated("i_password_forgot"));
   form.append(username).append(password).append(go).append(signup).append(forgot).on("submit",function(e) {
     e.preventDefault();
+    cleanErrors(form);
     var name=fixUsername(username.val());
     var passwd=password.val();
     if (name && passwd)
       login(name,passwd).fail(function() {
-        username.add(password).addClass("bad");
+        setError(username);
+        setError(password,"Invalid credentials");
       });
-    else username.add(password).addClass("bad");
+    else {
+      if (!name) setError(username,"Please enter your username");
+      if (!passwd) setError(password,"Please enter your password");
+    }
   });
   signup.on("click",function() {
     callback();
@@ -180,19 +185,19 @@ function editUserForm(userInfo,callback) {
   var go=$("<input>").addClass("go").attr("type","submit").val(Traduxio.getTranslated("i_save"));
   form.append(username).append(fullname).append(email).append(password).append(confirm_password).append(go).on("submit",function(e) {
     e.preventDefault();
+    cleanErrors(form);
     var bad=false;
     var emailRegExp=/^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
     if (!emailRegExp.test(email.val())) {
-      email.addClass("bad");
+      setError(email,"Invalid email");
       bad=true;
     }
     if (password.val() && confirm_password.val()!=password.val()) {
-      confirm_password.addClass("bad");
+      setError(confirm_password,"Passwords don't match");
       bad=true;
     }
     if (userInfo.forcedPassword && !password.val()) {
-      password.addClass("bad");
-      confirm_password.addClass("bad");
+      setError(confirm_password.add(password),"You must change your password");
       bad=true;
     }
     if (bad) return;
@@ -215,10 +220,7 @@ function editUserForm(userInfo,callback) {
     }});
   });
   if (userInfo.forcedPassword) {
-    var changePassword=$("<div>").insertAfter(password).append(
-      $("<span>").addClass("info").text("Please change your password")
-    );
-    password.addClass("bad");
+    setError(password,"Please change your password");
   }
   var div=$("<div>").insertAfter(email);
   if (userInfo.roles.indexOf("confirmed")==-1) {
@@ -296,9 +298,10 @@ function forgotForm(callback) {
   var go=$("<input>").addClass("go").attr("type","submit").val(Traduxio.getTranslated("i_password_reset"));
   form.append(emailInput).append(go).on("submit",function(e) {
     e.preventDefault();
+    cleanErrors(form);
     var email=emailInput.val();
     if (!isValidEmail(email)) {
-      emailInput.addClass("bad");
+      setError(emailInput,"Invalid email");
       return;
     }
     $.ajax({
@@ -316,6 +319,20 @@ function forgotForm(callback) {
   return form;
 }
 
+function setError(control,message) {
+  if (message)
+    $("<div>").append(
+      $("<span>").addClass("info").text(message)
+    ).addClass("error-message").insertAfter(control);
+  control.addClass("bad").attr("disabled",false).focus();
+}
+
+function cleanErrors(form) {
+  $("div.error-message",form).remove();
+  $("input.bad",form).removeClass("bad");
+}
+
+
 function signUpForm(callback) {
   var form=$("<form>").addClass("user-info");
   var username=$("<input>").addClass("username").attr("placeholder",Traduxio.getTranslated("i_username"));
@@ -326,27 +343,27 @@ function signUpForm(callback) {
   var go=$("<input>").addClass("go").attr("type","submit").val(Traduxio.getTranslated("i_signup"));
   form.append(username).append(fullname).append(email).append(password).append(confirm_password).append(go).on("submit",function(e) {
     e.preventDefault();
+    cleanErrors(form);
     var bad=false;
     [username,email,password,confirm_password].forEach(function(control) {
-      control.removeClass("bad");
       if (control.val().length<1) {
-        control.addClass("bad");
+        setError(control,"Information missing");
         bad=true;
       }
     });
     if (confirm_password.val()!=password.val()) {
-      confirm_password.addClass("bad");
+      setError(confirm_password,"Passwords don't match");
       bad=true;
     }
     var emailRegExp=/^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
-    if (!emailRegExp.test(email.val())) {
-      email.addClass("bad");
+    if (email.val() && !emailRegExp.test(email.val())) {
+      setError(email,"Invalid email");
       bad=true;
     }
     var fixedUsername=fixUsername(username.val())
     if (!fixedUsername || fixedUsername!==username.val()) {
       if (fixedUsername) username.val(fixedUsername);
-      username.addClass("bad");
+      setError(username,"Username must be composed of alphanumerical characters, '.', '_' or '-'");
       bad=true;
     }
     if (bad) return;
@@ -355,9 +372,13 @@ function signUpForm(callback) {
       email:email.val(),
       fullname:fullname.val().trim()
     }
-    register(data,password.val(),function(err) {
+    register(data,password.val(),function(err,body) {
       console.log(err);
-      username.addClass("bad");
+      if (err==409) {
+        setError(username,"Username already taken ("+body+")");
+      } else {
+        setError(username,"Register action reported following error : "+body+ "("+err+")");
+      }
     });
   });
   return form;
