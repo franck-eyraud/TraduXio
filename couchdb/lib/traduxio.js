@@ -17,7 +17,7 @@ js_i18n_elements.push("i_password");
 js_i18n_elements.push("i_fullname");
 js_i18n_elements.push("i_email");
 js_i18n_elements.push("i_save");
-js_i18n_elements.push("i_edit_user");
+js_i18n_elements.push("i_register_");
 
 // !code lib/path.js
 // !code lib/localization.js

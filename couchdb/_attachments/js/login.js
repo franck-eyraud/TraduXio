@@ -153,11 +153,11 @@ function loginForm(callback) {
     if (name && passwd)
       login(name,passwd).fail(function() {
         setError(username);
-        setError(password,"Invalid credentials");
+        setError(password,Traduxio.getTranslated("i_login_failed"));
       });
     else {
-      if (!name) setError(username,"Please enter your username");
-      if (!passwd) setError(password,"Please enter your password");
+      if (!name) setError(username,Traduxio.getTranslated("i_login_username_missing"));
+      if (!passwd) setError(password,Traduxio.getTranslated("i_login_password_missing"));
     }
   });
   signup.on("click",function() {
@@ -189,15 +189,15 @@ function editUserForm(userInfo,callback) {
     var bad=false;
     var emailRegExp=/^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
     if (!emailRegExp.test(email.val())) {
-      setError(email,"Invalid email");
+      setError(email,Traduxio.getTranslated("i_register_email_invalid"));
       bad=true;
     }
     if (password.val() && confirm_password.val()!=password.val()) {
-      setError(confirm_password,"Passwords don't match");
+      setError(confirm_password,Traduxio.getTranslated("i_register_password_not_match"));
       bad=true;
     }
     if (userInfo.forcedPassword && !password.val()) {
-      setError(confirm_password.add(password),"You must change your password");
+      setError(confirm_password.add(password),Traduxio.getTranslated("i_register_password_force_change"));
       bad=true;
     }
     if (bad) return;
@@ -220,7 +220,7 @@ function editUserForm(userInfo,callback) {
     }});
   });
   if (userInfo.forcedPassword) {
-    setError(password,"Please change your password");
+    setError(password,getTranslated("i_register_password_force_change"));
   }
   var div=$("<div>").insertAfter(email);
   if (userInfo.roles.indexOf("confirmed")==-1) {
@@ -301,7 +301,7 @@ function forgotForm(callback) {
     cleanErrors(form);
     var email=emailInput.val();
     if (!isValidEmail(email)) {
-      setError(emailInput,"Invalid email");
+      setError(emailInput,Traduxio.getTranslated("i_register_email_invalid"));
       return;
     }
     $.ajax({
@@ -353,26 +353,26 @@ function signUpForm(callback) {
     var bad=false;
     [username,email,password,confirm_password].forEach(function(control) {
       if (control.val().length<1) {
-        setError(control,"Information missing");
+        setError(control,Traduxio.getTranslated("i_register_information_missing"));
         bad=true;
       }
     });
     if (confirm_password.val()!=password.val()) {
-      setError(confirm_password,"Passwords don't match");
+      setError(confirm_password,Traduxio.getTranslated("i_register_password_not_match"));
       bad=true;
     }
     var emailRegExp=/^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
     if (email.val() && !emailRegExp.test(email.val())) {
-      setError(email,"Invalid email");
+      setError(email,Traduxio.getTranslated("i_register_email_invalid"));
       bad=true;
     }
     var fixedUsername=fixUsername(username.val())
     if (isValidUsername(fixedUsername) && fixedUsername!==username.val()) {
        username.val(fixedUsername);
-       setError(username,"Username has been modified, please verify");
+       setError(username,Traduxio.getTranslated("i_register_username_edited"));
        bad=true;
     } else if (!isValidUsername(fixedUsername)) {
-      setError(username,"Username must be composed of alphanumerical characters, '.', '_' or '-'");
+      setError(username,Traduxio.getTranslated("i_register_username_instructions"));
       username.attr("disabled",false);
       bad=true;
     }
@@ -385,9 +385,9 @@ function signUpForm(callback) {
     register(data,password.val(),function(err,body) {
       console.log(err);
       if (err==409) {
-        setError(username,"Username already taken ("+body+")");
+        setError(username,Traduxio.getTranslated("i_register_username_taken",body));
       } else {
-        setError(username,"Register action reported following error : "+body+ "("+err+")");
+        setError(username,Traduxio.getTranslated("i_register_failed",body,err));
       }
     });
   });

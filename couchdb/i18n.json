@@ -31,9 +31,21 @@
     "i_login": "Log in",
     "i_logout": "Log out",
     "i_signup": "Register",
+    "i_login_failed":"Invalid credentials",
+    "i_login_username_missing":"Please enter your username",
+    "i_login_password_missing":"Please enter your password",
     "i_edit_user": "Details",
-    "i_fullname": "Full name (e.g. John Smith)",
+    "i_fullname": "Full name (e.g. John Smith)"
 
+    ,"i_register_information_missing":"Information missing"
+    ,"i_register_username_edited":"Username has been modified, please check"
+    ,"i_register_username_instructions":"Username must be composed of alphanumerical characters, '.', '_' or '-'"
+    ,"i_register_username_taken":"Username already taken ({0})"
+    ,"i_register_failed":"Register action reported following error : {0} ({1})"
+    ,"i_register_email_invalid":"Invalid email address"
+    ,"i_register_password_not_match":"Passwords don't match"
+    ,"i_register_password_force_change":"Please change your password"
+,
     "i_glossary_add_entry": "Add a glossary entry",
     "i_glossary_add_translation": "Add a translation of {0} into the glossary",
     "i_glossary_source_language": "Source language",
@@ -168,10 +180,22 @@
     "i_login": "Connexion",
     "i_logout": "Se déconnecter",
     "i_signup": "S'enregistrer",
+    "i_login_failed":"Authentification incorrecte",
+    "i_login_username_missing":"Veuillez saisir votre nom de connexion",
+    "i_login_password_missing":"Veuillez entrer votre mot de passe",
     "i_edit_user": "Détails",
-    "i_fullname": "Nom Complet",
+    "i_fullname": "Nom Complet (ex. Paul Martin)"
 
-    "i_glossary_add_translation": "Ajouter une traduction de {0} dans le glossaire",
+    ,"i_register_information_missing":"Information manquante"
+    ,"i_register_username_edited":"Le nom de connexion a été modifé, veuillez vérifier"
+    ,"i_register_username_instructions":"Le nom de connexion doit être composé de caractères alphanumériques, '.', '_' or '-'"
+    ,"i_register_username_taken":"Ce nom de connexion est déjà utilisé ({0})"
+    ,"i_register_failed":"L'enregistrement a retourné l'erreur suivante : {0} ({1})"
+    ,"i_register_email_invalid":"Adresse email invalide"
+    ,"i_register_password_not_match":"Les mots de passe ne correspondent pas"
+    ,"i_register_password_force_change":"Veuillez changer votre mot de passe"
+
+    ,"i_glossary_add_translation": "Ajouter une traduction de {0} dans le glossaire",
     "i_glossary_add_entry": "Ajouter une entrée du glossaire",
     "i_glossary_source_language": "Depuis la langue",
     "i_glossary_target_language": "Vers la langue",
