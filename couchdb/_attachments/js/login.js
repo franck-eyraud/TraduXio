@@ -28,7 +28,7 @@ function updateUserInfo(ctx) {
     userSpan.on("click",function() {
       getUserInfo(ctx.name,function(userInfo) {
         var modal=addModal(editUserForm(userInfo,function() {
-          modal.remove();
+          modal.clean();
         }),getTranslated("i_edit_user"));
       })
     });
@@ -37,7 +37,7 @@ function updateUserInfo(ctx) {
     var userSpan=$("<span>").addClass("anonymous").append("anonymous");
     var loginSpan=$("<span>").addClass("login click-enabled").text(Traduxio.getTranslated("i_login")).on("click",function(){
       var modal=addModal(loginForm(function() {
-        modal.remove();
+        modal.clean();
       }),getTranslated("i_login"));
     });
     sessionInfo.empty().append(userSpan).append(" - ").append(loginSpan);
@@ -163,13 +163,13 @@ function loginForm(callback) {
   signup.on("click",function() {
     callback();
     var modal=addModal(signUpForm(function() {
-      modal.remove();
+      modal.clean();
     }),getTranslated("i_signup"));
   });
   forgot.on("click",function() {
     callback();
     var modal=addModal(forgotForm(function() {
-      modal.remove();
+      modal.clean();
     }),getTranslated("i_password_forgot"));
   });
   return form;
@@ -405,7 +405,7 @@ $(document).ready(function() {
     if (getParameterByName("email_confirm")) {
       if (!result.userCtx.name) {
         var modal=addModal(loginForm(function() {
-          modal.remove();
+          modal.clean();
         }),"Please log in to confirm your email");
       } else {
         emailConfirm(result.userCtx.name,getParameterByName("email_confirm"));
@@ -414,7 +414,7 @@ $(document).ready(function() {
       getUserInfo(result.userCtx.name,function(userInfo) {
         if (userInfo.forcedPassword) {
           var modal=addModal(editUserForm(userInfo,function() {
-            modal.remove();
+            modal.clean();
           }),"Please change your password");
         }
       });
