@@ -38,11 +38,12 @@ var runProcess=function(processFunction,callback) {
           if (err) {
             console.log("error inserting doc "+err);
           } else {
-            console.log("changed doc "+doc._id);
+            console.log("changed doc "+doc._id+" ("+doc._rev+")");
           }
-          callback(err);
+          setTimeout(callback,2000,err);
         });
       } else {
+        console.log("doc "+doc._id+" not modified");
         callback();
       }
       args.shift();
@@ -108,6 +109,9 @@ if (!config.server || !config.database || !config.user || !config.password) {
   console.log("config requires server, database, user and password");
 }
 
+if (config.insecure_ssl) {
+  process.env.NODE_TLS_REJECT_UNAUTHORIZED = "0";
+}
 
 var cookies={};
 
@@ -129,13 +133,17 @@ nano(config.server).auth(config.user,config.password,function (err, body, header
     cookie:headers['set-cookie']
   }).use(config.database);
   var csv=[];
-  tdxToCsv(null,csv);
-  runProcess(tdxToCsv,function() {
-    console.log("finished");
-    console.log(require("array-to-csv")(csv,",",true));
-  },csv);
-  //runProcess(fixStatus);
-  //runProcess(changePrivileges);
+  console.log("logged in, will start");
+  setTimeout(function() {
+    //select one or other process function
+    runProcess(changePrivileges);
+    //tdxToCsv(null,csv);
+    // runProcess(tdxToCsv,function() {
+    //   console.log("finished");
+    //   console.log(require("array-to-csv")(csv,",",true));
+    // },csv);
+    //runProcess(fixStatus);
+  },10000);
 });
 
 function forAll(treatment,callback) {
@@ -163,14 +171,13 @@ function forAll(treatment,callback) {
           total++;
           treat();
           function treat() {
-            if (treating) {
+            if (treating || !finished) {
               var wait=Math.random()*1000;
               setTimeout(treat,wait);
             } else {
               treating=true;
-              console.log("treating document "+(done+1)+"/"+body.rows.length+" "+row.id);
+              console.log("\ntreating document "+(done+1)+"/"+body.rows.length+" "+row.id);
               treatment(row,function(err,res) {
-                treating=false;
                 done++;
                 if (!err) {
                   success++;
@@ -179,6 +186,7 @@ function forAll(treatment,callback) {
                   console.log("error treating "+row.id+" : "+err);
                   toBeTreated--;
                 }
+                treating=false;
                 if (finished && toBeTreated==0) {
                   finish(total,success,skipped);
                 }
@@ -186,7 +194,9 @@ function forAll(treatment,callback) {
             }
           }
         } else {
+          console.log("skipping document "+(done+1)+"/"+body.rows.length+" "+row.id);
           skipped++;
+          done++;
         }
       });
       finished=true;
