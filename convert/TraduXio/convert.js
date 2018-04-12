@@ -61,7 +61,7 @@ var runProcess=function(processFunction,callback) {
       run(row.doc);
     }
   },function() {
-    console.log("finished fixingPrivileges");
+    console.log("finished Processing");
     if (callback) callback();
   });
 }
@@ -69,7 +69,7 @@ var runProcess=function(processFunction,callback) {
 var tdxToCsv=function(doc,stack) {
   if (!doc) {
     var headers=[
-      "id","author","title","language","text","translation"
+      "id","version","author","title","language","owner","license","last_edit"
     ];
     stack.push(headers);
     return false;
@@ -77,25 +77,49 @@ var tdxToCsv=function(doc,stack) {
   console.log("to csv for "+doc._id);
   var csv=[];
   csv.push(doc._id);
+  if (doc.text) {
+    csv.push("original");
+  } else {
+    csv.push("original absent");
+  }
   csv.push(doc.creator);
   csv.push(doc.title);
   csv.push(doc.language);
-  csv.push(doc.metadata["original_text"]);
   csv.push(doc.privileges && doc.privileges.owner || null);
+  csv.push(doc.creativeCommons || "All rights reserved");
+  if (doc.edits) {
+    var last_edit=doc.edits.pop().when;
+    csv.push(last_edit);
+  }
+  stack.push([]);
+  stack.push(csv);
   var translated=false;
   if (doc.translations) {
     for (var t in doc.translations) {
       var trans=doc.translations[t];
-      if (trans.language=="zh") {
-        translated=trans.text.join("\n\n");
+      if (trans.language && trans.text) {
+        csv=[]
+        csv.push(doc._id);
+        csv.push(t);
+        csv.push(trans.work_creator);
+        csv.push(trans.title);
+        csv.push(trans.language);
+        csv.push(trans.privileges && trans.privileges.owner || null);
+        csv.push(trans.creativeCommons || "All rights reserved");
+        if (doc.edits) {
+          var trans_edits=doc.edits.filter(function(e) {
+            return e.version==t;
+          })
+          if (trans_edits.length) {
+            var last_edit=trans_edits.pop().when;
+          }
+          csv.push(last_edit);
+        }
+        stack.push(csv);
       }
     }
-    if (translated) {
-      csv.push(translated);
-
-      stack.push(csv);
-    }
   }
+
   return false; //no modification
 }
 
@@ -105,46 +129,70 @@ var nano=require('nano');
 
 var config = JSON.parse(require("fs").readFileSync("config.json", "UTF-8"));
 
-if (!config.server || !config.database || !config.user || !config.password) {
-  console.log("config requires server, database, user and password");
+if (!config.server || !config.database) {
+  console.log("config requires server, database");
+  exit(1);
 }
 
 if (config.insecure_ssl) {
   process.env.NODE_TLS_REJECT_UNAUTHORIZED = "0";
 }
 
-var cookies={};
+if (config.user && config.password) {
 
-console.log("Logging in on "+config.server+" as "+config.user);
+  var cookies={};
 
-nano(config.server).auth(config.user,config.password,function (err, body, headers) {
-  if (err) {
-    console.log("error logging in");
-    console.log(err);
-    return;
-  }
+  console.log("Logging in on "+config.server+" as "+config.user);
 
-  if (headers && headers['set-cookie']) {
-    cookies = headers['set-cookie'];
-    console.log(cookies);
-  }
+  nano(config.server).auth(config.user,config.password,function (err, body, headers) {
+    if (err) {
+      console.log("error logging in");
+      console.log(err);
+      return;
+    }
 
-  db=nano({url:config.server,
-    cookie:headers['set-cookie']
-  }).use(config.database);
-  var csv=[];
-  console.log("logged in, will start");
+    if (headers && headers['set-cookie']) {
+      cookies = headers['set-cookie'];
+      console.log(cookies);
+    }
+
+    db=nano({url:config.server,
+      cookie:headers['set-cookie']
+    }).use(config.database);
+    console.log("logged in, will start");
+    start();
+  });
+} else {
+  db=nano({url:config.server}).use(config.database);
+  console.log("do not log in (no credentials provided), will start anonymously on "+config.server+"/"+config.database);
+  start();
+}
+
+function start() {
   setTimeout(function() {
     //select one or other process function
-    runProcess(changePrivileges);
-    //tdxToCsv(null,csv);
-    // runProcess(tdxToCsv,function() {
-    //   console.log("finished");
-    //   console.log(require("array-to-csv")(csv,",",true));
-    // },csv);
+    //runProcess(changePrivileges);
+    var filename="data/output.csv";
+    var csv=[];
+    tdxToCsv(null,csv);
+    runProcess(tdxToCsv,function() {
+      console.log("finished");
+      require("fs").writeFile(filename,
+        require("array-to-csv")(csv,",",true),
+        function() {
+          console.log("file "+filename+" written");
+          const { exec } = require('child_process');
+          exec('ls -l '+filename,function(error,stdout,stderr) {
+            console.log(error);
+            console.log(stdout);
+            console.log(stderr);
+          });
+
+        });
+    },csv);
     //runProcess(fixStatus);
-  },10000);
-});
+  },3000);
+}
 
 function forAll(treatment,callback) {
   var maxTreat=0;
