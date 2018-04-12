@@ -130,6 +130,18 @@ Traduxio= {
     return false;
   },
 
+  isObserver:function (work) {
+    var user=this.getUser();
+    work=work || this.doc;
+    if (work) {
+      this.config.debug && log(user.name+" isObserver on "+work.title+" "+work.creator);
+      var privileges=work.privileges || {public:true};
+      this.config.debug && log(privileges);
+      if (privileges.observers && privileges.observers.indexOf(user.name)!=-1) return true;
+    }
+    return false;
+  },
+
   hasSharedAccess:function (work) {
     var user=this.getUser();
     work=work || this.doc;
@@ -151,6 +163,7 @@ Traduxio= {
       if (this.isAdmin()) return true;
       if (this.isOwner(work)) return true;
       if (this.hasSharedAccess(work)) return true;
+      if (this.isObserver(work)) return true;
       if (this.isPublic(work)) return true;
       this.config.debug && log("no access");
       return false;
