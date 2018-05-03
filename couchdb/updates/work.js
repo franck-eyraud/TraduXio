@@ -197,11 +197,18 @@ function(work, req) {
         } else if (key == "public") {
           doc.privileges=doc.privileges || {};
           if (args[key]=="true" || args[key]==true) {
+            if (!doc.creativeCommons && !args.creativeCommons)  {
+              return [null,{code:403,body:"Can't set the document public without setting a Creative Commons license"}];
+            }
             doc.privileges.public=true;
             var name=version_name || "original";
             actions.push(name+" becomes public");
           } else {
             return [null,{code:400,body:"Can't set value "+args[key]+" to public"}];
+          }
+        } else if (key == "creativeCommons") {
+          if (!args[key] && doc.privileges) {
+            delete doc.privileges.public;
           }
         } else if (key == "shareTo") {
           var shared=validateArray(args[key]);

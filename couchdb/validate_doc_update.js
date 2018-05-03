@@ -164,7 +164,7 @@ function (newDoc, oldDoc, userCtx, secObj) {
 
   if (!Traduxio.canEdit(oldDoc)) {
     Traduxio.config.debug && log("can't edit old");
-    ensureUnchangedFields(["title","language","creator","date","privileges","text"]);
+    ensureUnchangedFields(["title","language","creator","date","privileges","text","creativeCommons"]);
   } else if (!Traduxio.isAdmin()){
     if (!oldDoc && !Traduxio.isOwner(newDoc) ) {
       throw({forbidden:"Must set owner to yourself"});
