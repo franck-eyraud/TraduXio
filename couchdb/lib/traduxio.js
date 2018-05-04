@@ -95,11 +95,6 @@ Traduxio= {
       if (work.privileges.public) {
         return true
       }
-      if (!work.privileges.owner) {
-        log("public because no owner");
-        work.privileges.public=true;
-        return true;
-      }
       log("work is not public");
       return false;
     }
@@ -121,7 +116,7 @@ Traduxio= {
   isOwner:function (work) {
     work=work || this.doc;
     if (work) {
-      var privileges=work.privileges || {public:true};
+      var privileges=work.privileges || {};
       var user=this.getUser();
       if ((!user.anonymous || Traduxio.config.anonymous_edit) && privileges.owner==user.name) return true;
     } else {
@@ -147,7 +142,7 @@ Traduxio= {
     work=work || this.doc;
     if (work) {
       this.config.debug && log(user.name+" hasSharedAccess to "+work.title+" "+work.creator);
-      var privileges=work.privileges || {public:true};
+      var privileges=work.privileges || {};
       this.config.debug && log(privileges);
       if (privileges.sharedTo && privileges.sharedTo.indexOf(user.name)!=-1) return true;
     }

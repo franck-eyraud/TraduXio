@@ -114,7 +114,7 @@ function(work, req) {
 
   work.edits=work.edits||[];
 
-  work.privileges=work.privileges || {public:true};
+  work.privileges=work.privileges || {};
 
   if (req.method=="DELETE") {
     if (!version_name && original) {
@@ -215,7 +215,7 @@ function(work, req) {
           if (shared === null) {
             return [null,{code:400,body:key+" must be a string or array"}];
           }
-          doc.privileges=doc.privileges || {public:true};
+          doc.privileges=doc.privileges || {};
           doc.privileges.sharedTo=doc.privileges.sharedTo || [];
           shared.forEach(function(user) {
             if (doc.privileges.sharedTo.indexOf(user)==-1) {
@@ -231,7 +231,7 @@ function(work, req) {
           if (unshared === null) {
             return [null,{code:400,body:key+" must be a string or array"}];
           }
-          doc.privileges=doc.privileges || {public:true};
+          doc.privileges=doc.privileges || {};
           doc.privileges.sharedTo=doc.privileges.sharedTo || [];
           doc.privileges.sharedTo=doc.privileges.sharedTo.filter(function(user) {
             if (unshared.indexOf(user)!=-1) {
