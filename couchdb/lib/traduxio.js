@@ -91,11 +91,27 @@ Traduxio= {
   isPublic:function (work) {
     work=work || this.doc;
     if (work) {
-      work.privileges=work.privileges || {};
-      if (work.privileges.public) {
-        return true
+      if (work.text || work.hasOwnProperty("original")) {  //comes from works view
+        work.privileges=work.privileges || {};
+        if (work.privileges.public) {
+          return true
+        }
+        Traduxio.debug && log("work is not public");
+        return false;
+      } else {
+        Traduxio.debug && log("no original version, checking translations");
+        if (this.isOriginalWork(work)) {
+          Traduxio.debug && log("checking translations");
+          for (var t in work.translations) {
+            if (this.isPublic(work.translations[t])) {
+              Traduxio.debug && log("translation "+t+" is public");
+              return true;
+            }
+          }
+          Traduxio.debug && log("no public translation, denying access");
+        }
       }
-      log("work is not public");
+      Traduxio.debug && log("work is not public");
       return false;
     }
     return false;
@@ -107,7 +123,7 @@ Traduxio= {
       if (work.hasOwnProperty("translations")) {
         return true;
       }
-      log("no translations, is not original");
+      Traduxio.debug && log("no translations, is not original");
       return false;
     }
     return false;
@@ -141,10 +157,18 @@ Traduxio= {
     var user=this.getUser();
     work=work || this.doc;
     if (work) {
-      this.config.debug && log(user.name+" hasSharedAccess to "+work.title+" "+work.creator);
-      var privileges=work.privileges || {};
-      this.config.debug && log(privileges);
-      if (privileges.sharedTo && privileges.sharedTo.indexOf(user.name)!=-1) return true;
+      if (work.text || work.hasOwnProperty("original")) {
+        this.config.debug && log(user.name+" hasSharedAccess to "+work.title+" "+work.creator);
+        var privileges=work.privileges || {};
+        this.config.debug && log(privileges);
+        if (privileges.sharedTo && privileges.sharedTo.indexOf(user.name)!=-1) return true;
+      } else {
+        if (this.isOriginalWork(work)) {
+          for (var t in work.translations) {
+            if (this.hasSharedAccess(work.translations[t])) return true;
+          }
+        }
+      }
     }
     return false;
   },

@@ -206,6 +206,7 @@ function(work, req) {
           } else {
             return [null,{code:400,body:"Can't set value "+args[key]+" to public"}];
           }
+          continue;
         } else if (key == "creativeCommons") {
           if (!args[key] && doc.privileges) {
             delete doc.privileges.public;
