@@ -69,7 +69,7 @@ var runProcess=function(processFunction,callback) {
 var tdxToCsv=function(doc,stack) {
   if (!doc) {
     var headers=[
-      "id","version","author","title","language","owner","license","last_edit"
+      "id","rev","version","author","title","language","owner","license","last_edit"
     ];
     stack.push(headers);
     return false;
@@ -77,6 +77,7 @@ var tdxToCsv=function(doc,stack) {
   console.log("to csv for "+doc._id);
   var csv=[];
   csv.push(doc._id);
+  csv.push(doc._rev);
   if (doc.text) {
     csv.push("original");
   } else {
@@ -100,6 +101,7 @@ var tdxToCsv=function(doc,stack) {
       if (trans.language && trans.text) {
         csv=[]
         csv.push(doc._id);
+        csv.push(doc._rev);
         csv.push(t);
         csv.push(trans.work_creator);
         csv.push(trans.title);
