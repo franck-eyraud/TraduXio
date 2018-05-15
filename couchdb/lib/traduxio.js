@@ -352,6 +352,7 @@ Traduxio= {
     }
     user.roles=this.req.userCtx.roles;
     user.isAdmin=this._isAdmin(this.req.userCtx,this.req.secObj);
+    Traduxio.debug && log("user is currently "+user.name);
     return user;
   },
 
