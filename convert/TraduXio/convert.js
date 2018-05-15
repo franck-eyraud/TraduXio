@@ -173,25 +173,57 @@ if (config.user && config.password) {
 function start() {
   setTimeout(function() {
     //select one or other process function
-    //runProcess(changePrivileges);
-    var filename="data/output.csv";
-    var csv=[];
-    tdxToCsv(null,csv);
-    runProcess(tdxToCsv,function() {
-      console.log("finished");
-      require("fs").writeFile(filename,
-        require("array-to-csv")(csv,",",true),
-        function() {
-          console.log("file "+filename+" written");
-          const { exec } = require('child_process');
-          exec('ls -l '+filename,function(error,stdout,stderr) {
-            console.log(error);
-            console.log(stdout);
-            console.log(stderr);
-          });
-
-        });
-    },csv);
+    {
+      console.log("attrib");
+      var attribution_file="data/doc_attribution.csv";
+      var papa=require("./papaparse.min.js");
+      var stream=fs.createReadStream(attribution_file);
+      papa.parse(stream,{
+        header:true,
+        complete:function(parsed,stream){
+            stream.close();
+            console.log("read "+parsed.data.length+" rows for doc/owner");
+            console.log(parsed);
+            //console.log(parsed.data.map(function(a){return a.join(",");}).join("\n"));
+            var attributions={};
+            parsed.data.forEach(function(row,i) {
+              if (row.doc && row.owner) {
+                db.get(row.doc,function(err,doc) {
+                  if (err) {
+                    console.log("error getting doc "+row.doc+" "+err);
+                  } else {
+                    if (changePrivileges(doc,row.owner)) {
+                      db.insert(doc,function() {
+                        console.log("inserted "+doc._id);
+                      });
+                    }
+                  }
+                });
+                attributions[row.doc]=row.owner;
+              }
+            });
+          }
+        }
+      );
+    }
+    // var filename="data/output_"+config.database+".csv";
+    // var csv=[];
+    // tdxToCsv(null,csv);
+    // runProcess(tdxToCsv,function() {
+    //   console.log("finished");
+    //   require("fs").writeFile(filename,
+    //     require("array-to-csv")(csv,",",true),
+    //     function() {
+    //       console.log("file "+filename+" written");
+    //       const { exec } = require('child_process');
+    //       exec('ls -l '+filename,function(error,stdout,stderr) {
+    //         console.log(error);
+    //         console.log(stdout);
+    //         console.log(stderr);
+    //       });
+    //
+    //     });
+    // },csv);
     //runProcess(fixStatus);
   },3000);
 }
@@ -257,32 +289,52 @@ function forAll(treatment,callback) {
   });
 }
 
-function changePrivileges(doc) {
-  var newOwner="newowner";
-  var modified=false;
-  if (!doc.privileges) {
-    doc.privileges={};
-    doc.privileges.owner=newOwner;
-    if (doc.creativeCommons) {
-      doc.privileges.public=true;
-    }
-    console.log("missing privilges to full doc, set owner "+newOwner);
-    modified=true;
+function changePrivileges(doc,newOwner) {
+
+  if (!doc) {
+    console.log("no doc");
+    return false;
   }
-  if (doc.translations) {
-    for (var transID in doc.translations) {
-      var translation=doc.translations[transID];
-      if (!translation.privileges) {
-        translation.privileges={};
-        translation.privileges.owner=newOwner;
-        if (translation.creativeCommons) {
-          translation.privileges.public=true;
+  var modified=false;
+
+  function setOwner(doc) {
+    if (!doc.privileges) {
+      doc.privileges={};
+      modified=true;
+    }
+    if (newOwner) {
+      console.log(doc.privileges);
+      if (!doc.privileges.owner) {
+        if (newOwner) {
+          doc.privileges.owner=newOwner;
+          console.log("missing owner to doc "+doc.title+" - "+doc.creator+", set owner "+newOwner);
+          modified=true;
+        } else {
+          console.log("no attribution to doc "+doc._id);
         }
-        console.log("missing privileges to translation "+transID+", set owner "+newOwner);
-        modified=true;
+      } else {
+        if (newOwner) {
+          if (doc.privileges.owner!=newOwner) {
+            console.log("owner mismatch, changing from "+doc.privileges.owner+" to "+newOwner);
+            doc.privileges.owner=newOwner;
+            modified=true;
+          }
+        }
       }
     }
   }
+
+  console.log(doc._id+" original");
+  setOwner(doc);
+
+  if (doc.translations) {
+    for (var transID in doc.translations) {
+      console.log(doc._id+" "+transID);
+      var translation=doc.translations[transID];
+      setOwner(translation);
+    }
+  }
+
   return modified;
 }
 
