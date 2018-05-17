@@ -15,8 +15,6 @@
     "i_start": "Start",
     "i_works_list": "Works list",
     "i_my_translations": "My translations",
-    "i_shared_translations": "Translations shared with me",
-    "i_public_translations": "Public translations",
     "i_my_works": "My translations",
     "i_username": "Username",
     "i_password": "Password",
@@ -315,6 +313,42 @@
     "i_work_together": "Trabalhe em conjunto com outros colaboradores",
     "i_work_together_description": "TraduXio oferece um ambiente colaborativo. Este compreende uma ferramenta de tradução que permite que vários usuários traduzam uma mesma obra simultaneamente.",
     "i_start": "Começar",
+    "i_works_list": "",
+    "i_my_translations": "",
+    "i_my_works": "",
+    "i_username": "",
+    "i_password": "",
+    "i_password_confirm": "",
+    "i_password_forgot": "",
+    "i_password_reset": "",
+    "i_email_confirmed": "",
+    "i_email_not_confirmed": "",
+    "i_confirmation_sent": "",
+    "i_confirmation_resend": "",
+    "i_confirmation_sending": "",
+    "i_login": "",
+    "i_logout": "",
+    "i_logged_out": "",
+    "i_signup": "",
+    "i_login_failed":"",
+    "i_login_username_missing":"",
+    "i_login_password_missing":"",
+    "i_edit_user": "",
+    "i_fullname": ""
+
+    ,"i_register_information_missing":""
+    ,"i_register_username_edited":""
+    ,"i_register_username_instructions":""
+    ,"i_register_username_taken":""
+    ,"i_register_failed":""
+    ,"i_register_email_invalid":""
+    ,"i_register_password_not_match":""
+    ,"i_register_password_force_change":""
+,
+    "i_glossary_add_entry": "",
+    "i_glossary_add_translation": "",
+    "i_glossary_source_language": "",
+    "i_glossary_target_language": "",
 
     "i_works": "Obras",
     "i_my_translations": "Minhas traduções",
@@ -325,6 +359,16 @@
     "i_about": "Sobre",
     "i_contact": "Contato",
     "i_copyright": "Respeite os Direitos Autorais",
+
+    "i_share": "",
+    "i_share_": "",
+    "i_share_participants": "",
+    "i_share_invite": "",
+    "i_share_confirm_public": "Você tem certeza de querer tornar essa obra publica ?",
+    "i_shares": "",
+    "i_shared": "",
+    "i_public": "",
+    "i_private": "",
 
     "i_report": "Denuncie",
     "i_report_description": "Denuncie uma publicação abusiva",
@@ -397,6 +441,42 @@
     "i_work_together": "Trabaje en conjunto con otros colaboradores",
     "i_work_together_description": "TraduXio ofrece un ambiente colaborativo. Este comprende una herramienta de traducción que permite que varios usuarios traduzcan una misma obra simultáneamente.",
     "i_start": "Comenzar",
+    "i_works_list": "",
+    "i_my_translations": "",
+    "i_my_works": "",
+    "i_username": "",
+    "i_password": "",
+    "i_password_confirm": "",
+    "i_password_forgot": "",
+    "i_password_reset": "",
+    "i_email_confirmed": "",
+    "i_email_not_confirmed": "",
+    "i_confirmation_sent": "",
+    "i_confirmation_resend": "",
+    "i_confirmation_sending": "",
+    "i_login": "",
+    "i_logout": "",
+    "i_logged_out": "",
+    "i_signup": "",
+    "i_login_failed":"",
+    "i_login_username_missing":"",
+    "i_login_password_missing":"",
+    "i_edit_user": "",
+    "i_fullname": ""
+
+    ,"i_register_information_missing":""
+    ,"i_register_username_edited":""
+    ,"i_register_username_instructions":""
+    ,"i_register_username_taken":""
+    ,"i_register_failed":""
+    ,"i_register_email_invalid":""
+    ,"i_register_password_not_match":""
+    ,"i_register_password_force_change":""
+,
+    "i_glossary_add_entry": "",
+    "i_glossary_add_translation": "",
+    "i_glossary_source_language": "",
+    "i_glossary_target_language": "",
 
     "i_works": "Obras",
     "i_my_translations": "Mis traducciones",
@@ -407,6 +487,16 @@
     "i_about": "Sobre",
     "i_contact": "Contacto",
     "i_copyright": "Respete los Derechos de Autor",
+
+    "i_share": "",
+    "i_share_": "",
+    "i_share_participants": "",
+    "i_share_invite": "",
+    "i_share_confirm_public": "",
+    "i_shares": "",
+    "i_shared": "",
+    "i_public": "",
+    "i_private": "",
 
     "i_report": "Denuncie",
     "i_report_description": "Denuncie una publicación abusiva",
@@ -479,6 +569,42 @@
     "i_work_together": "一起工作",
     "i_work_together_description": "TraduXio提供一个协作创作环境。多个贡献者可同时对同一份作品进行翻译。",
     "i_start": "开始",
+    "i_works_list": "",
+    "i_my_translations": "",
+    "i_my_works": "",
+    "i_username": "",
+    "i_password": "",
+    "i_password_confirm": "",
+    "i_password_forgot": "",
+    "i_password_reset": "",
+    "i_email_confirmed": "",
+    "i_email_not_confirmed": "",
+    "i_confirmation_sent": "",
+    "i_confirmation_resend": "",
+    "i_confirmation_sending": "",
+    "i_login": "",
+    "i_logout": "",
+    "i_logged_out": "",
+    "i_signup": "",
+    "i_login_failed":"",
+    "i_login_username_missing":"",
+    "i_login_password_missing":"",
+    "i_edit_user": "",
+    "i_fullname": ""
+
+    ,"i_register_information_missing":""
+    ,"i_register_username_edited":""
+    ,"i_register_username_instructions":""
+    ,"i_register_username_taken":""
+    ,"i_register_failed":""
+    ,"i_register_email_invalid":""
+    ,"i_register_password_not_match":""
+    ,"i_register_password_force_change":""
+,
+    "i_glossary_add_entry": "",
+    "i_glossary_add_translation": "",
+    "i_glossary_source_language": "",
+    "i_glossary_target_language": "",
 
     "i_works": "作品",
     "i_my_translations": "我的翻译",
@@ -488,6 +614,16 @@
 
     "i_about": "关于",
     "i_copyright": "遵守版权",
+
+    "i_share": "",
+    "i_share_": "",
+    "i_share_participants": "",
+    "i_share_invite": "",
+    "i_share_confirm_public": "",
+    "i_shares": "",
+    "i_shared": "",
+    "i_public": "",
+    "i_private": "",
 
     "i_report": "举报",
     "i_report_description": "举报滥用发布",
