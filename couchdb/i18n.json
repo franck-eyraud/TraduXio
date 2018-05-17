@@ -96,7 +96,6 @@
     "i_save": "Save",
     "i_cancel": "Cancel",
     "i_selected_license": "Selected license",
-    "i_not_free_license": "This is not a free cultural License",
 
     "i_print": "Print",
     "i_back": "Back",
@@ -248,7 +247,6 @@
     "i_save": "Enregistrer",
     "i_cancel": "Annuler",
     "i_selected_license": "Licence sélectionnée",
-    "i_not_free_license": "Ce n'est pas une licence culturelle gratuite",
 
     "i_print": "Imprimer",
     "i_back": "Retour",
@@ -396,7 +394,6 @@
     "i_save": "Salvar",
     "i_cancel": "Cancelar",
     "i_selected_license": "Licença selecionada",
-    "i_not_free_license": "Não é uma licença cultural gratuita",
 
     "i_language": "Língua",
     "i_language_": "Língua :",
@@ -524,7 +521,6 @@
     "i_save": "Salvar",
     "i_cancel": "Cancelar",
     "i_selected_license": "Licencia seleccionada",
-    "i_not_free_license": "No es una licencia cultural gratuita",
 
     "i_language": "Idioma",
     "i_language_": "Idioma:",
@@ -651,7 +647,6 @@
     "i_save": "保存",
     "i_cancel": "取消",
     "i_selected_license": "选取的许可",
-    "i_not_free_license": "这不是一个免费的文学许可",
 
     "i_language": "语言",
     "i_language_": "语言:",
