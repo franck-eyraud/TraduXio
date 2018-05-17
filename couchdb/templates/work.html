@@ -91,7 +91,6 @@
         </div>
       {{/is_original}}
         {{#canEdit}}<input type="button" class="edit" value="{{i_edit}}" />{{/canEdit}}
-        <div class="owner">{{owner}}</div>
         <span class="button hide">{{i_hide}}</span>
       </div></th>
     {{/headers}}
@@ -144,6 +143,8 @@
         </div>
         <div class="link"><a href="{{prefix}}/works/{{id}}/print/{{version}}">{{i_print}}</a></div>
         <div class="button hide">{{i_hide}}</div>
+        {{#hasSharedAccess}}
+        <div class="owner">{{owner}}</div>
         <div class="share">
         <select data-value="{{shareValue}}">
           <option value="public" class="public">{{i_public}}</option>
@@ -156,6 +157,7 @@
           <span class="shared">{{.}}</span>
           {{/sharedTo}}
         </div>
+        {{/hasSharedAccess}}
       </div>
       </div>
     </th>

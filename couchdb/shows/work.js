@@ -59,6 +59,7 @@ function(o, req) {
     data.canAccess=true;
     data.canDelete=Traduxio.canDelete(o);
     data.canTranslate=Traduxio.canTranslate(o);
+    data.hasSharedAccess=Traduxio.isOwner(o) || Traduxio.hasSharedAccess(o);
 
     if (!newWork) {
       var hexapla = new Hexapla();
@@ -115,6 +116,7 @@ function(o, req) {
             opened: Traduxio.canAccess(translation) && (opened_versions.indexOf(t)!== -1),
             canEdit: Traduxio.canEdit(translation),
             canDelete: Traduxio.canDelete(translation),
+            hasSharedAccess: Traduxio.isOwner(translation) || Traduxio.hasSharedAccess(translation),
             edited: Traduxio.canEdit(translation) && (edited_versions.indexOf(t)!== -1),
             owner:translation.privileges.owner,
             shareValue:shareValue,

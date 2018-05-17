@@ -352,7 +352,9 @@ tr.fulltext .unit .text {
 
 div.owner {
   font-style: italic;
+  font-size: 60%;
   color:normal;
+  float:right;
 }
 
 .button.show {
