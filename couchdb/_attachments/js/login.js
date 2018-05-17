@@ -34,7 +34,7 @@ function updateUserInfo(ctx) {
     });
     sessionInfo.empty().append(userSpan).append(" - ").append(logoutSpan);
   } else {
-    var userSpan=$("<span>").addClass("anonymous").append("anonymous");
+    var userSpan=$("<span>").addClass("anonymous").append(Traduxio.getTranslated("i_logged_out"));
     var loginSpan=$("<span>").addClass("login click-enabled").text(Traduxio.getTranslated("i_login")).on("click",function(){
       var modal=addModal(loginForm(function() {
         modal.clean();

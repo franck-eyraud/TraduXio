@@ -9,6 +9,7 @@ var js_i18n_elements=js_i18n_elements || [];
 js_i18n_elements.push("i_username");
 js_i18n_elements.push("i_password");
 js_i18n_elements.push("i_login");
+js_i18n_elements.push("i_logged_out");
 js_i18n_elements.push("i_logout");
 js_i18n_elements.push("i_search");
 js_i18n_elements.push("i_signup");
