@@ -1270,7 +1270,7 @@ var changePrivacy = function () {
     var modify;
     if (val=="public") {
       var select=$(this);
-      if (confirm("Are you sure you want to switch this work to public ? ")) {
+      if (confirm(getTranslated("i_share_confirm_public"))) {
         modify={public:true};
         modifyVersion(ref,modify)
         .done(function(result) {
