@@ -960,9 +960,9 @@ function insertBlock(line,local) {
   var newUnits=[];
   getVersions().forEach(function(version,index) {
     var oldUnit=findUnits(version).filter(function() {
-      return $(this).closest("tr").data("line") <= line;
+      return $(this).closest("tr").data("line") < line;
     }).last();
-    if (oldUnit.closest("tr").data("line")==line) {
+    if (oldUnit.closest("tr").data("line")==line-1 ) {
       var newUnit=createUnit("").attr("data-version",version);
       var direction=oldUnit.css("direction");
       if (direction) newUnit.css("direction",direction);
@@ -1333,9 +1333,10 @@ $(document).ready(function() {
     var unit=$(this).closest(".unit");
     var reference=unit.getReference();
     reference.version="original";
+    reference.line++;
     editOnServer(null, reference)
       .done(function() {
-        insertBlock(unit.getLine(),true);
+        insertBlock(reference.line,true);
       });
   });
 

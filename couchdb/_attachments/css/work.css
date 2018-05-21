@@ -295,9 +295,12 @@ tr.fulltext .unit .text {
  left:0px;
 }
 
-#hexapla .unit .join,
-#hexapla .unit .insert {
+#hexapla .unit .join {
   top:-24px;
+}
+
+#hexapla .unit .insert {
+  bottom:-24px;
 }
 
 #hexapla td.pleat.open.edit:hover .unit.edit .split,
