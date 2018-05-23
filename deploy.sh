@@ -1,9 +1,11 @@
 #!/bin/bash
 
 DATABASE=${1-http://localhost:5984/traduxio}
+log=deploy.log
 
 echo Deploying on $DATABASE
-DB=$(couchapp push couchdb $DATABASE 2>&1 | tail -1)
+couchapp push couchdb $DATABASE 2>&1 > $log
+DB=$(cat $log | tail -1)
 if [ $? -eq 0 ]; then
   echo Deployed on $DB
   echo Reindexing $DB/works
