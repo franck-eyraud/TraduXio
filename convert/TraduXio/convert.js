@@ -67,10 +67,16 @@ var runProcess=function(processFunction,callback) {
 }
 
 var tdxToCsv=function(doc,stack) {
+  var text_parts=["keywords","abstract","bionote"];
   if (!doc) {
     var headers=[
-      "id","rev","version","author","title","language","owner","license","last_edit"
+      "id","rev","version","author","title","language","translated title","translator","translator2","last_edit"
     ];
+    text_parts.forEach(function(text_part) {
+      headers.push(text_part);
+      headers.push("translated "+text_part);
+    });
+
     stack.push(headers);
     return false;
   }
@@ -85,29 +91,17 @@ var tdxToCsv=function(doc,stack) {
   }
   csv.push(doc.creator);
   csv.push(doc.title);
-  csv.push(doc.language);
-  csv.push(doc.privileges && doc.privileges.owner || null);
-  csv.push(doc.creativeCommons || "All rights reserved");
-  if (doc.edits) {
-    var last_edit=doc.edits.pop().when;
-    csv.push(last_edit);
-  }
-  stack.push([]);
-  stack.push(csv);
+  var base=csv.concat();
   var translated=false;
   if (doc.translations) {
     for (var t in doc.translations) {
       var trans=doc.translations[t];
       if (trans.language && trans.text) {
-        csv=[]
-        csv.push(doc._id);
-        csv.push(doc._rev);
-        csv.push(t);
-        csv.push(trans.work_creator);
-        csv.push(trans.title);
+        csv=base;
         csv.push(trans.language);
+        csv.push(trans.title);
+        csv.push(t);
         csv.push(trans.privileges && trans.privileges.owner || null);
-        csv.push(trans.creativeCommons || "All rights reserved");
         if (doc.edits) {
           var trans_edits=doc.edits.filter(function(e) {
             return e.version==t;
@@ -117,6 +111,32 @@ var tdxToCsv=function(doc,stack) {
           }
           csv.push(last_edit);
         }
+        text_parts.forEach(function(text_part) {
+          if (doc.metadata && doc.metadata.positions && doc.metadata.positions[text_part]) {
+            if (doc.text) {
+              csv.push(doc.text.slice(doc.metadata.positions[text_part].start,doc.metadata.positions[text_part].end+1).join(" "));
+            } else {
+              console.log(doc._id+" no text for "+text_part)
+              csv.push("");
+            }
+            if (trans.text) {
+              csv.push(trans.text.slice(doc.metadata.positions[text_part].start,doc.metadata.positions[text_part].end+1).join(" "));
+            } else {
+              console.log(doc._id+" no translation for "+text_part)
+              csv.push("");
+            }
+          } else {
+            if (text_part=="bionote" && doc.metadata && doc.metadata.positions && doc.metadata.positions["abstract"] && doc.text.length>doc.metadata.positions["abstract"].end+1) {
+              csv.push(doc.text.slice(doc.metadata.positions["abstract"].end+2).join(" "));
+              csv.push(trans.text.slice(doc.metadata.positions["abstract"].end+2).join(" "));
+            } else {
+              console.log(doc._id+" no positions for "+text_part)
+              csv.push("");
+              csv.push("");
+            }
+          }
+        });
+
         stack.push(csv);
       }
     }
@@ -173,57 +193,57 @@ if (config.user && config.password) {
 function start() {
   setTimeout(function() {
     //select one or other process function
-    {
-      console.log("attrib");
-      var attribution_file="data/doc_attribution.csv";
-      var papa=require("./papaparse.min.js");
-      var stream=fs.createReadStream(attribution_file);
-      papa.parse(stream,{
-        header:true,
-        complete:function(parsed,stream){
-            stream.close();
-            console.log("read "+parsed.data.length+" rows for doc/owner");
-            console.log(parsed);
-            //console.log(parsed.data.map(function(a){return a.join(",");}).join("\n"));
-            var attributions={};
-            parsed.data.forEach(function(row,i) {
-              if (row.doc && row.owner) {
-                db.get(row.doc,function(err,doc) {
-                  if (err) {
-                    console.log("error getting doc "+row.doc+" "+err);
-                  } else {
-                    if (changePrivileges(doc,row.owner)) {
-                      db.insert(doc,function() {
-                        console.log("inserted "+doc._id);
-                      });
-                    }
-                  }
-                });
-                attributions[row.doc]=row.owner;
-              }
-            });
-          }
-        }
-      );
-    }
-    // var filename="data/output_"+config.database+".csv";
-    // var csv=[];
-    // tdxToCsv(null,csv);
-    // runProcess(tdxToCsv,function() {
-    //   console.log("finished");
-    //   require("fs").writeFile(filename,
-    //     require("array-to-csv")(csv,",",true),
-    //     function() {
-    //       console.log("file "+filename+" written");
-    //       const { exec } = require('child_process');
-    //       exec('ls -l '+filename,function(error,stdout,stderr) {
-    //         console.log(error);
-    //         console.log(stdout);
-    //         console.log(stderr);
-    //       });
-    //
-    //     });
-    // },csv);
+    // {
+    //   console.log("attrib");
+    //   var attribution_file="data/doc_attribution.csv";
+    //   var papa=require("./papaparse.min.js");
+    //   var stream=fs.createReadStream(attribution_file);
+    //   papa.parse(stream,{
+    //     header:true,
+    //     complete:function(parsed,stream){
+    //         stream.close();
+    //         console.log("read "+parsed.data.length+" rows for doc/owner");
+    //         console.log(parsed);
+    //         //console.log(parsed.data.map(function(a){return a.join(",");}).join("\n"));
+    //         var attributions={};
+    //         parsed.data.forEach(function(row,i) {
+    //           if (row.doc && row.owner) {
+    //             db.get(row.doc,function(err,doc) {
+    //               if (err) {
+    //                 console.log("error getting doc "+row.doc+" "+err);
+    //               } else {
+    //                 if (changePrivileges(doc,row.owner)) {
+    //                   db.insert(doc,function() {
+    //                     console.log("inserted "+doc._id);
+    //                   });
+    //                 }
+    //               }
+    //             });
+    //             attributions[row.doc]=row.owner;
+    //           }
+    //         });
+    //       }
+    //     }
+    //   );
+    // }
+    var filename="data/output_"+config.database+".csv";
+    var csv=[];
+    tdxToCsv(null,csv);
+    runProcess(tdxToCsv,function() {
+      console.log("finished");
+      require("fs").writeFile(filename,
+        require("array-to-csv")(csv,",",true),
+        function() {
+          console.log("file "+filename+" written");
+          const { exec } = require('child_process');
+          exec('ls -l '+filename,function(error,stdout,stderr) {
+            console.log(error);
+            console.log(stdout);
+            console.log(stderr);
+          });
+
+        });
+    },csv);
     //runProcess(fixStatus);
   },3000);
 }
