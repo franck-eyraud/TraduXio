@@ -66,11 +66,54 @@ var runProcess=function(processFunction,callback) {
   });
 }
 
+var tdxIatis=function(doc) {
+  var iatis_doc={};
+  iatis_doc.id=doc._id;
+  iatis_doc.rev=doc._rev;
+  iatis_doc.author=doc.creator;
+  iatis_doc.title=doc.title;
+  iatis_doc.category=doc.metadata["Categories of Presentation"];
+  iatis_doc.panel=doc.metadata["Thematic Panels"];
+  var trans_list=Object.keys(doc.translations);
+  if (trans_list.length) {
+    var trans=doc.translations[trans_list[0]];
+    iatis_doc.translated_title=trans.title;
+    iatis_doc.language=trans.language;
+    var text_parts=["keywords","abstract","bionote"];
+    text_parts.forEach(function(text_part) {
+      if (doc.metadata && doc.metadata.positions && doc.metadata.positions[text_part]) {
+        if (doc.text) {
+          iatis_doc[text_part]=doc.text.slice(doc.metadata.positions[text_part].start,doc.metadata.positions[text_part].end+1).join(" ");
+        } else {
+          console.log(doc._id+" no text for "+text_part)
+          iatis_doc[text_part]="";
+        }
+        if (trans.text) {
+          iatis_doc["translated_"+text_part]=trans.text.slice(doc.metadata.positions[text_part].start,doc.metadata.positions[text_part].end+1).join(" ");
+        } else {
+          console.log(doc._id+" no translation for "+text_part)
+          iatis_doc["translated_"+text_part]="";
+        }
+      } else if (text_part=="bionote") {
+        iatis_doc[text_part]=doc.metadata["Biographical Note(s)"];
+        if (doc.metadata && doc.metadata.positions && doc.metadata.positions["abstract"] && doc.text.length>doc.metadata.positions["abstract"].end+1) {
+          iatis_doc["translated_"+text_part]=trans.text.slice(doc.metadata.positions["abstract"].end+2).join(" ");
+        } else {
+          iatis_doc["translated_"+text_part]="";
+        }
+
+      }
+    });
+
+  }
+  return iatis_doc;
+}
+
 var tdxToCsv=function(doc,stack) {
   var text_parts=["keywords","abstract","bionote"];
   if (!doc) {
     var headers=[
-      "id","rev","version","author","title","language","translated title","translator","translator2","last_edit"
+      "id","rev","author","title","category","keywords","panel","language","status","translated title","translator","translator2","last_edit"
     ];
     text_parts.forEach(function(text_part) {
       headers.push(text_part);
@@ -84,11 +127,6 @@ var tdxToCsv=function(doc,stack) {
   var csv=[];
   csv.push(doc._id);
   csv.push(doc._rev);
-  if (doc.text) {
-    csv.push("original");
-  } else {
-    csv.push("original absent");
-  }
   csv.push(doc.creator);
   csv.push(doc.title);
   var base=csv.concat();
@@ -99,6 +137,7 @@ var tdxToCsv=function(doc,stack) {
       if (trans.language && trans.text) {
         csv=base;
         csv.push(trans.language);
+        csv.push(trans.status);
         csv.push(trans.title);
         csv.push(t);
         csv.push(trans.privileges && trans.privileges.owner || null);
@@ -226,24 +265,42 @@ function start() {
     //     }
     //   );
     // }
-    var filename="data/output_"+config.database+".csv";
-    var csv=[];
-    tdxToCsv(null,csv);
-    runProcess(tdxToCsv,function() {
-      console.log("finished");
-      require("fs").writeFile(filename,
-        require("array-to-csv")(csv,",",true),
-        function() {
-          console.log("file "+filename+" written");
-          const { exec } = require('child_process');
-          exec('ls -l '+filename,function(error,stdout,stderr) {
-            console.log(error);
-            console.log(stdout);
-            console.log(stderr);
-          });
-
-        });
-    },csv);
+    {
+      var template_file="template.mustache";
+      var docs=[];
+      runProcess(function (doc) {
+        docs.push(tdxIatis(doc));
+      },function() {
+        console.log(docs);
+        var grouped=require("group-array")(docs,"category","panel");
+        console.log(grouped);
+        var source=require("fs").readFileSync(template_file);
+        var hb=require("handlebars");
+        var template=hb.compile(source.toString());
+        console.log(template({category:grouped}));
+      });
+    }
+    // {
+    //   var filename="data/output_"+config.database+".csv";
+    //   var csv=[];
+    //   tdxToCsv(null,csv);
+    //   runProcess(tdxToCsv,function() {
+    //     groupArray(csv, 'Panel');
+    //     console.log("finished");
+    //     require("fs").writeFile(filename,
+    //       require("array-to-csv")(csv,",",true),
+    //       function() {
+    //         console.log("file "+filename+" written");
+    //         const { exec } = require('child_process');
+    //         exec('ls -l '+filename,function(error,stdout,stderr) {
+    //           console.log(error);
+    //           console.log(stdout);
+    //           console.log(stderr);
+    //         });
+    //
+    //       });
+    //   },csv);
+    // }
     //runProcess(fixStatus);
   },3000);
 }
