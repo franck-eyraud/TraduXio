@@ -1,0 +1,28 @@
+article {
+    padding: 1em;
+    width:100%;
+    clear:both;
+}
+
+div.version {
+    padding: 0.5em;
+    width: 49%;
+    float:left;
+}
+
+div.version div {
+  margin-top:0.5em;
+}
+
+div.keywords {
+  font-style: italic;
+}
+
+div.title {
+  font-weight: bold;
+}
+
+div.author {
+  font-weight: bold;
+  font-style: italic;
+}

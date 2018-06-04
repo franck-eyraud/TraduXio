@@ -66,49 +66,6 @@ var runProcess=function(processFunction,callback) {
   });
 }
 
-var tdxIatis=function(doc) {
-  var iatis_doc={};
-  iatis_doc.id=doc._id;
-  iatis_doc.rev=doc._rev;
-  iatis_doc.author=doc.creator;
-  iatis_doc.title=doc.title;
-  iatis_doc.category=doc.metadata["Categories of Presentation"];
-  iatis_doc.panel=doc.metadata["Thematic Panels"];
-  var trans_list=Object.keys(doc.translations);
-  if (trans_list.length) {
-    var trans=doc.translations[trans_list[0]];
-    iatis_doc.translated_title=trans.title;
-    iatis_doc.language=trans.language;
-    var text_parts=["keywords","abstract","bionote"];
-    text_parts.forEach(function(text_part) {
-      if (doc.metadata && doc.metadata.positions && doc.metadata.positions[text_part]) {
-        if (doc.text) {
-          iatis_doc[text_part]=doc.text.slice(doc.metadata.positions[text_part].start,doc.metadata.positions[text_part].end+1).join(" ");
-        } else {
-          console.log(doc._id+" no text for "+text_part)
-          iatis_doc[text_part]="";
-        }
-        if (trans.text) {
-          iatis_doc["translated_"+text_part]=trans.text.slice(doc.metadata.positions[text_part].start,doc.metadata.positions[text_part].end+1).join(" ");
-        } else {
-          console.log(doc._id+" no translation for "+text_part)
-          iatis_doc["translated_"+text_part]="";
-        }
-      } else if (text_part=="bionote") {
-        iatis_doc[text_part]=doc.metadata["Biographical Note(s)"];
-        if (doc.metadata && doc.metadata.positions && doc.metadata.positions["abstract"] && doc.text.length>doc.metadata.positions["abstract"].end+1) {
-          iatis_doc["translated_"+text_part]=trans.text.slice(doc.metadata.positions["abstract"].end+2).join(" ");
-        } else {
-          iatis_doc["translated_"+text_part]="";
-        }
-
-      }
-    });
-
-  }
-  return iatis_doc;
-}
-
 var tdxToCsv=function(doc,stack) {
   var text_parts=["keywords","abstract","bionote"];
   if (!doc) {
@@ -266,18 +223,88 @@ function start() {
     //   );
     // }
     {
+      function tdxIatis(doc) {
+        var iatis_doc={};
+        iatis_doc.id=doc._id;
+        iatis_doc.rev=doc._rev;
+        iatis_doc.author=doc.creator;
+        iatis_doc.title=doc.title;
+        iatis_doc.category=doc.metadata["Categories of Presentation"];
+        if (iatis_doc.category=="Panels")  iatis_doc.panel=doc.metadata["Thematic Panels"];
+        var trans_list=Object.keys(doc.translations);
+        if (trans_list.length) {
+          var trans=doc.translations[trans_list[0]];
+          iatis_doc.translator=trans_list[0];
+          iatis_doc.revisors=trans.privileges.sharedTo.filter(function(share) {
+            return (share!="iatis" && share.indexOf("/*")==-1 && share!=trans.privileges.owner);
+          }).join(",");
+          iatis_doc.translation_status=trans.status;
+          iatis_doc.translated_title=trans.title;
+          iatis_doc.language=trans.language;
+          var text_parts=["keywords","abstract","bionote"];
+          text_parts.forEach(function(text_part) {
+            if (doc.metadata && doc.metadata.positions && doc.metadata.positions[text_part]) {
+              if (doc.text) {
+                iatis_doc[text_part]=doc.text.slice(doc.metadata.positions[text_part].start,doc.metadata.positions[text_part].end+1).join(" ");
+              } else {
+                console.log(doc._id+" no text for "+text_part)
+                iatis_doc[text_part]="";
+              }
+              if (trans.text) {
+                iatis_doc["translated_"+text_part]=trans.text.slice(doc.metadata.positions[text_part].start,doc.metadata.positions[text_part].end+1).join(" ");
+              } else {
+                console.log(doc._id+" no translation for "+text_part)
+                iatis_doc["translated_"+text_part]="";
+              }
+            } else if (text_part=="bionote") {
+              iatis_doc[text_part]=doc.metadata["Biographical Note(s)"];
+              if (doc.metadata && doc.metadata.positions && doc.metadata.positions["abstract"] && doc.text.length>doc.metadata.positions["abstract"].end+1) {
+                iatis_doc["translated_"+text_part]=trans.text.slice(doc.metadata.positions["abstract"].end+2).join(" ");
+              } else {
+                iatis_doc["translated_"+text_part]="";
+              }
+
+            }
+          });
+
+        }
+        return iatis_doc;
+      }
+
+      function compare(a1,a2) {
+        if (!a1 || typeof a1 != "string") {
+          return 1
+        }
+        if (!a2 || typeof a2 != "string") {
+          return -1
+        }
+        return a1.localeCompare(a2);
+      }
+
       var template_file="template.mustache";
       var docs=[];
       runProcess(function (doc) {
-        docs.push(tdxIatis(doc));
+        var tdxDoc=tdxIatis(doc);
+        if (tdxDoc.category!="Withdrawn")  docs.push(tdxDoc);
       },function() {
-        console.log(docs);
-        var grouped=require("group-array")(docs,"category","panel");
+        docs.sort(function(a1,a2) {
+          if (compare(a1.author,a2.author)==0) {
+            return compare(a1.title,a2.title);
+          } else {
+            return compare(a1.author,a2.author);
+          }
+        });
+        //console.log(docs);
+        var grouped=require("group-array")(docs,"category");
+        console.log(grouped);
+        var grouped_panels=require("group-array")(grouped["Panels"],"panel");
+        //console.log(grouped_panels);
+        grouped["Panels"]={panels:require("group-array")(grouped["Panels"],"panel")};
         console.log(grouped);
         var source=require("fs").readFileSync(template_file);
         var hb=require("handlebars");
         var template=hb.compile(source.toString());
-        console.log(template({category:grouped}));
+        require("fs").writeFileSync("data/output.html",template({category:grouped}));
       });
     }
     // {

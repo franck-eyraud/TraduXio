@@ -1,0 +1,81 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html>
+<head><meta charset="utf-8"/>
+<title>IATIS Conference 2018</title>
+<link rel="stylesheet" type="text/css" href="style.css">
+</head>
+<body>
+<!--Table of contents-->
+<h1 id="toc">Table of contents</h1>
+{{#each category}}
+  <h2 id="cat-{{@key}}">Category {{@key}}</h1>
+  {{#panels}}
+  {{#each this}}
+    <h2 id="pan-{{@key}}">Panel {{@key}}</h2>
+    {{#this}}
+      <div clas="article-toc"><a href="#art-{{id}}">{{author}} - {{title}}</a></div>
+    {{/this}}
+  {{/each}}
+  {{/panels}}
+  {{^panels}}
+  {{#each this}}
+    {{#this}}
+      <div clas="article-toc"><a href="#art-{{id}}">{{author}} - {{title}}</a></div>
+    {{/this}}
+  {{/each}}
+  {{/panels}}
+{{/each}}
+
+
+<!--Abstracts-->
+{{#each category}}
+  <h1 id="cat-{{@key}}">category {{@key}}</h1>
+  {{^panels}}
+    {{#this}}
+      <article id="art-{{id}}">
+      <div class="author">{{author}}</div>
+      <div class="version original">
+        <div class="title">
+          {{#translated_title}}{{translated_title}}{{/translated_title}}
+          {{^translated_title}}{{title}}{{/translated_title}}
+        </div>
+        <div class="keywords">{{keywords}}</div>
+        <div class="abstract">{{abstract}}</div>
+      </div>
+      <div class="version translation">
+        <div class="title">{{translated_title}}</div>
+        <div class="keywords">{{translated_keywords}}</div>
+        <div class="abstract">{{translated_abstract}}</div>
+        <div class="translation_details">{{translator}} {{translation_status}} {{revisors}}</div>
+      </div>
+      </article>
+    {{/this}}
+  {{/panels}}
+  {{#panels}}
+  {{#each this}}
+    <h2 id="pan-{{@key}}"> panel {{@key}}</h2>
+    {{#this}}
+      <article id="art-{{id}}">
+        <a href="#toc">^ top</a>
+      <div class="title">{{title}}</div>
+      <div class="author">{{author}}</div>
+      <div class="version original">
+        <div class="keywords">{{keywords}}</div>
+        <div class="abstract">{{abstract}}</div>
+      </div>
+      <div class="version translation">
+        <div class="title">
+          {{#translated_title}}{{translated_title}}{{/translated_title}}
+          {{^translated_title}}{{title}}{{/translated_title}}
+        </div>
+        <div class="keywords">{{translated_keywords}}</div>
+        <div class="abstract">{{translated_abstract}}</div>
+        <div class="translation_details">{{translator}} {{translation_status}} {{revisors}}</div>
+      </div>
+      </article>
+    {{/this}}
+  {{/each}}
+  {{/panels}}
+{{/each}}
+</body>
+</html>
