@@ -1,3 +1,7 @@
+h1, h2 {
+  clear: both;
+}
+
 article {
     padding: 1em;
     width:100%;
@@ -6,7 +10,7 @@ article {
 
 div.version {
     padding: 0.5em;
-    width: 49%;
+    width: 45%;
     float:left;
 }
 

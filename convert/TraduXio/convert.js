@@ -223,6 +223,15 @@ function start() {
     //   );
     // }
     {
+      var known_users;
+      var statuses={
+        "translating":"Translating",
+        "translated":"Translated",
+        "proofreading":"Revising",
+        "proofread":"Revised",
+        "validating":"Validating",
+        "validated":"Validated"
+      }
       function tdxIatis(doc) {
         var iatis_doc={};
         iatis_doc.id=doc._id;
@@ -237,8 +246,11 @@ function start() {
           iatis_doc.translator=trans_list[0];
           iatis_doc.revisors=trans.privileges.sharedTo.filter(function(share) {
             return (share!="iatis" && share.indexOf("/*")==-1 && share!=trans.privileges.owner);
+          }).map(function(user) {
+            if (known_users[user]) return known_users[user].fullname;
+            else return user;
           }).join(",");
-          iatis_doc.translation_status=trans.status;
+          iatis_doc.translation_status=statuses[trans.status] || trans.status;
           iatis_doc.translated_title=trans.title;
           iatis_doc.language=trans.language;
           var text_parts=["keywords","abstract","bionote"];
@@ -283,29 +295,34 @@ function start() {
 
       var template_file="template.mustache";
       var docs=[];
-      runProcess(function (doc) {
-        var tdxDoc=tdxIatis(doc);
-        if (tdxDoc.category!="Withdrawn")  docs.push(tdxDoc);
-      },function() {
-        docs.sort(function(a1,a2) {
-          if (compare(a1.author,a2.author)==0) {
-            return compare(a1.title,a2.title);
-          } else {
-            return compare(a1.author,a2.author);
-          }
+      db.get("known_users",function(err,users) {
+        console.log(users);
+        known_users=users;
+        runProcess(function (doc) {
+          var tdxDoc=tdxIatis(doc);
+          if (tdxDoc.category!="Withdrawn")  docs.push(tdxDoc);
+        },function() {
+          docs.sort(function(a1,a2) {
+            if (compare(a1.author,a2.author)==0) {
+              return compare(a1.title,a2.title);
+            } else {
+              return compare(a1.author,a2.author);
+            }
+          });
+          //console.log(docs);
+          var grouped=require("group-array")(docs,"category");
+          console.log(grouped);
+          var grouped_panels=require("group-array")(grouped["Panels"],"panel");
+          //console.log(grouped_panels);
+          grouped["Panels"]={panels:require("group-array")(grouped["Panels"],"panel")};
+          console.log(grouped);
+          var source=require("fs").readFileSync(template_file);
+          var hb=require("handlebars");
+          var template=hb.compile(source.toString());
+          require("fs").writeFileSync("data/output.html",template({category:grouped}));
         });
-        //console.log(docs);
-        var grouped=require("group-array")(docs,"category");
-        console.log(grouped);
-        var grouped_panels=require("group-array")(grouped["Panels"],"panel");
-        //console.log(grouped_panels);
-        grouped["Panels"]={panels:require("group-array")(grouped["Panels"],"panel")};
-        console.log(grouped);
-        var source=require("fs").readFileSync(template_file);
-        var hb=require("handlebars");
-        var template=hb.compile(source.toString());
-        require("fs").writeFileSync("data/output.html",template({category:grouped}));
       });
+
     }
     // {
     //   var filename="data/output_"+config.database+".csv";
