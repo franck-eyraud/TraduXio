@@ -235,6 +235,7 @@ function start() {
       function tdxIatis(doc) {
         var iatis_doc={};
         iatis_doc.id=doc._id;
+        iatis_doc.ref=doc.metadata["#"];
         iatis_doc.rev=doc._rev;
         iatis_doc.author=doc.creator;
         iatis_doc.title=doc.title;
@@ -250,6 +251,8 @@ function start() {
             if (known_users[user]) return known_users[user].fullname;
             else return user;
           }).join(",");
+          if (!iatis_doc.revisors) delete iatis_doc.revisors;
+          trans.status=trans.status || "translating";
           iatis_doc.translation_status=statuses[trans.status] || trans.status;
           iatis_doc.translated_title=trans.title;
           iatis_doc.language=trans.language;
@@ -257,13 +260,13 @@ function start() {
           text_parts.forEach(function(text_part) {
             if (doc.metadata && doc.metadata.positions && doc.metadata.positions[text_part]) {
               if (doc.text) {
-                iatis_doc[text_part]=doc.text.slice(doc.metadata.positions[text_part].start,doc.metadata.positions[text_part].end+1).join(" ");
+                iatis_doc[text_part]=doc.text.slice(doc.metadata.positions[text_part].start,doc.metadata.positions[text_part].end+1).join(" ").trim();
               } else {
                 console.log(doc._id+" no text for "+text_part)
                 iatis_doc[text_part]="";
               }
               if (trans.text) {
-                iatis_doc["translated_"+text_part]=trans.text.slice(doc.metadata.positions[text_part].start,doc.metadata.positions[text_part].end+1).join(" ");
+                iatis_doc["translated_"+text_part]=trans.text.slice(doc.metadata.positions[text_part].start,doc.metadata.positions[text_part].end+1).join(" ").trim();
               } else {
                 console.log(doc._id+" no translation for "+text_part)
                 iatis_doc["translated_"+text_part]="";
@@ -279,6 +282,8 @@ function start() {
             }
           });
 
+        } else {
+          iatis_doc.translation_status="Not translated";
         }
         return iatis_doc;
       }
@@ -319,7 +324,7 @@ function start() {
           var source=require("fs").readFileSync(template_file);
           var hb=require("handlebars");
           var template=hb.compile(source.toString());
-          require("fs").writeFileSync("data/output.html",template({category:grouped}));
+          require("fs").writeFileSync("data/abstracts.html",template({docs:docs}));
         });
       });
 

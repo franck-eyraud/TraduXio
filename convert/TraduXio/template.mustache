@@ -5,85 +5,38 @@
 <link rel="stylesheet" type="text/css" href="style.css">
 </head>
 <body>
+<h1>IATIS Conference 2018 - Hong-Kong</h1>
 <!--Table of contents-->
-<h1 id="toc">Table of contents</h1>
-{{#each category}}
-  <h2 id="cat-{{@key}}">Category {{@key}}</h1>
-  {{#panels}}
-  {{#each this}}
-    <h2 id="pan-{{@key}}">Panel {{@key}}</h2>
-    {{#this}}
-      <div clas="article-toc"><a href="#art-{{id}}">{{author}} - {{title}}</a></div>
-    {{/this}}
-  {{/each}}
-  {{/panels}}
-  {{^panels}}
-  {{#each this}}
-    {{#this}}
-      <div clas="article-toc"><a href="#art-{{id}}">{{author}} - {{title}}</a></div>
-    {{/this}}
-  {{/each}}
-  {{/panels}}
+<h2 id="toc">Table of contents</h1>
+<div class="toc">
+{{#each docs}}
+  <div class="article-toc" id="toc-{{ref}}"><a href="#art-{{ref}}">{{author}} - {{title}}</a></div>
 {{/each}}
+</div>
 
 
 <!--Abstracts-->
-{{#each category}}
-  <h1 id="cat-{{@key}}">category {{@key}}</h1>
-  {{^panels}}
-    {{#this}}
-      <article id="art-{{id}}">
-      <div class="author">{{author}}</div>
-      <div class="version original">
-        <div class="title">
-          {{#translated_title}}{{translated_title}}{{/translated_title}}
-          {{^translated_title}}{{title}}{{/translated_title}}
-        </div>
-        <div class="keywords">{{keywords}}</div>
-        <div class="abstract">{{abstract}}</div>
-      </div>
-      <div class="version translation">
-        <div class="title">{{translated_title}}</div>
-        <div class="keywords">{{translated_keywords}}</div>
-        <div class="abstract">{{translated_abstract}}</div>
-        <div class="translation_details">
-          <div class="translator">{{translator}}</div>
-          <div class="translation_status">{{translation_status}}</div>
-          <div class="revisors">{{revisors}}</div>
-        </div>
-      </div>
-      </article>
-    {{/this}}
-  {{/panels}}
-  {{#panels}}
-  {{#each this}}
-    <h2 id="pan-{{@key}}"> panel {{@key}}</h2>
-    {{#this}}
-      <article id="art-{{id}}">
-        <a href="#toc">^ top</a>
-      <div class="title">{{title}}</div>
-      <div class="author">{{author}}</div>
-      <div class="version original">
-        <div class="keywords">{{keywords}}</div>
-        <div class="abstract">{{abstract}}</div>
-      </div>
-      <div class="version translation">
-        <div class="title">
-          {{#translated_title}}{{translated_title}}{{/translated_title}}
-          {{^translated_title}}{{title}}{{/translated_title}}
-        </div>
-        <div class="keywords">{{translated_keywords}}</div>
-        <div class="abstract">{{translated_abstract}}</div>
-        <div class="translation_details">
-          <div class="translator">{{translator}}</div>
-          <div class="translation_status">{{translation_status}}</div>
-          <div class="revisors">{{revisors}}</div>
-        </div>
-      </div>
-      </article>
-    {{/this}}
-  {{/each}}
-  {{/panels}}
+<h2 id="abstracts">Translated abstracts</h2>
+{{#each docs}}
+  <article id="art-{{ref}}">
+  <div class="header">
+    <a class="gototop" href="#toc-{{ref}}">&lt;-</a>
+    <div class="author">{{author}}</div>
+    <div class="title">{{title}}</div>
+    {{#translated_title}}<div class="translated_title">{{.}}</div>{{/translated_title}}
+    <div class="category">{{category}}</div>
+    {{#panel}}<div class="panel">{{.}}</div>{{/panel}}
+  </div>
+  <div class="version translation">
+    <div class="keywords">{{translated_keywords}}</div>
+    <div class="abstract">{{translated_abstract}}</div>
+    <div class="translation_details">
+      {{#translator}}<div class="translator">{{.}}</div>{{/translator}}
+      {{#revisors}}<div class="revisors">{{.}}</div>{{/revisors}}
+      <div class="translation_status">{{translation_status}}</div>
+    </div>
+  </div>
+  </article>
 {{/each}}
 </body>
 </html>

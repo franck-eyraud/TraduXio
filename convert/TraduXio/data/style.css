@@ -1,5 +1,14 @@
 h1, h2 {
+  text-align: center;
+}
+
+h1, h2 {
   clear: both;
+}
+
+div.toc {
+  width:100%;
+  margin: auto;
 }
 
 article {
@@ -10,8 +19,9 @@ article {
 
 div.version {
     padding: 0.5em;
-    width: 45%;
-    float:left;
+    width: 95%;
+    text-align: justify;
+    margin: auto;
 }
 
 div.version div {
@@ -28,5 +38,47 @@ div.title {
 
 div.author {
   font-weight: bold;
+  font-style: italic;
+}
+
+a.gototop {
+    float:right;
+}
+
+div.header {
+  width:98%;
+  border:1px solid;
+  background-color:#ececfa;
+  text-align: center;
+  margin: auto;
+}
+
+div.translation_details {
+  font-size:80%;
+}
+
+div.translation_details div {
+  display: inline-block;
+}
+
+div.translator::before {
+  content: "Translated by : ";
+}
+
+div.translation_status {
+  font-style: italic;
+}
+
+div.translation_status::before {
+  content: " - Status : ";
+  font-style: italic;
+}
+
+div.revisors {
+  font-style: italic;
+}
+
+div.revisors::before {
+  content: " - Revised by : ";
   font-style: italic;
 }
