@@ -2,6 +2,7 @@ h1, h2 {
   text-align: center;
   margin: auto;
   padding:5px;
+  page-break-inside: avoid;
 }
 
 h1.title {
@@ -48,10 +49,11 @@ div.toc {
   width:100%;
   margin: auto;
   padding-top: 20px;
+  page-break-after: always;
 }
 
 div.article-toc {
-  line-height: 1.2em;
+  line-height: 1.4em;
   font-size: 0.9em;
   text-indent: -2em;
   padding-left: 2em;
@@ -66,6 +68,7 @@ article {
     padding: 1em;
     width:100%;
     clear:both;
+    page-break-inside: avoid;
 }
 
 div.version {
