@@ -5,9 +5,25 @@
 <link rel="stylesheet" type="text/css" href="style.css">
 </head>
 <body>
-<h1>IATIS Conference 2018 - Hong-Kong</h1>
+<h1 class="title">
+  <img src="conference_logo-01.jpg" class="right"/>
+  <img src="iatis.jpg" class="left" />
+
+  6th IATIS Conference<br/>
+  第六屆國際翻譯與跨文化研究協會國際會議</h1>
+
+<h2 class="venue">Hong Kong, July 2018<br/>
+  香港    2018年7月</h2>
+
+<h2 class="topic">Translation and Cultural Mobility<br/>
+  翻譯與文化流動</h2>
+
+<h2 class="subtitle">Abstracts organized by name of the author (in alphabetic order)<br/>
+  論文摘要 (按作者英文姓名順序排列)</h2>
+
+<h2 class="note">Work in progress<br/>
+翻譯初稿 (整理中)</h2>
 <!--Table of contents-->
-<h2 id="toc">Table of contents</h1>
 <div class="toc">
 {{#each docs}}
   <div class="article-toc" id="toc-{{ref}}"><a href="#art-{{ref}}">{{author}} - {{title}}</a></div>
@@ -16,7 +32,6 @@
 
 
 <!--Abstracts-->
-<h2 id="abstracts">Translated abstracts</h2>
 {{#each docs}}
   <article id="art-{{ref}}">
   <div class="header">

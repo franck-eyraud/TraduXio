@@ -1,14 +1,65 @@
 h1, h2 {
   text-align: center;
+  margin: auto;
+  padding:5px;
 }
 
-h1, h2 {
+h1.title {
+  color:#339966;
+  font-variant: small-caps;
+}
+
+h1.title img {
+  height: 6em;
+}
+
+h1.title img.left {
+  float: left;
+}
+
+h1.title img.right {
+  float: right;
+}
+
+h2.venue {
+  font-weight: normal;
+  font-size: 1.5em;
+}
+
+h2.note {
+  font-size:1em;
+}
+
+h2.topic {
+  color:#003399;
+}
+
+h2.subtitle {
+  font-variant: small-caps;
+  background-color: #003399;
+  color:#fff;
+  width:90%;
+  text-align: center;
+  border: solid 1px #000;
   clear: both;
 }
 
 div.toc {
   width:100%;
   margin: auto;
+  padding-top: 20px;
+}
+
+div.article-toc {
+  line-height: 1.2em;
+  font-size: 0.9em;
+  text-indent: -2em;
+  padding-left: 2em;
+}
+
+a {
+  color: black;
+  text-decoration: none;
 }
 
 article {
