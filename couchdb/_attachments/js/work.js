@@ -413,7 +413,8 @@ function toggleEdit (e) {
             return;
           }
         });
-        if (empty) {
+        var user_copy_from_button=false;
+        if (empty && user_copy_from_button) {
           var inputCopy=$("<input>").attr("type","button").addClass("copy").val(getTranslated("i_copy_from"));
           inputCopy.insertBefore(doc.find("input.edit"));
         }
