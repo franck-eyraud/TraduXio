@@ -1104,8 +1104,8 @@ var editOnServerChain = function(content, reference) {
   return chainRequest({
     type: "PUT",
     url: "version/"+Traduxio.getId()+"?"+ $.param(reference),
-    contentType: "text/plain",
-    data: content
+    contentType: "application/json",
+    data: JSON.stringify(content)
   });
 };
 
