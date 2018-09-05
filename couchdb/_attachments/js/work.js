@@ -332,7 +332,7 @@ function toggleEdit (e) {
     if (edited) {
       var fulltext=$("textarea.fulltext").val();
       $("textarea.fulltext").prop("disabled",true);
-      var lines=fulltext.split("\n\n");
+      var lines=fulltext.split(/\n\s*\n/);
       var id=Traduxio.getId();
       var update=function(){
         $("#hexapla tbody tr.fulltext").hide();
