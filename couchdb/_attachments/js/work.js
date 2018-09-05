@@ -90,13 +90,45 @@ function removeGlossary(glossaryEntry) {
 }
 
 function editGlossaryEntry(glossaryEntry,language) {
-  $("form#addGlossaryForm [name='src']").val(glossaryEntry.src_sentence);
-  $("form#addGlossaryForm [name='target']").val(glossaryEntry.targets && glossaryEntry.targets[language] ? glossaryEntry.targets[language] : "");
-  $("form#addGlossaryForm [name='src_language']").val(glossaryEntry.src_language);
-  $("form#addGlossaryForm [name='target_language']").val(language);
-  if (!$("form#addGlossaryForm").is(":visible")) {
-    toggleGlossaryEntry();
-  }
+  var selectSource=$("<select>").addClass("language").attr("name","src_language").attr("placeholder",getTranslated("i_glossary_source_language"));
+  var inputSource=$("<input>").attr("name","src");
+  var selectTarget=$("<select>").addClass("language").attr("name","target_language").attr("placeholder",getTranslated("i_glossary_target_language"));
+  var inputTarget=$("<input>").attr("name","target");
+  var glossaryForm=$("<form>")
+    .append(selectSource).append(inputSource)
+    .append(selectTarget).append(inputTarget);
+  fillLanguages(selectSource.add(selectTarget));
+  inputSource.val(glossaryEntry.src_sentence);
+  selectSource.val(glossaryEntry.src_language);
+  inputTarget.val(glossaryEntry.targets && glossaryEntry.targets[language] ? glossaryEntry.targets[language] : "");
+  selectTarget.val(language);
+  var modal=addModal(glossaryForm);
+  var submit=$("<input>").attr("type","submit").val(getTranslated("i_save"));
+  glossaryForm.append(submit).on("submit",function() {
+    var bad=false;
+    [inputSource,selectSource,inputTarget,selectTarget].forEach(function(control) {
+      control.removeClass("bad");
+      if (!control.val()) {
+        control.addClass("bad");
+        bad=true;
+      }
+    });
+    if (bad) return false;
+    var glossaryEntry={
+      src_sentence:inputSource.val(),
+      src_language:selectSource.val(),
+      target_sentence:inputTarget.val(),
+      target_language:selectTarget.val()
+    };
+    addGlossarySubmit(glossaryEntry,function(err) {
+      if (err) {
+        alert(err);
+      } else {
+        modal.clean();
+      }
+    });
+    return false;
+  });
 }
 
 var runningEdit;
@@ -549,23 +581,12 @@ function toggleRemoveDoc() {
   toggleHeader("#removePanel");
 }
 
-function toggleGlossaryEntry() {
-  toggleHeader("#addGlossaryForm");
-}
-
 function closeTop(except) {
   $(".top form, #removePanel").not(except).slideUp(200);
 }
 
-function addGlossarySubmit() {
+function addGlossarySubmit(glossaryEntry,callback) {
   var id = $("#hexapla").data("id");
-  var form=$("#addGlossaryForm");
-  var glossaryEntry={
-    src_sentence:$("[name='src']",form).val(),
-    src_language:$("[name='src_language']",form).val(),
-    target_sentence:$("[name='target']",form).val(),
-    target_language:$("[name='target_language']",form).val()
-  };
   if (glossaryEntry.src_sentence && glossaryEntry.src_language &&
     glossaryEntry.target_sentence && glossaryEntry.target_language) {
     var url="work/"+id+"/glossary/"+glossaryEntry.src_language+"/"+encodeURIComponent(glossaryEntry.src_sentence)+"/"+glossaryEntry.target_language;
@@ -576,15 +597,17 @@ function addGlossarySubmit() {
       contentType: 'application/json',
       data: glossaryEntry.target_sentence
     }).done(function(result) {
-      closeTop();
       if ("ok" in result) {
         addGlossaryEntry(glossaryEntry);
+        callback();
       }
-    }).fail(function() { alert("fail!"); });
+    }).fail(function() {
+      callback("fail")
+    });
   } else {
-    alert("missing data");
+    callback("missing data");
+    return false;
   }
-  return false;
 }
 
 function toggleEditDoc() {
@@ -1417,8 +1440,6 @@ $(document).ready(function() {
 
   $(".top").on("click", "#removeDoc", toggleRemoveDoc);
   $("#removePanel").on("click", removeDoc);
-
-  $("#addGlossaryForm").on("submit", addGlossarySubmit);
 
   var versions=getVersions();
   const N = versions.length;

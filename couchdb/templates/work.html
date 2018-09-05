@@ -31,12 +31,6 @@
     <select class="language" name="language" placeholder="{{i_version_language}}"></select>
     <input type="submit" value="{{i_create}}" name="do-create" />
   </form>
-  <form id="addGlossaryForm"><h3>{{i_glossary_add_entry}}</h3>
-    <select class="language" name="src_language" placeholder="{{i_glossary_source_language}}"></select><input name="src"/>
-    <select class="language" name="target_language" placeholder="{{i_glossary_target_language}}"></select><input name="target"/>
-    <input type="hidden" name="num" />
-    <input type="submit" value="{{i_save}}" />
-  </form>
   <div id="removePanel"><button id="remove-confirm">{{i_delete_text_and_translations}}</button></div>
   {{#notext}}
     <form id="work-info">

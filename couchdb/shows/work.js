@@ -3,9 +3,9 @@ function(o, req) {
   var js_i18n_elements=[
     "i_read","i_edit","i_show","i_copy_from","i_search_concordance",
     "i_confirm_delete","i_delete_version","i_delete_original", "i_no_title", "i_no_author",
-    "i_glossary_add_translation",
     "i_share","i_public","i_shared","i_public","i_private"
     ,"i_activity_","i_chat_"
+    ,"i_glossary_"
   ];
 
 
