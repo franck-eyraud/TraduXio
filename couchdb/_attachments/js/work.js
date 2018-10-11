@@ -90,13 +90,45 @@ function removeGlossary(glossaryEntry) {
 }
 
 function editGlossaryEntry(glossaryEntry,language) {
-  $("form#addGlossaryForm [name='src']").val(glossaryEntry.src_sentence);
-  $("form#addGlossaryForm [name='target']").val(glossaryEntry.targets && glossaryEntry.targets[language] ? glossaryEntry.targets[language] : "");
-  $("form#addGlossaryForm [name='src_language']").val(glossaryEntry.src_language);
-  $("form#addGlossaryForm [name='target_language']").val(language);
-  if (!$("form#addGlossaryForm").is(":visible")) {
-    toggleGlossaryEntry();
-  }
+  var selectSource=$("<select>").addClass("language").attr("name","src_language").attr("placeholder",getTranslated("i_glossary_source_language"));
+  var inputSource=$("<input>").attr("name","src");
+  var selectTarget=$("<select>").addClass("language").attr("name","target_language").attr("placeholder",getTranslated("i_glossary_target_language"));
+  var inputTarget=$("<input>").attr("name","target");
+  var glossaryForm=$("<form>")
+    .append(selectSource).append(inputSource)
+    .append(selectTarget).append(inputTarget);
+  fillLanguages(selectSource.add(selectTarget));
+  inputSource.val(glossaryEntry.src_sentence);
+  selectSource.val(glossaryEntry.src_language);
+  inputTarget.val(glossaryEntry.targets && glossaryEntry.targets[language] ? glossaryEntry.targets[language] : "");
+  selectTarget.val(language);
+  var modal=addModal(glossaryForm);
+  var submit=$("<input>").attr("type","submit").val(getTranslated("i_save"));
+  glossaryForm.append(submit).on("submit",function() {
+    var bad=false;
+    [inputSource,selectSource,inputTarget,selectTarget].forEach(function(control) {
+      control.removeClass("bad");
+      if (!control.val()) {
+        control.addClass("bad");
+        bad=true;
+      }
+    });
+    if (bad) return false;
+    var glossaryEntry={
+      src_sentence:inputSource.val(),
+      src_language:selectSource.val(),
+      target_sentence:inputTarget.val(),
+      target_language:selectTarget.val()
+    };
+    addGlossarySubmit(glossaryEntry,function(err) {
+      if (err) {
+        alert(err);
+      } else {
+        modal.clean();
+      }
+    });
+    return false;
+  });
 }
 
 var runningEdit;
@@ -332,7 +364,7 @@ function toggleEdit (e) {
     if (edited) {
       var fulltext=$("textarea.fulltext").val();
       $("textarea.fulltext").prop("disabled",true);
-      var lines=fulltext.split("\n\n");
+      var lines=fulltext.split(/\n\s*\n/);
       var id=Traduxio.getId();
       var update=function(){
         $("#hexapla tbody tr.fulltext").hide();
@@ -413,7 +445,8 @@ function toggleEdit (e) {
             return;
           }
         });
-        if (empty) {
+        var user_copy_from_button=false;
+        if (empty && user_copy_from_button) {
           var inputCopy=$("<input>").attr("type","button").addClass("copy").val(getTranslated("i_copy_from"));
           inputCopy.insertBefore(doc.find("input.edit"));
         }
@@ -548,23 +581,12 @@ function toggleRemoveDoc() {
   toggleHeader("#removePanel");
 }
 
-function toggleGlossaryEntry() {
-  toggleHeader("#addGlossaryForm");
-}
-
 function closeTop(except) {
   $(".top form, #removePanel").not(except).slideUp(200);
 }
 
-function addGlossarySubmit() {
+function addGlossarySubmit(glossaryEntry,callback) {
   var id = $("#hexapla").data("id");
-  var form=$("#addGlossaryForm");
-  var glossaryEntry={
-    src_sentence:$("[name='src']",form).val(),
-    src_language:$("[name='src_language']",form).val(),
-    target_sentence:$("[name='target']",form).val(),
-    target_language:$("[name='target_language']",form).val()
-  };
   if (glossaryEntry.src_sentence && glossaryEntry.src_language &&
     glossaryEntry.target_sentence && glossaryEntry.target_language) {
     var url="work/"+id+"/glossary/"+glossaryEntry.src_language+"/"+encodeURIComponent(glossaryEntry.src_sentence)+"/"+glossaryEntry.target_language;
@@ -575,15 +597,17 @@ function addGlossarySubmit() {
       contentType: 'application/json',
       data: glossaryEntry.target_sentence
     }).done(function(result) {
-      closeTop();
       if ("ok" in result) {
         addGlossaryEntry(glossaryEntry);
+        callback();
       }
-    }).fail(function() { alert("fail!"); });
+    }).fail(function() {
+      callback("fail")
+    });
   } else {
-    alert("missing data");
+    callback("missing data");
+    return false;
   }
-  return false;
 }
 
 function toggleEditDoc() {
@@ -961,9 +985,9 @@ function insertBlock(line,local) {
   var newUnits=[];
   getVersions().forEach(function(version,index) {
     var oldUnit=findUnits(version).filter(function() {
-      return $(this).closest("tr").data("line") <= line;
+      return $(this).closest("tr").data("line") < line;
     }).last();
-    if (oldUnit.closest("tr").data("line")==line) {
+    if (oldUnit.closest("tr").data("line")==line-1 ) {
       var newUnit=createUnit("").attr("data-version",version);
       var direction=oldUnit.css("direction");
       if (direction) newUnit.css("direction",direction);
@@ -1105,8 +1129,8 @@ var editOnServerChain = function(content, reference) {
   return chainRequest({
     type: "PUT",
     url: "version/"+Traduxio.getId()+"?"+ $.param(reference),
-    contentType: "text/plain",
-    data: content
+    contentType: "application/json",
+    data: JSON.stringify(content)
   });
 };
 
@@ -1271,7 +1295,7 @@ var changePrivacy = function () {
     var modify;
     if (val=="public") {
       var select=$(this);
-      if (confirm("Are you sure you want to switch this work to public ? ")) {
+      if (confirm(getTranslated("i_share_confirm_public"))) {
         modify={public:true};
         modifyVersion(ref,modify)
         .done(function(result) {
@@ -1334,9 +1358,10 @@ $(document).ready(function() {
     var unit=$(this).closest(".unit");
     var reference=unit.getReference();
     reference.version="original";
+    reference.line++;
     editOnServer(null, reference)
       .done(function() {
-        insertBlock(unit.getLine(),true);
+        insertBlock(reference.line,true);
       });
   });
 
@@ -1455,8 +1480,6 @@ $(document).ready(function() {
 
   $(".top").on("click", "#removeDoc", toggleRemoveDoc);
   $("#removePanel").on("click", removeDoc);
-
-  $("#addGlossaryForm").on("submit", addGlossarySubmit);
 
   var versions=getVersions();
   const N = versions.length;

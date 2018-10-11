@@ -114,7 +114,7 @@ function(work, req) {
 
   work.edits=work.edits||[];
 
-  work.privileges=work.privileges || {public:true};
+  work.privileges=work.privileges || {};
 
   if (req.method=="DELETE") {
     if (!version_name && original) {
@@ -197,18 +197,26 @@ function(work, req) {
         } else if (key == "public") {
           doc.privileges=doc.privileges || {};
           if (args[key]=="true" || args[key]==true) {
+            if (!doc.creativeCommons && !args.creativeCommons)  {
+              return [null,{code:403,body:"Can't set the document public without setting a Creative Commons license"}];
+            }
             doc.privileges.public=true;
             var name=version_name || "original";
             actions.push(name+" becomes public");
           } else {
             return [null,{code:400,body:"Can't set value "+args[key]+" to public"}];
           }
+          continue;
+        } else if (key == "creativeCommons") {
+          if (!args[key] && doc.privileges) {
+            delete doc.privileges.public;
+          }
         } else if (key == "shareTo") {
           var shared=validateArray(args[key]);
           if (shared === null) {
             return [null,{code:400,body:key+" must be a string or array"}];
           }
-          doc.privileges=doc.privileges || {public:true};
+          doc.privileges=doc.privileges || {};
           doc.privileges.sharedTo=doc.privileges.sharedTo || [];
           shared.forEach(function(user) {
             if (doc.privileges.sharedTo.indexOf(user)==-1) {
@@ -224,7 +232,7 @@ function(work, req) {
           if (unshared === null) {
             return [null,{code:400,body:key+" must be a string or array"}];
           }
-          doc.privileges=doc.privileges || {public:true};
+          doc.privileges=doc.privileges || {};
           doc.privileges.sharedTo=doc.privileges.sharedTo || [];
           doc.privileges.sharedTo=doc.privileges.sharedTo.filter(function(user) {
             if (unshared.indexOf(user)!=-1) {

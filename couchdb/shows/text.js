@@ -27,7 +27,7 @@ function(work, req) {
       data.isTrad=false;
     } else if (work.translations && work.translations[version]) {
       data.work=work.translations[version];
-      data.work.creator=data.i18n["i_trad"]+" "+version;
+      data.work.creator=version;
       data.isTrad=true;
     }
     data.text=[];

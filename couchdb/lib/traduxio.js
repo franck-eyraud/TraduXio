@@ -9,6 +9,7 @@ var js_i18n_elements=js_i18n_elements || [];
 js_i18n_elements.push("i_username");
 js_i18n_elements.push("i_password");
 js_i18n_elements.push("i_login");
+js_i18n_elements.push("i_logged_out");
 js_i18n_elements.push("i_logout");
 js_i18n_elements.push("i_search");
 js_i18n_elements.push("i_signup");
@@ -17,7 +18,7 @@ js_i18n_elements.push("i_password");
 js_i18n_elements.push("i_fullname");
 js_i18n_elements.push("i_email");
 js_i18n_elements.push("i_save");
-js_i18n_elements.push("i_edit_user");
+js_i18n_elements.push("i_register_");
 
 // !code lib/path.js
 // !code lib/localization.js
@@ -91,16 +92,27 @@ Traduxio= {
   isPublic:function (work) {
     work=work || this.doc;
     if (work) {
-      work.privileges=work.privileges || {};
-      if (work.privileges.public) {
-        return true
+      if (work.text || work.hasOwnProperty("original")) {  //comes from works view
+        work.privileges=work.privileges || {};
+        if (work.privileges.public) {
+          return true
+        }
+        Traduxio.debug && log("work is not public");
+        return false;
+      } else {
+        Traduxio.debug && log("no original version, checking translations");
+        if (this.isOriginalWork(work)) {
+          Traduxio.debug && log("checking translations");
+          for (var t in work.translations) {
+            if (this.isPublic(work.translations[t])) {
+              Traduxio.debug && log("translation "+t+" is public");
+              return true;
+            }
+          }
+          Traduxio.debug && log("no public translation, denying access");
+        }
       }
-      if (!work.privileges.owner) {
-        log("public because no owner");
-        work.privileges.public=true;
-        return true;
-      }
-      log("work is not public");
+      Traduxio.debug && log("work is not public");
       return false;
     }
     return false;
@@ -112,7 +124,7 @@ Traduxio= {
       if (work.hasOwnProperty("translations")) {
         return true;
       }
-      log("no translations, is not original");
+      Traduxio.debug && log("no translations, is not original");
       return false;
     }
     return false;
@@ -121,7 +133,7 @@ Traduxio= {
   isOwner:function (work) {
     work=work || this.doc;
     if (work) {
-      var privileges=work.privileges || {public:true};
+      var privileges=work.privileges || {};
       var user=this.getUser();
       if ((!user.anonymous || Traduxio.config.anonymous_edit) && privileges.owner==user.name) return true;
     } else {
@@ -130,14 +142,34 @@ Traduxio= {
     return false;
   },
 
+  isObserver:function (work) {
+    var user=this.getUser();
+    work=work || this.doc;
+    if (work) {
+      this.config.debug && log(user.name+" isObserver on "+work.title+" "+work.creator);
+      var privileges=work.privileges || {public:true};
+      this.config.debug && log(privileges);
+      if (privileges.observers && privileges.observers.indexOf(user.name)!=-1) return true;
+    }
+    return false;
+  },
+
   hasSharedAccess:function (work) {
     var user=this.getUser();
     work=work || this.doc;
     if (work) {
-      this.config.debug && log(user.name+" hasSharedAccess to "+work.title+" "+work.creator);
-      var privileges=work.privileges || {public:true};
-      this.config.debug && log(privileges);
-      if (privileges.sharedTo && privileges.sharedTo.indexOf(user.name)!=-1) return true;
+      if (work.text || work.hasOwnProperty("original")) {
+        this.config.debug && log(user.name+" hasSharedAccess to "+work.title+" "+work.creator);
+        var privileges=work.privileges || {};
+        this.config.debug && log(privileges);
+        if (privileges.sharedTo && privileges.sharedTo.indexOf(user.name)!=-1) return true;
+      } else {
+        if (this.isOriginalWork(work)) {
+          for (var t in work.translations) {
+            if (this.hasSharedAccess(work.translations[t])) return true;
+          }
+        }
+      }
     }
     return false;
   },
@@ -151,6 +183,7 @@ Traduxio= {
       if (this.isAdmin()) return true;
       if (this.isOwner(work)) return true;
       if (this.hasSharedAccess(work)) return true;
+      if (this.isObserver(work)) return true;
       if (this.isPublic(work)) return true;
       this.config.debug && log("no access");
       return false;
@@ -344,6 +377,7 @@ Traduxio= {
     }
     user.roles=this.req.userCtx.roles;
     user.isAdmin=this._isAdmin(this.req.userCtx,this.req.secObj);
+    Traduxio.debug && log("user is currently "+user.name);
     return user;
   },
 

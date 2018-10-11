@@ -180,8 +180,9 @@ span.click-enabled {
   width:10em;
 }
 
-form input.bad {
+.bad {
   border-color:red;
+  border-width: 3px;
 }
 
 /* ====

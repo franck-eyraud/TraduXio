@@ -1,6 +1,13 @@
 function(work, req) {
+
+    var js_i18n_elements=[
+      "i_all_rights_reserved",
+      "i_license"
+    ];
+
   // !code lib/traduxio.js
   // !code lib/mustache.js
+
 
   var version=req.query.version;
 

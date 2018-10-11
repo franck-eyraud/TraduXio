@@ -132,10 +132,10 @@ function getTranslated(name) {
 function addModal (content,title) {
   function modalClean() {
     modal.remove();
-    $("body").css("overflow",body_overfolw);
+    $("body").css("overflow",body_overflow);
   }
   var modal=$("<div>").addClass("modal").appendTo("body");
-  var body_overfolw=$("body").css("overflow");
+  var body_overflow=$("body").css("overflow");
   $("body").css("overflow","hidden");
 
   var dialog=$("<div>").addClass("dialog").appendTo(modal);
@@ -146,6 +146,8 @@ function addModal (content,title) {
   dialog.on("click",function(e) {e.stopPropagation();});
   modal.on("click",modalClean);
   close.on("click",modalClean);
+
+  modal.clean=modalClean;
 
   var contentPane=$("<div>").addClass("content").appendTo(dialog);
   contentPane.append(content);

@@ -295,9 +295,12 @@ tr.fulltext .unit .text {
  left:0px;
 }
 
-#hexapla .unit .join,
-#hexapla .unit .insert {
+#hexapla .unit .join {
   top:-24px;
+}
+
+#hexapla .unit .insert {
+  bottom:-24px;
 }
 
 #hexapla .unit .rubric {
@@ -336,7 +339,6 @@ tr.fulltext .unit .text {
   background-color: #fff;
   border-style:dashed;
 }
-
 
 #hexapla td.pleat.open.edit:hover .unit.edit .split,
 #hexapla td.pleat.open.edit:hover .unit.edit .join {
@@ -390,7 +392,9 @@ tr.fulltext .unit .text {
 
 div.owner {
   font-style: italic;
+  font-size: 60%;
   color:normal;
+  float:right;
 }
 
 .button.show {

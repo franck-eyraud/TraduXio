@@ -16,15 +16,12 @@ function(head, req) {
 
   function getHeaders(work, translation_id) {
     var translation = work.translations[translation_id];
-    if (Traduxio.canAccess(work) && Traduxio.canAccess(translation)) {
-      return {
-        creator: translation_id,
-        publisher: translation.publisher,
-        date: translation.date
-      };
-    } else {
-      return {date: translation.date};
-    }
+    return {
+      creator: translation_id,
+      publisher: translation.publisher,
+      date: translation.date,
+      canAccess:Traduxio.canAccess(work) && Traduxio.canAccess(translation)
+    };
   }
 
   var MAXRESULTS=100;
@@ -70,15 +67,14 @@ function(head, req) {
         text:work.text
       } : null;
       var original_header = {date: work.date};
-      if (Traduxio.canAccess(work)) {
-        original_header = {
-          work_id: work._id,
-          creator: work.creator?work.creator:"Anonymus",
-          title: work.title,
-          publisher: work.publisher,
-          date: work.date
-        };
-      }
+      original_header = {
+        work_id: work._id,
+        creator: work.creator?work.creator:"Anonymus",
+        title: work.title,
+        publisher: work.publisher,
+        date: work.date,
+        canAccess: Traduxio.canAccess(work)
+      };
       if (row.value.unit) {
         var translation_id = row.value.translation;
         var line_number = row.value.unit;

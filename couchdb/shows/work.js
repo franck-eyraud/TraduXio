@@ -3,10 +3,9 @@ function(o, req) {
   var js_i18n_elements=[
     "i_read","i_edit","i_show","i_copy_from","i_search_concordance",
     "i_confirm_delete","i_delete_version","i_delete_original", "i_no_title", "i_no_author",
-    "i_glossary_add_translation",
-    "i_share","i_share_","i_share_invite","i_share_participants",
-    "i_public","i_shared","i_public","i_private"
+    "i_share","i_public","i_shared","i_public","i_private"
     ,"i_activity_","i_chat_"
+    ,"i_glossary_"
   ];
 
 
@@ -59,6 +58,7 @@ function(o, req) {
     data.canAccess=true;
     data.canDelete=Traduxio.canDelete(o);
     data.canTranslate=Traduxio.canTranslate(o);
+    data.hasSharedAccess=Traduxio.isOwner(o) || Traduxio.hasSharedAccess(o);
 
     if (!newWork) {
       var hexapla = new Hexapla();
@@ -94,7 +94,7 @@ function(o, req) {
 
       for (var t in o.translations) {
         var translation = o.translations[t];
-        translation.privileges=translation.privileges || {public:true};
+        translation.privileges=translation.privileges || {};
         if (Traduxio.canAccess(translation)) {
           hexapla.addVersion({
             id: t,
@@ -117,6 +117,7 @@ function(o, req) {
             opened: Traduxio.canAccess(translation) && (opened_versions.indexOf(t)!== -1),
             canEdit: Traduxio.canEdit(translation),
             canDelete: Traduxio.canDelete(translation),
+            hasSharedAccess: Traduxio.isOwner(translation) || Traduxio.hasSharedAccess(translation),
             edited: Traduxio.canEdit(translation) && (edited_versions.indexOf(t)!== -1),
             owner:translation.privileges.owner,
             shareValue:shareValue,
