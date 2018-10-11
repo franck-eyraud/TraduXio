@@ -70,7 +70,8 @@ function(o, req) {
       if (o.text) {
         hexapla.addVersion({
           id: "original",
-          text: o.text
+          text: o.text,
+          rubrics: o.rubrics,
         });
         data.headers.push({
           version: "original",
