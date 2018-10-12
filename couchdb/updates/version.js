@@ -2,6 +2,14 @@ function(old, req) {
   var doc=old;
   //!code lib/traduxio.js
 
+  function isEmpty(string) {
+    return string === null || typeof string !== "string" || string.trim() === "";
+    if (string === null) return true;
+    if (typeof string !== "string") return false;
+    if (string.trim() !== "") return false;
+    return true;
+  }
+
   function Work() {
     this.data = old;
     this.getVersion = function(version) {
@@ -21,8 +29,12 @@ function(old, req) {
       return version=="original";
     };
     this.getContent = function(version, line) {
-      var text=this.getVersion(version).text;
-      return text ? text[line] : false;
+      if (this.exists(version)) {
+        var text=this.getVersion(version).text;
+        return text ? text[line] : false;
+      } else {
+        return false;
+      }
     };
     this.textLength = function(version) {
       if (version=="original") {
@@ -68,6 +80,30 @@ function(old, req) {
   }
   var old_content = work.getContent(VERSION_ID, LINE),
       new_content,error=false;
+  if (req.method=="DELETE") {
+    if (work.isOriginal(VERSION_ID)) {
+      //delete on bloc in original version
+      if (work.data.text) {
+        if (!isEmpty(work.getContent(VERSION_ID,LINE))) {
+          return [null, {code:400,body:"line "+LINE+" is not empty for version "+VERSION_ID+" "+work.getContent(VERSION_ID,LINE)+JSON.stringify(work.data.text)}];
+        } else {
+          work.data.text.splice(LINE,1);
+        }
+      }
+
+      for (var tr in work.data.translations) {
+        if (!isEmpty(work.getContent(tr,LINE))) {
+          return [null, {code:400,body:"line "+LINE+" is not empty for version "+tr+" "+work.getContent(tr,LINE)}];
+        } else {
+          work.data.translations[tr].text.splice(LINE,1);
+        }
+      }
+      Traduxio.addActivity(doc.edits,{action:"removed",line:LINE});
+      return [work.data, "removed an empty block at line " + LINE];
+    } else {
+      return [null, {code:400,body:"can't remove line "+LINE}];
+    }
+  }
   try {
     new_content = JSON.parse(req.body);
   } catch (e) {
