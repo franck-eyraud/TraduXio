@@ -1365,38 +1365,47 @@ $(document).ready(function() {
       });
   });
 
-  $("body").on("click",function(e) {
-    $("#hexapla .edit .rubric.change").each(function() {
-      var self=$(this);
-      var rubric=$("input",this).val();
-      if (rubric != $(this).text()) {
-        //send change to server
-        var unit=$(this).closest(".unit");
-        var reference=unit.getReference();
-        reference.rubric="true";
-        request({
-          type:"PUT",
-          data:JSON.stringify(rubric),
-          contentType: "application/json",
-          url:"version/"+Traduxio.getId()+"?"+ $.param(reference)
-        })
-        .done(function() {
-          self.text(rubric);
-          self.toggleClass("change");
-        });
-      } else {
+  function saveRubric() {
+    var self=$(this);
+    var rubric=$("input",this).val();
+    if (rubric != $(this).text()) {
+      //send change to server
+      var unit=$(this).closest(".unit");
+      var reference=unit.getReference();
+      reference.rubric="true";
+      request({
+        type:"PUT",
+        data:JSON.stringify(rubric),
+        contentType: "application/json",
+        url:"version/"+Traduxio.getId()+"?"+ $.param(reference)
+      })
+      .done(function() {
         self.text(rubric);
         self.toggleClass("change");
-      }
-    });
-  });
+      });
+    } else {
+      self.text(rubric);
+      self.toggleClass("change");
+    }
+  }
 
   $("#hexapla").on("click", ".edit .rubric", function(e) {
     e.stopPropagation();
-    if (!$(this).is(".change")) {
-      $(this).toggleClass("change");
-      if (!$("input",this).length) {
-        $(this).append($("<input>"));
+    var rubric=$(this);
+    if (!rubric.is(".change")) {
+      rubric.toggleClass("change");
+      if (!$("input",rubric).length) {
+        var input=$("<input>");
+        rubric.append(input);
+        $(input).on("focusout",function() {
+          saveRubric.apply(rubric);
+        });
+        $(input).on("keypress",function(e) {
+          if (e.keyCode === 13) {
+            e.preventDefault();
+            saveRubric.apply(rubric);
+          }
+        });
       }
       $("input",this).val($(this).text()).focus();
     } else {
