@@ -276,7 +276,8 @@ tr.fulltext .unit .text {
 
 #hexapla .unit .join,
 #hexapla .unit .split,
-#hexapla .unit .insert {
+#hexapla .unit .insert,
+#hexapla .unit .remove {
   position:absolute;
   width:32px;
   height:32px;
@@ -288,30 +289,28 @@ tr.fulltext .unit .text {
 
 #hexapla .unit .join,
 #hexapla .unit .split {
- right:0px;
+  right: -32px;
 }
 
 #hexapla .unit .insert {
- left:0px;
+  left: -32px;
+  bottom:-24px;
 }
 
 #hexapla .unit .join {
   top:-24px;
 }
 
-#hexapla .unit .insert {
-  bottom:-24px;
+#hexapla .unit .remove {
+  right:0px;
+  top:0px;
 }
 
 #hexapla td.pleat.open.edit:hover .unit.edit .split,
-#hexapla td.pleat.open.edit:hover .unit.edit .join {
+#hexapla td.pleat.open.edit:hover .unit.edit .join,
+#hexapla td.pleat.open.edit:hover .unit.edit .insert,
+#hexapla td.pleat.open.edit:hover .unit.edit .remove {
   visibility: visible;
-  right: -32px;
-}
-
-#hexapla td.pleat.open.edit:hover .unit.edit .insert {
-  visibility: visible;
-  left: -32px;
 }
 
 .dirty {
@@ -331,6 +330,10 @@ tr.fulltext .unit .text {
 #hexapla .unit .insert {
   background-image:url(../img/merge.png);
   bottom:-32px;
+}
+
+#hexapla .unit .remove {
+  background-image:url(../img/split.png);
 }
 
 #hexapla .unit.tomerge, #hexapla .unit.tosplit,#hexapla .unit.highlight.included.tosplit {
