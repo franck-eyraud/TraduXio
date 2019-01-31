@@ -1250,6 +1250,18 @@ var shareText = function(version) {
 
   add.on("click submit",shareAll);
 
+  input.on("keypress",function(e){
+    switch (e.key) {
+      case "Enter":
+        if (!e.altKey && !e.shiftKey && !e.ctrlKey) {
+          e.preventDefault();
+          shareAll(e);
+        }
+        break;
+      default:
+    }
+  });
+
   var req;
   input.autocomplete({
     source: function( request, response ) {
