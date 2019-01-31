@@ -29,7 +29,7 @@ function (newDoc, oldDoc, userCtx, secObj) {
 
   function shouldBeEqual(obj1,obj2,attribute) {
     if ((typeof obj1==typeof obj2) && (typeof obj1=="object")) {
-      log("obj1 and obj2 are both objects");
+      Traduxio.config.debug && log("obj1 and obj2 are both objects");
       obj1=obj1 || {};
       obj2=obj2 || {};
       if (!obj1.hasOwnProperty(attribute) && !obj2.hasOwnProperty(attribute))
@@ -40,7 +40,7 @@ function (newDoc, oldDoc, userCtx, secObj) {
         throw({forbidden:attribute+" can't be changed"});
       }
     } else {
-      log("obj1 and obj2 have different types");
+      Traduxio.config.debug && log("obj1 and obj2 have different types");
       throw({forbidden:attribute+" can't be added or removed"});
     }
   }
@@ -124,7 +124,7 @@ function (newDoc, oldDoc, userCtx, secObj) {
 
   function compare(obj1,obj2) {
     if (Traduxio.config.debug && isString(obj1) && isString(obj2)) {
-      log("comparing 2 strings '"+obj1+"' '"+obj2+"'");
+      Traduxio.config.debug && log("comparing 2 strings '"+obj1+"' '"+obj2+"'");
     }
     if (typeof obj1 != typeof obj2) return false;
     if (typeof obj1 == 'object') {
@@ -198,8 +198,8 @@ function (newDoc, oldDoc, userCtx, secObj) {
     if (oldDoc && oldDoc.translations && oldDoc.translations[t]) {
       var oldTrans=oldDoc.translations[t];
       //check that edit forbidden translations are not modified
-      log(oldTrans);
-      log(newTrans);
+      Traduxio.config.debug && log(oldTrans);
+      Traduxio.config.debug && log(newTrans);
       if (!Traduxio.isOwner(oldDoc) && !Traduxio.canEdit(oldTrans) &&
           !compare(oldTrans,newTrans)) {
         throw({forbidden:"Can't modify translation "+t});

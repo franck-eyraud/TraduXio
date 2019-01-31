@@ -200,7 +200,7 @@ Traduxio= {
     if (work) {
       var privileges=work.privileges || {};
       if (Traduxio.config.anonymous_edit && !privileges.owner) {
-        log("can anonymously edit work");
+        Traduxio.config.debug && log("can anonymously edit work");
         return true;
       }
       Traduxio.config.debug && log("no edit access to "+work.title+" "+work.creator);
@@ -218,7 +218,7 @@ Traduxio= {
   },
 
   canTranslate:function(work) {
-    log("can translate ?");
+    Traduxio.config.debug && log("can translate ?");
     if (this.isAdmin()) return true;
     work=work||this.doc;
     if (this.isOriginalWork(work) &&
@@ -229,7 +229,7 @@ Traduxio= {
     ) {
       return true;
     }
-    log("no, cannot translate");
+    Traduxio.config.debug && log("no, cannot translate");
     return false;
   },
 

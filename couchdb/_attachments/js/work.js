@@ -565,7 +565,7 @@ function toggleHeader(item) {
 
 function toggleAddVersion() {
   var existingLanguages=$("#hexapla .metadata.language").map(
-    function(i,t) {console.log(t);return $(t).data("id");}
+    function(i,t) {return $(t).data("id");}
   ).get();
   $("#addPanel select.language option").each(function() {
     var optVal=$(this).val();
@@ -938,11 +938,9 @@ function copyFrom(unit,version) {
           }
         });
       }
-    } else {
-      console.log("skipped line "+line+" already filled");
     }
   } else {
-    console.log("can't find version for line "+line);
+    console.error("can't find version for line "+line);
   }
 }
 
@@ -1276,10 +1274,8 @@ var shareText = function(version) {
         }).done(function(result) {
           var send=result || [];
           send=send.filter(function(o) {return alreadyShares.indexOf(o.value)==-1});
-          console.log(send);
           response(send);
         }).error(function() {
-          console.log(arguments);
           response([]);
         });
       }

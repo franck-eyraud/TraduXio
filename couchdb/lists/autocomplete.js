@@ -1,4 +1,6 @@
 function (head, req) {
+  // !code lib/traduxio.js
+
   var items=[];
 
   function match(search,term,ignoreCase) {
@@ -8,7 +10,7 @@ function (head, req) {
         if (term.indexOf(search) != -1) {
           return true;
         } else {
-          log(term+" ne contient pas "+search);
+          Traduxio.debug && log(term+" ne contient pas "+search);
           return false;
         }
       }
@@ -45,14 +47,14 @@ function (head, req) {
       } else if (returnAll) {
         items.push(item);
       } else {
-        log("do not select "+row.key);
+        Traduxio.debug && log("do not select "+row.key);
       }
     }
   } else {
-    log("nothing to return");
+    Traduxio.debug && log("nothing to return");
   }
 
-  log(items);
+  Traduxio.debug && log(items);
 
   start ({headers: {"Content-Type": "application/json"}});
   return JSON.stringify(items);
