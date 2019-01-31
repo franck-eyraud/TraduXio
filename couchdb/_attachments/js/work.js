@@ -1219,30 +1219,37 @@ var shareText = function(version) {
   addPanel.append($("<label>").addClass("share").text(getTranslated("i_share_invite")));
   var input=$("<input>").appendTo(addPanel);
   var add=$("<input>").attr("type","button").attr("value",getTranslated("i_share")).appendTo(addPanel);
-  add.on("click submit",function() {
-    var val=input.val();
-    if (val) {
-      if (alreadyShares.indexOf(val)!=-1) {
-        input.val("");
+
+  function shareTo(user) {
+    if (user) {
+      if (alreadyShares.indexOf(user)!=-1) {
         return;
       }
-      var req=request({
+      chainRequest({
         url: "work/"+Traduxio.getId()+"/"+encodeURIComponent(version),
         type:"PUT",
-        data:JSON.stringify({shareTo:val}),
+        data:JSON.stringify({shareTo:user}),
         dataType:"json"
       }).done(function(result) {
-        input.val("");
-        alreadyShares.push(val);
-        find(version).find(".list-shares").append($("<span>").addClass("shared").text(val));
+        alreadyShares.push(user);
+        find(version).find(".list-shares").append($("<span>").addClass("shared").text(user));
         find(version).find(".list-shares .total").text(find(version).find(".list-shares .shared").length);
-        var newItem=sharedItem(val).appendTo(shareList);
+        var newItem=sharedItem(user).appendTo(shareList);
         find(version).find("div.share select").val("shared");
         updatePrivacyInfo.apply(find(version).find("div.share select"));
         shareList.scrollTop(newItem.position().top);
       });
     }
-  });
+  }
+
+  function shareAll(e) {
+    var val=input.val();
+    val.split(/[,; ]/).forEach(shareTo);
+    input.val("");
+  }
+
+  add.on("click submit",shareAll);
+
   var req;
   input.autocomplete({
     source: function( request, response ) {
