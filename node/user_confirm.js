@@ -115,7 +115,7 @@ function recordUser(user,callback) {
   if (user._modified) {
     delete user._modified;
     console.log("insert modified user "+user.name);
-    users_db.insert(user,function(err,body) {
+    if (config.send) users_db.insert(user,function(err,body) {
       if (!err) {
         user._rev=body.rev;
       } else {
@@ -124,6 +124,7 @@ function recordUser(user,callback) {
       }
       if (typeof callback === "function") callback(err);
     });
+    else callback("no modification, testing phase");
   } else {
     if (user._deleted) {
       if (known_users[user.name]) {
@@ -403,15 +404,31 @@ function followGroups () {
 }
 
 function resetPasswords() {
+  var init=true;
   var password_follow=db.follow({
-      include_docs:true,
-      filter:function(doc,req) {
-        return doc.type=="password_request";
-      }
-    });
+    include_docs:true,
+    filter:function(doc,req) {
+      return doc.type=="password_request";
+    }
+  });
+  password_follow.on("catchup",function () {
+    console.log("Caught up passwords");
+    init=false;
+  });
   password_follow.on("change",function (change) {
     if (change.doc.error || change.doc.success) { //ignore it, already users_db
       console.log("password request "+change.id+" already used");
+      return;
+    } else {
+      if (init) {
+        console.log("outdated password request "+change.id);
+        password_follow.pause();
+        admin_db.destroy(change.id,change.doc._rev,function (err) {
+          password_follow.resume();
+          if (err) console.error("error deleting "+change.id+":"+err)
+          else console.log("deleted "+change.id);
+        });
+      }
       return;
     }
     if (change.doc.email) {
@@ -427,7 +444,7 @@ function resetPasswords() {
           recordUser(user,function(err) {
             if (err) {
               change.doc.error=err;
-              db.insert(change.doc);
+              if (config.send) db.insert(change.doc);
             } else {
               sendPassword(user,function(err,message) {
                 if (!err) {
@@ -436,7 +453,7 @@ function resetPasswords() {
                   console.log("found error "+err);
                   change.doc.error=err;
                 }
-                db.insert(change.doc);
+                if (config.send) db.insert(change.doc);
               });
             }
           });
