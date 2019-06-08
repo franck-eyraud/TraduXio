@@ -25,26 +25,34 @@ function(o) {
 
   if (o.translations) {
     var nb_translations=Object.keys(o.translations).length;
-
-    if (nb_translations) {
-      if (o.language) for (var i in o.text) {
+    if (o.language && o.text && o.text.length<1000 && nb_translations > 0) {
+      for (var i in o.text) {
         var text = o.text[i];
         if (text && text.length<1024) {
           send_text(text, o.language, {unit: i});
         }
       }
+    } else {
+      log("no text for "+o._id);
+    }
+    if (o.text || nb_translations >1) {
       for (var t in o.translations) {
         var translation = o.translations[t];
-        if (translation.language) for (var i in translation.text) {
-          var text = translation.text[i];
-          if (text && text.length<1024) {
-            send_text(text, translation.language, {unit: i, translation: t});
+        if (translation.language && translation.text && translation.text.length<1000) {
+          for (var i in translation.text) {
+            var text = translation.text[i];
+            if (text && text.length<1024) {
+              send_text(text, translation.language, {unit: i, translation: t});
+            }
           }
         }
       }
+    } else {
+      log("do not index tanslations for "+o._id+" nb_translations:"+nb_translations);
     }
   }
-  if (o.glossary)
+
+  if (o.glossary) {
     for (src_language in o.glossary) {
       if (src_language!="edits")
       for (src_sentence in o.glossary[src_language]) {
@@ -63,6 +71,7 @@ function(o) {
         }
       }
     }
+  }
 
   function send_text(text,language,object) {
     const WORD_MATCHER = new RegExp(regex,"g");
