@@ -1,6 +1,7 @@
 function(o) {
   const MAX_SIZE = 124;
   const NB_WORDS = 10;
+  const MAX_SEND = 200000;
 
   var ideograms=["\\u3400-\\u9FFF","\\u3040-\\u30FF"].join("");
   var punctuation_signs=["'","`","\\-","\\uff0c","\\u3002","\\(","\\)"].join("");
@@ -23,34 +24,7 @@ function(o) {
     return s.substr(0, end).toLowerCase();
   }
 
-  if (o.translations) {
-    var nb_translations=Object.keys(o.translations).length;
-    if (o.language && o.text && o.text.length<1000 && nb_translations > 0) {
-      for (var i in o.text) {
-        var text = o.text[i];
-        if (text && text.length<1024) {
-          send_text(text, o.language, {unit: i});
-        }
-      }
-    } else {
-      log("no text for "+o._id);
-    }
-    if (o.text || nb_translations >1) {
-      for (var t in o.translations) {
-        var translation = o.translations[t];
-        if (translation.language && translation.text && translation.text.length<1000) {
-          for (var i in translation.text) {
-            var text = translation.text[i];
-            if (text && text.length<1024) {
-              send_text(text, translation.language, {unit: i, translation: t});
-            }
-          }
-        }
-      }
-    } else {
-      log("do not index tanslations for "+o._id+" nb_translations:"+nb_translations);
-    }
-  }
+  var sent_so_far=0;
 
   if (o.glossary) {
     for (src_language in o.glossary) {
@@ -62,28 +36,62 @@ function(o) {
             src:{language:src_language,sentence:src_sentence},
             target:{language:target_language,sentence:target_sentence}
           };
-          send_text(src_sentence,src_language,{glossary_entry:glossary_entry});
+          sent_so_far=send_text(src_sentence,src_language,{glossary_entry:glossary_entry},sent_so_far);
 
           var target=glossary_entry.target;
           glossary_entry.target=glossary_entry.src;
           glossary_entry.src=target;
-          send_text(target_sentence,target_language,{glossary_entry:glossary_entry});
+          sent_so_far=send_text(target_sentence,target_language,{glossary_entry:glossary_entry},sent_so_far);
         }
       }
     }
   }
 
-  function send_text(text,language,object) {
+  if (o.translations) {
+    var nb_translations=Object.keys(o.translations).length;
+    if (o.language && o.text && nb_translations > 0) {
+      for (var i in o.text) {
+        var text = o.text[i];
+        if (text) {
+          sent_so_far=send_text(text, o.language, {unit: i},sent_so_far);
+        }
+      }
+    }
+    if (o.text || nb_translations > 1) {
+      for (var t in o.translations) {
+        var translation = o.translations[t];
+        if (translation.language && translation.text) {
+          for (var i in translation.text) {
+            var text = translation.text[i];
+            if (text) {
+              sent_so_far=send_text(text, translation.language, {unit: i, translation: t},sent_so_far);
+            }
+          }
+        }
+      }
+    }
+  }
+
+  not_sent=0;
+
+  function send_text(text,language,object,sent_so_far) {
     const WORD_MATCHER = new RegExp(regex,"g");
-    if (text && text.length<1024) {
+    if (text) {
       var match;
-      while ((match = WORD_MATCHER.exec(text))) {
+      while ((match = WORD_MATCHER.exec(text)) && sent_so_far < MAX_SEND) {
         var begin = match.index;
         object.char=begin;
         emit(
           [language, format(text, begin)], object
         );
+        sent_so_far++;
       }
     }
+    return sent_so_far;
   }
+
+  if (sent_so_far >= MAX_SEND) {
+    log("concordance.map: warning : too much concordance matches for "+o._id+" ("+MAX_SEND+" max matches");
+  }
+
 }
