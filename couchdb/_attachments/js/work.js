@@ -726,6 +726,12 @@ function createInsert(unit) {
   unit.append(insert);
 }
 
+function createRemove(unit) {
+  unit.find(".remove").remove();
+  var remove=$("<span/>").addClass("remove").prop("title","remove block");
+  unit.append(remove);
+}
+
 function saveUnit(callback) {
   var textarea=$(this);
   if (textarea.hasClass("dirty")) {
@@ -962,6 +968,51 @@ function findLine(line) {
 
 jQuery.fn.reverse = [].reverse;
 
+function removeBlock(line,local) {
+  var tr=$("#hexapla tr#line-"+line);
+  if (tr.hasClass("removed") && !local) {
+    //ignore replay of local change from change listener
+    tr.removeClass("removed");
+    return;
+  }
+  tr.remove();
+  //change merged block rowspan
+  getVersions().forEach(function(version,index) {
+    var oldUnit=findUnits(version).filter(function() {
+      return $(this).closest("tr").data("line") <= line;
+    }).last();
+    if (oldUnit.closest("tr").data("line")<line) {
+      var oldSize=getSize(oldUnit);
+      oldUnit.closest("td").prop("rowspan",oldSize-1);
+      if (oldUnit.isEdited()) {
+        createSplits(oldUnit);
+      }
+    }
+  });
+  //change other tr number
+  var all_trs=$("#hexapla tr.text-line");
+  all_trs.each(function() {
+    var old_line=$(this).data("line");
+    if (old_line>line) {
+      var new_line=old_line-1;
+      $(this).attr("data-line",new_line);
+      $(this).data("line",new_line);
+      $(this).attr("id","line-"+new_line);
+      if (new_line==line && local) {
+        $(this).addClass("removed");
+      }
+    }
+  });
+  $("unit.edit .split").each(function() {
+    var splitLine=$(this).data("line");
+    if (splitLine>line) {
+      $(this).data("line",splitLine-1);
+    }
+  });
+  $("td.pleat.close").prop("rowspan",$("tbody tr").length);
+  positionSplits($("td.pleat.edit"));
+}
+
 function insertBlock(line,local) {
   var tr=$("#hexapla tr#line-"+line);
   if (tr.hasClass("added") && !local) {
@@ -998,6 +1049,7 @@ function insertBlock(line,local) {
       if (!oldUnit.is(":visible")) newTd.hide();
       if (index==0) {
         createInsert(newUnit);
+        createRemove(newUnit);
       } else {
         newUnits.push(newUnit);
       }
@@ -1021,8 +1073,9 @@ function insertBlock(line,local) {
     }
   });
   $("unit.edit .split").each(function() {
-    if ($(this).data("line")>=line) {
-        $(this).data("line",line+1);
+    var splitLine=$(this).data("line");
+    if (splitLine>=line) {
+      $(this).data("line",splitLine+1);
     }
   });
   if (last_tr) {
@@ -1128,6 +1181,15 @@ var editOnServerChain = function(content, reference) {
     url: "version/"+Traduxio.getId()+"?"+ $.param(reference),
     contentType: "application/json",
     data: JSON.stringify(content)
+  });
+};
+
+var deleteBlockOnServer = function(reference) {
+  reference.version="original";
+  return request({
+    type: "DELETE",
+    url: "version/"+Traduxio.getId()+"?"+$.param(reference),
+    contentType: "application/json"
   });
 };
 
@@ -1376,6 +1438,17 @@ $(document).ready(function() {
     editOnServer(null, reference)
       .done(function() {
         insertBlock(reference.line,true);
+      });
+  });
+
+  $("#hexapla").on("click", ".remove", function(e) {
+    e.stopPropagation();
+    var unit=$(this).closest(".unit");
+    var reference=unit.getReference();
+    reference.version="original";
+    deleteBlockOnServer(reference)
+      .done(function() {
+        removeBlock(reference.line,true);
       });
   });
 
