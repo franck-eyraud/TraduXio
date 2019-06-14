@@ -8,6 +8,8 @@ function(o) {
 
   var regex="["+ideograms+"]|[^\\s"+punctuation_signs+ideograms+"]+";
 
+  log("concordance.map: start id "+o._id);
+
   function format(text, begin) {
     var SUB_WORD_MATCHER=new RegExp(regex,"g"),
         s=text.substr(begin),
@@ -89,6 +91,8 @@ function(o) {
     }
     return sent_so_far;
   }
+
+  log("emitted "+sent_so_far+" matches for "+o._id+" out of "+MAX_SEND);
 
   if (sent_so_far >= MAX_SEND) {
     log("concordance.map: warning : too much concordance matches for "+o._id+" ("+MAX_SEND+" max matches");

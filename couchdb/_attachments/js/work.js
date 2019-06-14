@@ -343,6 +343,19 @@ function modified() {
   }
 }
 
+function expandBlock(e) {
+  var version=$(this).getVersion("th");
+  var doc = find(version);
+  var units = findUnits(version);
+  var top = doc.first();
+  var edited = doc.isEdited();
+  if (!edited) {
+    return;
+  }
+  var text=find(version)$("textarea.fulltext").val();
+
+}
+
 function toggleEdit (e) {
   var version=$(this).getVersion("th");
   var doc = find(version);
@@ -1451,6 +1464,33 @@ $(document).ready(function() {
         removeBlock(reference.line,true);
       });
   });
+
+  $("#hexapla").on("click", ".expand", function(e) {
+    e.stopPropagation();
+    var unit=$(this).closest(".unit");
+    var reference=unit.getReference();
+    var text=$(this).find("textarea").val();
+    var lines=text.split(/\n\s*\n/);
+    if (lines.length) {
+      for (lines.forEach(function (text,index) {
+        if (index>0) {
+          editOnServer(null,{version:original,reference.line})
+          .done(function() {
+            insertBlock(reference.line,true);
+            editOnServer(text,reference).done(function() {
+              updateOnScreen(reference.version,reference.line,text);
+            });
+            reference.line++;
+          });
+        } else {
+          editOnServer(text,reference).done(function() {
+            updateOnScreen(reference.version,reference.line,text);
+          });
+          reference.line++;
+        }
+      });
+    }
+  }
 
   $("#hexapla").on("click", ".join", function(e) {
     e.stopPropagation();
