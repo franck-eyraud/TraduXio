@@ -399,6 +399,7 @@ function followGroups () {
       console.log(change.doc);
     }
   });
+  console.log("following groups");
   group_follow.follow();
   return group_follow;
 }
@@ -416,23 +417,25 @@ function resetPasswords() {
     init=false;
   });
   password_follow.on("change",function (change) {
-    if (change.doc.error || change.doc.success) { //ignore it, already users_db
+    if (change.doc.error || change.doc.success) { //ignore it, already used
       console.log("password request "+change.id+" already used");
       return;
     } else {
       if (init) {
-        console.log("outdated password request "+change.id);
-        password_follow.pause();
-        admin_db.destroy(change.id,change.doc._rev,function (err) {
-          password_follow.resume();
-          if (err) console.error("error deleting "+change.id+":"+err)
-          else console.log("deleted "+change.id);
-        });
+        console.log("outdated password request "+change.id+" for "+change.doc.email);
+        if (config.send) {
+          password_follow.pause();
+          admin_db.destroy(change.id,change.doc._rev,function (err) {
+            password_follow.resume();
+            if (err) console.error("error deleting "+change.id+":"+err)
+            else console.log("deleted "+change.id);
+          });
+        }
         return;
       }
     }
     if (change.doc.email) {
-      console.log("received password reset request for "+change.doc.email);
+      console.log("received password reset request "+change.id+" for "+change.doc.email);
       for (var username in known_users) {
         if (isSameEmail(known_users[username].email,change.doc.email)) {
           console.log("found user "+username);
@@ -441,10 +444,10 @@ function resetPasswords() {
           user.password=password;
           user.forcedPassword=true;
           user._modified=true;
-          recordUser(user,function(err) {
+          if (config.send) recordUser(user,function(err) {
             if (err) {
               change.doc.error=err;
-              if (config.send) db.insert(change.doc);
+              db.insert(change.doc);
             } else {
               sendPassword(user,function(err,message) {
                 if (!err) {
@@ -453,7 +456,7 @@ function resetPasswords() {
                   console.log("found error "+err);
                   change.doc.error=err;
                 }
-                if (config.send) db.insert(change.doc);
+                db.insert(change.doc);
               });
             }
           });
@@ -466,6 +469,7 @@ function resetPasswords() {
     }
     console.log("no email found");
   });
+  console.log("following password requests");
   password_follow.follow();
   return password_follow;
 }
@@ -488,6 +492,7 @@ function followUsers() {
   }).on("start",function() {
     console.log("Started");
   });
+  console.log("following users");
   user_follow.follow();
   return user_follow;
 }
