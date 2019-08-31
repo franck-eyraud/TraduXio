@@ -428,8 +428,8 @@ function resetPasswords() {
           if (err) console.error("error deleting "+change.id+":"+err)
           else console.log("deleted "+change.id);
         });
+        return;
       }
-      return;
     }
     if (change.doc.email) {
       console.log("received password reset request for "+change.doc.email);
