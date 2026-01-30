@@ -16,7 +16,12 @@
   "traduxio_host": "127.0.0.1",
   "traduxio_database_path": "/traduxio",
   "traduxio_port": "5984",
+  "site_name":"TraduXio website",
 
   "admin_username":"admin",
-  "admin_password":"admin"
+  "admin_password":"admin",
+
+  "salt":"uuid-gen",
+  "base_url":"https://traduxio.org/works/",
+  "max_hours":96
 }
