@@ -21,10 +21,21 @@ services:
       nofile:
         soft: 2048
         hard: 4096
-#  couchapp:
-#    build: ../couchapp
+  couchapp:
+    build: ../../couchapp
+    command: couchapp push /app http://couchdb:5984/traduxio
+    depends_on:
+     couchdb:
+       condition: service_started
+    volumes:
+      - traduxio-code:/app/
+    links:
+      - couchdb
   user-confirm:
     build: ../../node/
+    depends_on:
+     couchdb:
+       condition: service_started
     links:
       - couchdb
 
@@ -47,4 +58,10 @@ volumes:
       type: 'none'
       o: 'bind'
       device: '/home/couchdb/lib/'
+  traduxio-code:
+    driver: local
+    driver_opts:
+      type: 'none'
+      o: 'bind'
+      device: '../../couchdb/'
 
