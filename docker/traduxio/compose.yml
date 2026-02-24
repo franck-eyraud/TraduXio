@@ -1,0 +1,41 @@
+services:
+  couchdb:
+    image: "couchdb:1.7.1"
+    ports:
+      - 5984:5984
+    volumes:
+      - couch-log:/usr/local/var/log/couchdb/
+      - couch-etc:/usr/local/etc/couchdb/
+      - couch-data:/usr/local/var/lib/couchdb/
+    # https://github.com/apache/couchdb/discussions/4571#discussioncomment-6047313
+    ulimits:
+      nofile:
+        soft: 2048
+        hard: 4096
+#  couchapp:
+#    build: ../couchapp
+  user-confirm:
+    build: ../../node/
+    links:
+      - couchdb
+
+volumes:
+  couch-log:
+    driver: local
+    driver_opts:
+      type: 'none'
+      o: 'bind'
+      device: '/home/couchdb/log/'
+  couch-etc:
+    driver: local
+    driver_opts:
+      type: 'none'
+      o: 'bind'
+      device: '/home/couchdb/etc/'
+  couch-data:
+    driver: local
+    driver_opts:
+      type: 'none'
+      o: 'bind'
+      device: '/home/couchdb/lib/'
+
