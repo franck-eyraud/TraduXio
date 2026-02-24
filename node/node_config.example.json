@@ -1,7 +1,7 @@
 {
   "server_url": "127.0.0.1",
   "port": "1337",
-  "database": "http://localhost:5984/traduxio",
+  "database": "http://couchdb:5984/traduxio",
 
   "public_key": "6LeEL_QSAAAAAJ2jLuZ9FcV7sIik7VFAHRHl1wPv",
   "private_key": "6LeEL_QSAAAAAB7HQAIwmbPXTeRqlLE2st4WFJTt",
@@ -12,6 +12,7 @@
   "email_host": "smtp.gmail.com",
   "email_sender": "TraduXio <someone@gmail.com>",
   "email_receiver": "me <example@gmail.com>",
+  "send": false,
 
   "traduxio_host": "127.0.0.1",
   "traduxio_database_path": "/traduxio",
