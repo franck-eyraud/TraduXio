@@ -1,3 +1,4 @@
+name: TraduXio-test
 services:
   couchdb-config:
     volumes:
@@ -22,7 +23,7 @@ services:
         soft: 2048
         hard: 4096
   couchapp:
-    build: ../../couchapp
+    build: couchapp
     command: couchapp push /app http://couchdb:5984/traduxio
     depends_on:
      couchdb:
@@ -32,7 +33,7 @@ services:
     links:
       - couchdb
   user-confirm:
-    build: ../../node/
+    build: node/
     depends_on:
      couchdb:
        condition: service_started
@@ -63,5 +64,5 @@ volumes:
     driver_opts:
       type: 'none'
       o: 'bind'
-      device: '../../couchdb/'
+      device: 'couchdb/'
 
