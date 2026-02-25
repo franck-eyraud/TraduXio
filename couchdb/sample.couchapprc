@@ -1,0 +1,9 @@
+{
+  "env":
+  {
+    "traduxio" : {
+      "db" : "http://admin:changeme@couchdb:5984/traduxio"
+    }
+  }
+}
+

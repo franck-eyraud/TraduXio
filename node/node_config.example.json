@@ -20,9 +20,9 @@
   "site_name":"TraduXio website",
 
   "admin_username":"admin",
-  "admin_password":"admin",
+  "admin_password":"changeme",
 
   "salt":"uuid-gen",
-  "base_url":"https://traduxio.org/works/",
+  "base_url":"https://traduxio.domain.cdn/works/",
   "max_hours":96
 }
