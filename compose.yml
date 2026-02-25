@@ -1,0 +1,75 @@
+name: TraduXio-test
+services:
+  couchdb-config:
+    volumes:
+      - couch-etc:/usr/local/etc/couchdb/
+      - ./couchdb-custom.ini:/tmp/traduxio.ini
+    image: alpine
+    command: cp -p /tmp/traduxio.ini /usr/local/etc/couchdb/local.d/
+  couchdb:
+    image: "couchdb:1.7.1"
+    depends_on:
+      couchdb-config:
+        condition: service_completed_successfully
+    ports:
+      - 5984:5984
+    volumes:
+      - couch-log:/usr/local/var/log/couchdb/
+      - couch-etc:/usr/local/etc/couchdb/
+      - couch-data:/usr/local/var/lib/couchdb/
+    env_file: couchdb-admin.env
+    secrets:
+      - couchdb_admin_password
+    # some incompatibiliyt with more modern OS limits
+    # https://github.com/apache/couchdb/discussions/4571#discussioncomment-6047313
+    ulimits:
+      nofile:
+        soft: 2048
+        hard: 4096
+  couchapp:
+    build: couchapp
+    command: couchapp push /app traduxio
+    depends_on:
+     couchdb:
+       condition: service_started
+    volumes:
+      - traduxio-code:/app/
+    links:
+      - couchdb
+  user-confirm:
+    build: node/
+    depends_on:
+     couchapp:
+       condition: service_completed_successfully
+    links:
+      - couchdb
+secrets:
+  couchdb_admin_password:
+    file: ./couchdb-admin-password
+
+volumes:
+  couch-log:
+    driver: local
+    driver_opts:
+      type: 'none'
+      o: 'bind'
+      device: '/home/couchdb/log/'
+  couch-etc:
+    driver: local
+    driver_opts:
+      type: 'none'
+      o: 'bind'
+      device: '/home/couchdb/etc/'
+  couch-data:
+    driver: local
+    driver_opts:
+      type: 'none'
+      o: 'bind'
+      device: '/home/couchdb/lib/'
+  traduxio-code:
+    driver: local
+    driver_opts:
+      type: 'none'
+      o: 'bind'
+      device: 'couchdb/'
+

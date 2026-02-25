@@ -419,6 +419,14 @@ function resetPasswords() {
   password_follow.on("change",function (change) {
     if (change.doc.error || change.doc.success) { //ignore it, already used
       console.log("password request "+change.id+" already used");
+      if (config.send) {
+        password_follow.pause();
+        admin_db.destroy(change.id,change.doc._rev,function (err) {
+          password_follow.resume();
+          if (err) console.error("error deleting "+change.id+":"+err)
+          else console.log("deleted "+change.id);
+        });
+      }
       return;
     } else {
       if (init) {
