@@ -1,6 +1,15 @@
 services:
+  couchdb-config:
+    volumes:
+      - couch-etc:/usr/local/etc/couchdb/
+      - ./couchdb-custom.ini:/tmp/traduxio.ini
+    image: alpine
+    command: cp -p /tmp/traduxio.ini /usr/local/etc/couchdb/local.d/
   couchdb:
     image: "couchdb:1.7.1"
+    depends_on:
+      couchdb-config:
+        condition: service_completed_successfully
     ports:
       - 5984:5984
     volumes:
