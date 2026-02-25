@@ -22,6 +22,18 @@ Installation procedure
         cd TraduXio
         couchapp push --browse couchdb http://127.0.0.1:5984/traduxio
 
+
+Using docker compose
+--------------------
+
+You can run the application by using docker containers. The compose.yml file allows to run everything. What needs to be setup first is :
+
+- Admin password necessary to manipulate users in `couchdb-admin.env`, `couchdh/.couchaprc` and `node/node_config.json`
+- domain name for the installation, in `couchdb-custom.ini` and `node/node_config.json`
+- email server to send notification emails in `node/node_config.json`
+
+This procedure doesn't handle ssl configuration for https traffic, you need to either set it up separately, or use an exsting reverse proxy.
+
 Tests requirements
 ------------------
 
